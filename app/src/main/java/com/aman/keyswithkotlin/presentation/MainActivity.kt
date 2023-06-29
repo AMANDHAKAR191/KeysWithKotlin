@@ -8,9 +8,11 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.aman.keyswithkotlin.presentation.auth.AuthViewModel
-import com.aman.keyswithkotlin.presentation.navigation.NavGraph
-import com.aman.keyswithkotlin.presentation.navigation.Screen
+import com.aman.keyswithkotlin.auth.presentation.auth.AuthViewModel
+import com.aman.keyswithkotlin.navigation.NavGraph
+import com.aman.keyswithkotlin.navigation.Screen
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,6 +25,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            Firebase.database.setPersistenceEnabled(true)
             val context = LocalContext.current
             navController = rememberNavController()
             NavGraph(
@@ -41,7 +44,7 @@ class MainActivity : ComponentActivity() {
 
     private fun navigateToProfileScreen() {
         navController.popBackStack()
-        navController.navigate(Screen.ProfileScreen.route)
+        navController.navigate(Screen.HomeScreen.route)
     }
 
 }

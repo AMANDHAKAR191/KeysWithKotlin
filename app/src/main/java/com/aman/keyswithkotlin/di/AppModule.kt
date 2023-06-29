@@ -5,10 +5,17 @@ import android.content.Context
 import com.aman.keyswithkotlin.R
 import com.aman.keyswithkotlin.core.Constants.SIGN_IN_REQUEST
 import com.aman.keyswithkotlin.core.Constants.SIGN_UP_REQUEST
-import com.aman.keyswithkotlin.data.repository.AuthRepositoryImpl
-import com.aman.keyswithkotlin.data.repository.ProfileRepositoryImpl
-import com.aman.keyswithkotlin.domain.repository.AuthRepository
-import com.aman.keyswithkotlin.domain.repository.ProfileRepository
+import com.aman.keyswithkotlin.auth.data.repository.AuthRepositoryImpl
+import com.aman.keyswithkotlin.passwords.data.repository.PasswordRepositoryImpl
+import com.aman.keyswithkotlin.auth.data.repository.ProfileRepositoryImpl
+import com.aman.keyswithkotlin.auth.domain.repository.AuthRepository
+import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
+import com.aman.keyswithkotlin.auth.domain.repository.ProfileRepository
+import com.aman.keyswithkotlin.passwords.domain.use_cases.AddPassword
+import com.aman.keyswithkotlin.passwords.domain.use_cases.DeletePassword
+import com.aman.keyswithkotlin.passwords.domain.use_cases.GetPassword
+import com.aman.keyswithkotlin.passwords.domain.use_cases.GetPasswords
+import com.aman.keyswithkotlin.passwords.domain.use_cases.PasswordUseCases
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -17,6 +24,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -36,6 +45,9 @@ class AppModule {
 
     @Provides
     fun provideFirebaseFirestore() = Firebase.firestore
+
+    @Provides
+    fun provideFirebaseDatabase() = Firebase.database
 
     @Provides
     fun provideOneTapClient(
@@ -126,18 +138,20 @@ class AppModule {
 //        ).build()
 //    }
 
-//    @Provides
-//    fun provideExpanseRepository(database: ExpanseDatabase): ExpanseRepository {
-//        return ExpanseRepositoryImpl(database.expanseDao)
-//    }
+    @Provides
+    fun providePasswordRepository(
+        database:FirebaseDatabase
+    ): PasswordRepository {
+        return PasswordRepositoryImpl(database)
+    }
 
-//    @Provides
-//    fun provideExpanseUseCases(repository: ExpanseRepository): ExpanseUseCases {
-//        return ExpanseUseCases(
-//            getExpanse = GetExpanse(repository),
-//            getExpanses = GetExpanses(repository),
-//            addExpanse = AddExpanse(repository),
-//            deleteExpanse = DeleteExpanse(repository)
-//        )
-//    }
+    @Provides
+    fun providePasswordUseCases(repository: PasswordRepository): PasswordUseCases {
+        return PasswordUseCases(
+            getPassword = GetPassword(repository),
+            getPasswords = GetPasswords(repository),
+            addPassword = AddPassword(repository),
+            deletePassword = DeletePassword(repository)
+        )
+    }
 }
