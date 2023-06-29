@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
 
     private fun navigateToProfileScreen() {
         navController.popBackStack()
-        navController.navigate(Screen.HomeScreen.route)
+        navController.navigate(Screen.PasswordScreen.route)
     }
 
 }

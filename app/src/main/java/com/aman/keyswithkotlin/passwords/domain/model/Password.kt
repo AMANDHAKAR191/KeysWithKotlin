@@ -5,8 +5,6 @@ data class Password constructor(
     val password: String = "",
     val websiteName: String = "",
     val websiteLink: String = ""
-) {
-
-}
+)
 
 class InvalidPasswordException(message: String) : Exception(message)

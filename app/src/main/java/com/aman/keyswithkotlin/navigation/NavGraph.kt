@@ -9,11 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.aman.keyswithkotlin.auth.presentation.auth.AuthScreen
+import com.aman.keyswithkotlin.auth.presentation.profile.ProfileScreen
 import com.aman.keyswithkotlin.navigation.Screen.AuthScreen
 import com.aman.keyswithkotlin.navigation.Screen.ProfileScreen
-import com.aman.keyswithkotlin.auth.presentation.profile.ProfileScreen
-import com.aman.keyswithkotlin.auth.presentation.auth.AuthScreen
-import com.aman.keyswithkotlin.passwords.presentation.HomeScreen
+import com.aman.keyswithkotlin.passwords.presentation.PasswordScreen
 
 @Composable
 @ExperimentalAnimationApi
@@ -34,6 +34,10 @@ fun NavGraph(
                 navigateToProfileScreen = {
                     navController.popBackStack()
                     navController.navigate(ProfileScreen.route)
+                },
+                navigateToPasswordScreen = {
+                    navController.popBackStack()
+                    navController.navigate(Screen.PasswordScreen.route)
                 }
             )
         }
@@ -47,8 +51,8 @@ fun NavGraph(
                 }
             )
         }
-        composable(route = Screen.HomeScreen.route){
-            HomeScreen()
+        composable(route = Screen.PasswordScreen.route){
+            PasswordScreen()
         }
     }
 }

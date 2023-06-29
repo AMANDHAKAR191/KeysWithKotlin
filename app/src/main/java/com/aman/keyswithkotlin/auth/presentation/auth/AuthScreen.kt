@@ -20,7 +20,8 @@ import com.google.firebase.auth.GoogleAuthProvider.getCredential
 @Composable
 fun AuthScreen(
     viewModel: AuthViewModel = hiltViewModel(),
-    navigateToProfileScreen: () -> Unit
+    navigateToProfileScreen: () -> Unit,
+    navigateToPasswordScreen: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -63,7 +64,8 @@ fun AuthScreen(
     SignInWithGoogle(
         navigateToHomeScreen = { signedIn ->
             if (signedIn) {
-                navigateToProfileScreen()
+//                navigateToProfileScreen()
+                navigateToPasswordScreen()
             }
         }
     )

@@ -24,8 +24,6 @@ import com.aman.keyswithkotlin.passwords.domain.model.Password
 fun PasswordItem(
     password: Password?,
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 10.dp,
-    cutCornerSize: Dp = 30.dp,
     onDeleteClick: () -> Unit
 ) {
     Box(
