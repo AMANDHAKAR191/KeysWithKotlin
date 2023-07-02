@@ -10,6 +10,7 @@ class GetPasswords (
     private val passwordRepository: PasswordRepository
 ) {
     operator fun invoke():Flow<Response<List<Password>>>{
+        println("check: GetPasswords")
         return passwordRepository.getPasswords()
     }
 }

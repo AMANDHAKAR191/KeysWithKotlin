@@ -64,9 +64,12 @@ fun AuthScreen(
     SignInWithGoogle(
         navigateToHomeScreen = { signedIn ->
             if (signedIn) {
-//                navigateToProfileScreen()
-                navigateToPasswordScreen()
+                navigateToProfileScreen()
+//                navigateToPasswordScreen()
             }
         }
     )
+//    if (viewModel.isUserAuthenticated) {
+//        navigateToProfileScreen()
+//    }
 }

@@ -13,6 +13,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Named
@@ -62,10 +63,11 @@ class AuthRepositoryImpl @Inject constructor(
     private suspend fun addUserToFireStore() {
         auth.currentUser?.apply {
             val user = User(
-                displayName,
-                email,
-                photoUrl?.toString(),
-                ""
+                displayName =  displayName,
+                email =  email,
+                publicUID = uid,
+                photoUrl =  photoUrl?.toString(),
+                createdAt = ""
             )
             db.reference.child(USERS).child(uid).setValue(user).await()
         }

@@ -26,6 +26,7 @@ object Constants {
     const val AUTH_SCREEN = "Authentication"
     const val PROFILE_SCREEN = "Profile"
     const val PASSWORD_SCREEN = "PasswordScreen"
+    const val ADD_EDIT_PASSWORD_SCREEN = "AddEditPasswordScreen"
 
     //Messages
     const val REVOKE_ACCESS_MESSAGE = "You need to re-authenticate before revoking the access."

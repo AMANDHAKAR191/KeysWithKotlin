@@ -24,6 +24,7 @@ class PasswordRepositoryImpl(
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     _passwordsItems.clear()
+                    println("dataSnapshot: $dataSnapshot")
                     for (ds in dataSnapshot.children) {
                         for (ds1 in ds.children){
                             val items = ds1.getValue(Password::class.java)
