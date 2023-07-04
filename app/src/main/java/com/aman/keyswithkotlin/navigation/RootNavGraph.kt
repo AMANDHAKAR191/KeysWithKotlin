@@ -49,9 +49,13 @@ fun RootNavGraph(
             composable(BottomBarScreen.Home.route) {
                 PasswordScreen(
                     navigateToAddEditPasswordScreen = {
-//                        navController.navigate(BottomBarScreen.Settings.route)
-//                        navController.navigate(Screen.AddEditPasswordScreen.route)
+                        navController.navigate(Screen.AddEditPasswordScreen.route)
+                    },
+                    navigateToGeneratePasswordScreen = {
                         navController.navigate(Screen.GeneratePasswordScreen.route)
+                    },
+                    navigateToProfileScreen = {
+                        navController.navigate(BottomBarScreen.Settings.route)
                     }
                 )
             }
