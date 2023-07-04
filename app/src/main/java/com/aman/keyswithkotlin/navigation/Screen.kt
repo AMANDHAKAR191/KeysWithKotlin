@@ -2,6 +2,7 @@ package com.aman.keyswithkotlin.navigation
 
 import com.aman.keyswithkotlin.core.Constants.ADD_EDIT_PASSWORD_SCREEN
 import com.aman.keyswithkotlin.core.Constants.AUTH_SCREEN
+import com.aman.keyswithkotlin.core.Constants.GENERATE_PASSWORD_SCREEN
 import com.aman.keyswithkotlin.core.Constants.PROFILE_SCREEN
 
 sealed class Screen(val route: String) {
@@ -9,4 +10,6 @@ sealed class Screen(val route: String) {
     object ProfileScreen : Screen(PROFILE_SCREEN)
 
     object AddEditPasswordScreen : Screen(ADD_EDIT_PASSWORD_SCREEN)
+
+    object GeneratePasswordScreen : Screen(GENERATE_PASSWORD_SCREEN)
 }

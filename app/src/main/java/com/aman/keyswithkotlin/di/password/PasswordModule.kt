@@ -4,6 +4,7 @@ import com.aman.keyswithkotlin.passwords.data.repository.PasswordRepositoryImpl
 import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
 import com.aman.keyswithkotlin.passwords.domain.use_cases.AddPassword
 import com.aman.keyswithkotlin.passwords.domain.use_cases.DeletePassword
+import com.aman.keyswithkotlin.passwords.domain.use_cases.GeneratePassword
 import com.aman.keyswithkotlin.passwords.domain.use_cases.GetPasswords
 import com.aman.keyswithkotlin.passwords.domain.use_cases.PasswordUseCases
 import com.google.firebase.database.FirebaseDatabase
@@ -26,7 +27,8 @@ class PasswordModule {
         return PasswordUseCases(
             getPasswords = GetPasswords(repository),
             addPassword = AddPassword(repository),
-            deletePassword = DeletePassword(repository)
+            deletePassword = DeletePassword(repository),
+            generatePassword = GeneratePassword(repository)
         )
     }
     @Provides

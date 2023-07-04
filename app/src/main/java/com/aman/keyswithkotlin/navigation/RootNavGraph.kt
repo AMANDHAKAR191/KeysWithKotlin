@@ -14,6 +14,7 @@ import com.aman.keyswithkotlin.chats.presentation.ChatsScreen
 import com.aman.keyswithkotlin.notes.presentation.NotesScreen
 import com.aman.keyswithkotlin.passwords.presentation.PasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordScreen
+import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordScreen
 import com.aman.keyswithkotlin.presentation.BottomBarScreen
 
 @Composable
@@ -49,7 +50,8 @@ fun RootNavGraph(
                 PasswordScreen(
                     navigateToAddEditPasswordScreen = {
 //                        navController.navigate(BottomBarScreen.Settings.route)
-                        navController.navigate(Screen.AddEditPasswordScreen.route)
+//                        navController.navigate(Screen.AddEditPasswordScreen.route)
+                        navController.navigate(Screen.GeneratePasswordScreen.route)
                     }
                 )
             }
@@ -62,6 +64,13 @@ fun RootNavGraph(
                     }
                 )
             }
+            composable(Screen.GeneratePasswordScreen.route){
+                GeneratePasswordScreen(
+                    navigateToPasswordScreen = {},
+                    navigateToAddEditPasswordScreen = {}
+                )
+            }
+
             composable(BottomBarScreen.Chats.route) {
                 ChatsScreen()
             }
