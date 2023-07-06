@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.passwords.presentation.password_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
@@ -65,9 +67,12 @@ fun PasswordScreen(
         )
     )
 
-
     val openDialog = remember { mutableStateOf(false) }
     val itemToDelete = remember { mutableStateOf<Password?>(null) }
+    val itemToView = remember { mutableStateOf<Password?>(null) }
+
+    var viewPassword by remember { mutableStateOf(false) }
+
     if (openDialog.value) {  //ask confirmation from user to delete the expanse
         AlertDialog(
             title = { Text(text = "Alert") },
@@ -76,7 +81,8 @@ fun PasswordScreen(
                 openDialog.value = false
             },
             confirmButton = {
-                Text(text = "Yes,delete",
+                Text(
+                    text = "Yes,delete",
                     modifier = Modifier.clickable {
                         itemToDelete.value?.let {
                             viewModel.onEvent(PasswordEvent.DeletePassword(it))
@@ -120,8 +126,8 @@ fun PasswordScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopBar(title = "Keys",
-                onClickBackIcon = {
-
+                onClickActionButton = {
+                    navigateToProfileScreen()
                 }
             )
         },
@@ -140,7 +146,8 @@ fun PasswordScreen(
                         Identifier.GeneratePassword.name->{
                             navigateToGeneratePasswordScreen()
                         }
-                        Identifier.Profile.name->{
+
+                        Identifier.Profile.name -> {
                             navigateToProfileScreen()
                         }
 
@@ -149,27 +156,43 @@ fun PasswordScreen(
             )
         },
         bottomBar = {
-        }
-    ) { innerPadding ->
-
-        if (state.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
-                CircularProgressIndicator()
+        },
+        content = { innerPadding ->
+            if (state.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
+                    CircularProgressIndicator()
+                }
             }
-        }
-        Column(modifier = Modifier.padding(innerPadding)) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(state.passwords) { password ->
-                    PasswordItem(
-                        password = password,
-                        onItemClick = {},
-                        onDeleteClick = {
-                            itemToDelete.value = password
-                            openDialog.value = true
+            Column(modifier = Modifier.padding(innerPadding)) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(state.passwords) { password ->
+                        PasswordItem(
+                            password = password,
+                            onItemClick = {
+                                itemToView.value = password
+                                viewPassword = true
+                            },
+                            onDeleteClick = {
+                                itemToDelete.value = password
+                                openDialog.value = true
+                            }
+                        )
+                    }
+                }
+            }
+            if (viewPassword) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            viewPassword = false
                         }
-                    )
+                        .background(Color(0x80000000)),
+                    contentAlignment = Center
+                ) {
+                    ViewPasswordScreen(itemToView.value!!)
                 }
             }
         }
-    }
+    )
 }
