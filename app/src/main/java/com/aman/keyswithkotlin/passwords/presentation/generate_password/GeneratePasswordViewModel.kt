@@ -2,14 +2,16 @@ package com.aman.keyswithkotlin.passwords.presentation.generate_password
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.core.Constants
 import com.aman.keyswithkotlin.passwords.domain.use_cases.PasswordUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @HiltViewModel
 class GeneratePasswordViewModel @Inject constructor(
@@ -23,11 +25,13 @@ class GeneratePasswordViewModel @Inject constructor(
         _state.value = state.value.copy(
             generatedPassword = "Generate Password",
             slider = 8,
-            upperCaseAlphabet = true,
-            lowerCaseAlphabet = true,
-            number = true,
-            specialCharacter = true
+            upperCaseAlphabet = !state.value.upperCaseAlphabet,
+            lowerCaseAlphabet = !state.value.lowerCaseAlphabet,
+            number = !state.value.number,
+            specialCharacter = !state.value.specialCharacter
         )
+        println("inside: GeneratePasswordViewModel")
+        generatePassword()
     }
 
     fun onEvent(event: GeneratePasswordEvent) {
@@ -57,23 +61,53 @@ class GeneratePasswordViewModel @Inject constructor(
                     )
                 }
 
+                //check if all switch is off then default on anyone by default
+                if (
+                    !state.value.upperCaseAlphabet &&
+                    !state.value.lowerCaseAlphabet &&
+                    !state.value.number &&
+                    !state.value.specialCharacter
+                ) {
+                    _state.value = state.value.copy(
+                        generatedPassword = "Generate Password",
+                        upperCaseAlphabet = true
+                    )
+                }
+
             }
 
             is GeneratePasswordEvent.GeneratePassword -> {
-                viewModelScope.launch {
-                    passwordUseCases.generatePassword(
-                        max_length = state.value.slider,
-                        upperCase = state.value.upperCaseAlphabet,
-                        lowerCase = state.value.lowerCaseAlphabet,
-                        numbers = state.value.number,
-                        specialCharacters = state.value.specialCharacter,
-                    ).collect{
-                        _state.value = state.value.copy(
-                            generatedPassword = it
-                        )
-                    }
-                }
+                generatePassword()
+            }
+            is GeneratePasswordEvent.CopyPassword->{
+                copyPasswordToClipBoard(event.clipboardManager)
             }
         }
+    }
+
+    private fun generatePassword() {
+        viewModelScope.launch {
+            passwordUseCases.generatePassword(
+                max_length = state.value.slider,
+                upperCase = state.value.upperCaseAlphabet,
+                lowerCase = state.value.lowerCaseAlphabet,
+                numbers = state.value.number,
+                specialCharacters = state.value.specialCharacter,
+            ).collect {
+                _state.value = state.value.copy(
+                    generatedPassword = it
+                )
+            }
+        }
+    }
+
+    private fun copyPasswordToClipBoard(
+        clipboardManager: ClipboardManager
+    ) {
+        clipboardManager.setText(
+            AnnotatedString(
+                state.value.generatedPassword
+            )
+        )
     }
 }

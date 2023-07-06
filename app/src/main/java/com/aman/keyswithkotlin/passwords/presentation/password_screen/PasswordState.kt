@@ -1,4 +1,4 @@
-package com.aman.keyswithkotlin.passwords.presentation
+package com.aman.keyswithkotlin.passwords.presentation.password_screen
 
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.domain.model.RealtimeModelResponse

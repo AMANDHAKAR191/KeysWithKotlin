@@ -1,16 +1,21 @@
 package com.aman.keyswithkotlin.passwords.presentation.add_edit_password
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,7 +29,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun AddEditPasswordScreen(
     viewModel: AddEditPasswordViewModel = hiltViewModel(),
-    navigateToPasswordScreen: () -> Unit
+    generatedPassword:String,
+    navigateToPasswordScreen: () -> Unit,
+    navigateToGeneratePasswordScreen: () -> Unit
 ) {
     val userName = viewModel.userName.value
     val password = viewModel.password.value
@@ -34,6 +41,11 @@ fun AddEditPasswordScreen(
 
     val focusState = remember {
         mutableStateOf(false)
+    }
+
+    println("generatedPassword: $generatedPassword")
+    if (generatedPassword != "") {
+        viewModel.onEvent(PasswordEvent.EnteredPassword(generatedPassword))
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -55,12 +67,19 @@ fun AddEditPasswordScreen(
         }
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 modifier = Modifier.fillMaxWidth(),
-                title = { Text(text = "Add Password") }
+                title = { Text(text = "Add Password") },
+                navigationIcon = {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = null,
+                        modifier = Modifier.clickable { navigateToPasswordScreen() })
+                }
             )
         }) { innerPadding ->
         Column(
@@ -85,8 +104,10 @@ fun AddEditPasswordScreen(
                 enabled = true,
                 singleLine = true,
                 trailingIcon = {
-                    if (focusState.value){
-                        Button(onClick = { /*TODO*/ }) {
+                    if (focusState.value) {
+                        TextButton(onClick = {
+                            navigateToGeneratePasswordScreen()
+                        }) {
                             Text(text = "Generate")
                         }
                     }

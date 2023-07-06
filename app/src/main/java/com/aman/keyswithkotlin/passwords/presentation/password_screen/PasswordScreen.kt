@@ -1,4 +1,4 @@
-package com.aman.keyswithkotlin.passwords.presentation
+package com.aman.keyswithkotlin.passwords.presentation.password_screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,16 +34,12 @@ import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.*
-import com.aman.keyswithkotlin.passwords.presentation.componants.Identifier
-import com.aman.keyswithkotlin.passwords.presentation.componants.MinFabItem
-import com.aman.keyswithkotlin.passwords.presentation.componants.MultiFloatingButton
-import com.aman.keyswithkotlin.passwords.presentation.componants.MultiFloatingState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordScreen(
     viewModel: PasswordViewModel = hiltViewModel(),
-    navigateToAddEditPasswordScreen: () -> Unit,
+    navigateToAddEditPasswordScreen: (String) -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit,
     navigateToProfileScreen: () -> Unit
 ) {
@@ -51,21 +49,20 @@ fun PasswordScreen(
     var multiFloatingState by remember { mutableStateOf(MultiFloatingState.Collapsed) }
     val items = listOf(
         MinFabItem(
-            icon = Icons.Default.Create,
-            label = "Add Password",
-            identifier = Identifier.AddEditPassword.name
+            icon = Icons.Default.Person,
+            label = "Profile",
+            identifier = Identifier.Profile.name
         ),
-    MinFabItem(
-            icon = Icons.Default.Create,
+        MinFabItem(
+            icon = Icons.Default.Password,
             label = "Generate Password",
             identifier = Identifier.GeneratePassword.name
         ),
-    MinFabItem(
+        MinFabItem(
             icon = Icons.Default.Create,
-            label = "Profile",
-            identifier = Identifier.Profile.name
+            label = "Add Password",
+            identifier = Identifier.AddEditPassword.name
         )
-
     )
 
 
@@ -138,7 +135,7 @@ fun PasswordScreen(
                 onMinFabItemClick = {minFabItem ->
                     when(minFabItem.identifier){
                         Identifier.AddEditPassword.name->{
-                            navigateToAddEditPasswordScreen()
+                            navigateToAddEditPasswordScreen(" ")
                         }
                         Identifier.GeneratePassword.name->{
                             navigateToGeneratePasswordScreen()
