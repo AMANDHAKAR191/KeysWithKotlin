@@ -4,17 +4,17 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthScreen
 import com.aman.keyswithkotlin.auth.presentation.profile.ProfileScreen
 import com.aman.keyswithkotlin.chats.presentation.ChatsScreen
 import com.aman.keyswithkotlin.notes.presentation.NotesScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordScreen
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordScreen
 import com.aman.keyswithkotlin.presentation.BottomBarScreen
@@ -24,6 +24,7 @@ import com.aman.keyswithkotlin.presentation.BottomBarScreen
 fun RootNavGraph(
     navController: NavHostController
 ) {
+    val sharedPasswordViewModel: ShareGeneratedPasswordViewModel = hiltViewModel()
     NavHost(
         navController = navController,
         startDestination = Screen.AuthScreen.route,
@@ -50,8 +51,9 @@ fun RootNavGraph(
         ){
             composable(BottomBarScreen.Home.route) {
                 PasswordScreen(
+                    sharedPasswordViewModel = sharedPasswordViewModel,
                     navigateToAddEditPasswordScreen = {
-                        navController.navigate("${Screen.AddEditPasswordScreen.route}/$it")
+                        navController.navigate(Screen.AddEditPasswordScreen.route)
                     },
                     navigateToGeneratePasswordScreen = {
                         navController.navigate(Screen.GeneratePasswordScreen.route)
@@ -61,15 +63,9 @@ fun RootNavGraph(
                     }
                 )
             }
-            composable("${Screen.AddEditPasswordScreen.route}/{generatedPassword}",
-                arguments = listOf(
-                    navArgument("generatedPassword") {
-                        type = NavType.StringType
-                    }
-                )) { entry ->
-                val param = entry.arguments?.getString("generatedPassword") ?: ""
+            composable(Screen.AddEditPasswordScreen.route) { entry ->
                 AddEditPasswordScreen(
-                    generatedPassword = param,
+                    sharedPasswordViewModel = sharedPasswordViewModel,
                     navigateToPasswordScreen = {
                         navController.navigate(BottomBarScreen.Home.route) {
                             popUpTo(BottomBarScreen.Home.route)
@@ -82,11 +78,12 @@ fun RootNavGraph(
             }
             composable(Screen.GeneratePasswordScreen.route) {
                 GeneratePasswordScreen(
+                    sharedPasswordViewModel = sharedPasswordViewModel,
                     navigateToPasswordScreen = {
                         navController.popBackStack()
                     },
                     navigateToAddEditPasswordScreen = {
-                        navController.navigate("${Screen.AddEditPasswordScreen.route}/$it")
+                        navController.navigate(Screen.AddEditPasswordScreen.route)
                     }
                 )
             }
@@ -111,16 +108,6 @@ fun RootNavGraph(
                 )
             }
         }
-//        composable(
-//            route = Screen.ProfileScreen.route
-//        ) {
-//            ProfileScreen(
-//                navigateToAuthScreen = {
-//                    navController.popBackStack()
-//                    navController.navigate(Screen.AuthScreen.route)
-//                }
-//            )
-//        }
     }
 }
 

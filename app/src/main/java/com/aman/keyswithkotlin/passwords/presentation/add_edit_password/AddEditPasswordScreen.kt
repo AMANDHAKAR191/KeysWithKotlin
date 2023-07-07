@@ -29,7 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun AddEditPasswordScreen(
     viewModel: AddEditPasswordViewModel = hiltViewModel(),
-    generatedPassword:String,
+    sharedPasswordViewModel: ShareGeneratedPasswordViewModel,
     navigateToPasswordScreen: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit
 ) {
@@ -38,14 +38,24 @@ fun AddEditPasswordScreen(
     val websiteName = viewModel.websiteName.value
     val websiteLink = viewModel.websiteLink.value
     val eventFlow = viewModel.eventFlow
+    val generatedPassword = sharedPasswordViewModel.generatedPassword.value.generatedPassword
+    val passwordItem = sharedPasswordViewModel.itemToEdit.value.passwordItem
 
     val focusState = remember {
         mutableStateOf(false)
     }
-
-    println("generatedPassword: $generatedPassword")
+    //if generatedPassword is not null then we are coming from GeneratePasswordScreen
+    println("generatedPassword: ${generatedPassword}")
     if (generatedPassword != "") {
         viewModel.onEvent(PasswordEvent.EnteredPassword(generatedPassword))
+    }
+
+    //if
+    println("generatedPassword: ${generatedPassword}")
+    if (passwordItem != null) {
+        viewModel.onEvent(PasswordEvent.EnteredUsername(passwordItem.userName))
+        viewModel.onEvent(PasswordEvent.EnteredPassword(passwordItem.password))
+        viewModel.onEvent(PasswordEvent.EnteredWebsiteName(passwordItem.websiteName))
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -78,7 +88,11 @@ fun AddEditPasswordScreen(
                     Icon(
                         Icons.Default.ArrowBack,
                         contentDescription = null,
-                        modifier = Modifier.clickable { navigateToPasswordScreen() })
+                        modifier = Modifier.clickable {
+                            sharedPasswordViewModel.onEvent(SharedPasswordEvent.resetViewmodel)
+                            navigateToPasswordScreen()
+                        }
+                    )
                 }
             )
         }) { innerPadding ->

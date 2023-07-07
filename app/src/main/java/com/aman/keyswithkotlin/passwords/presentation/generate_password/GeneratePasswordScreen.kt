@@ -36,6 +36,7 @@ import com.aman.keyswithkotlin.passwords.presentation.componants.CustomSwitch
 @Composable
 fun GeneratePasswordScreen(
     viewModel: GeneratePasswordViewModel = hiltViewModel(),
+    sharedPasswordViewModel:ShareGeneratedPasswordViewModel,
     navigateToPasswordScreen:()->Unit,
     navigateToAddEditPasswordScreen:(String)->Unit
 ) {
@@ -133,6 +134,7 @@ fun GeneratePasswordScreen(
                 }
                 Button(onClick = {
                     println("generatedPassword1: ${state.generatedPassword}")
+                    sharedPasswordViewModel.onEvent(SharedPasswordEvent.onPasswordGenerated(state.generatedPassword))
                     navigateToAddEditPasswordScreen(state.generatedPassword)
                 }) {
                     Text(text = "Use")

@@ -35,13 +35,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordScreen(
     viewModel: PasswordViewModel = hiltViewModel(),
-    navigateToAddEditPasswordScreen: (String) -> Unit,
+    sharedPasswordViewModel: ShareGeneratedPasswordViewModel,
+    navigateToAddEditPasswordScreen: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit,
     navigateToProfileScreen: () -> Unit
 ) {
@@ -141,7 +144,7 @@ fun PasswordScreen(
                 onMinFabItemClick = {minFabItem ->
                     when(minFabItem.identifier){
                         Identifier.AddEditPassword.name->{
-                            navigateToAddEditPasswordScreen(" ")
+                            navigateToAddEditPasswordScreen()
                         }
                         Identifier.GeneratePassword.name->{
                             navigateToGeneratePasswordScreen()
@@ -190,7 +193,15 @@ fun PasswordScreen(
                         .background(Color(0x80000000)),
                     contentAlignment = Center
                 ) {
-                    ViewPasswordScreen(itemToView.value!!)
+                    ViewPasswordScreen(
+                        itemToView.value!!,
+                        onCloseButtonClick = {
+                            viewPassword = false
+                        },
+                        onEditButtonClick = {
+                            sharedPasswordViewModel.onEvent(SharedPasswordEvent.onEditItem(itemToView.value!!))
+                            navigateToAddEditPasswordScreen()
+                        })
                 }
             }
         }

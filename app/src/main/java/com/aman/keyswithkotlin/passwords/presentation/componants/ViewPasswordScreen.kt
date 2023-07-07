@@ -39,7 +39,9 @@ import com.aman.keyswithkotlin.passwords.domain.model.Password
 @Composable
 fun ViewPasswordScreen(
     password: Password,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCloseButtonClick:()->Unit,
+    onEditButtonClick:()->Unit
 ) {
     var passwordVisibility by remember { mutableStateOf(false) }
     var icon = if (passwordVisibility) Icons.Default.Visibility else Icons.Default.VisibilityOff
@@ -48,7 +50,7 @@ fun ViewPasswordScreen(
         shape = RoundedCornerShape(10f),
         tonalElevation = 5.dp,
         shadowElevation = 5.dp,
-        modifier = Modifier
+        modifier = modifier
             .wrapContentHeight(),
         color = MaterialTheme.colorScheme.surface
     ) {
@@ -63,7 +65,9 @@ fun ViewPasswordScreen(
                     .padding(top = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = {
+                    onCloseButtonClick()
+                }) {
                     Icon(Icons.Default.Close, contentDescription = "Close")
                 }
                 Surface(
@@ -87,8 +91,10 @@ fun ViewPasswordScreen(
                         )
                     }
                 }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Default.Create, contentDescription = "Close")
+                IconButton(onClick = {
+                    onEditButtonClick()
+                }) {
+                    Icon(Icons.Default.Create, contentDescription = "Edit password")
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
