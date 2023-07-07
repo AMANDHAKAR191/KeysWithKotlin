@@ -95,71 +95,71 @@ fun AddEditPasswordScreen(
                     )
                 }
             )
-        }) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            CustomTextField(
-                text = userName.text,
-                label = userName.hint,
-                onValueChange = { viewModel.onEvent(PasswordEvent.EnteredUsername(it)) },
-                enabled = true,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text
+        }, content = {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
+                CustomTextField(
+                    text = userName.text,
+                    label = userName.hint,
+                    onValueChange = { viewModel.onEvent(PasswordEvent.EnteredUsername(it)) },
+                    enabled = true,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text
+                    )
                 )
-            )
-            CustomTextField(
-                text = password.text,
-                label = password.hint,
-                onValueChange = { viewModel.onEvent(PasswordEvent.EnteredPassword(it)) },
-                enabled = true,
-                singleLine = true,
-                trailingIcon = {
-                    if (focusState.value) {
-                        TextButton(onClick = {
-                            navigateToGeneratePasswordScreen()
-                        }) {
-                            Text(text = "Generate")
+                CustomTextField(
+                    text = password.text,
+                    label = password.hint,
+                    onValueChange = { viewModel.onEvent(PasswordEvent.EnteredPassword(it)) },
+                    enabled = true,
+                    singleLine = true,
+                    trailingIcon = {
+                        if (focusState.value) {
+                            TextButton(onClick = {
+                                navigateToGeneratePasswordScreen()
+                            }) {
+                                Text(text = "Generate")
+                            }
                         }
-                    }
-                },
-                onFocusChange = {
-                    focusState.value = it.isFocused
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text
+                    },
+                    onFocusChange = {
+                        focusState.value = it.isFocused
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text
+                    )
                 )
-            )
-            CustomTextField(
-                text = websiteName.text,
-                label = websiteName.hint,
-                onValueChange = { viewModel.onEvent(PasswordEvent.EnteredWebsiteName(it)) },
-                enabled = true,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text
+                CustomTextField(
+                    text = websiteName.text,
+                    label = websiteName.hint,
+                    onValueChange = { viewModel.onEvent(PasswordEvent.EnteredWebsiteName(it)) },
+                    enabled = true,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text
+                    )
                 )
-            )
-            CustomTextField(
-                text = websiteLink.text,
-                label = websiteLink.hint,
-                onValueChange = { viewModel.onEvent(PasswordEvent.EnteredWebsiteName(it)) },
-                enabled = true,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text
+                CustomTextField(
+                    text = websiteLink.text,
+                    label = websiteLink.hint,
+                    onValueChange = { viewModel.onEvent(PasswordEvent.EnteredWebsiteName(it)) },
+                    enabled = true,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text
+                    )
                 )
-            )
-            Button(onClick = {
-                viewModel.onEvent(PasswordEvent.SavePassword)
-            }) {
-                Text(text = "Save")
+                Button(onClick = {
+                    viewModel.onEvent(PasswordEvent.SavePassword)
+                }) {
+                    Text(text = "Save")
+                }
             }
-        }
-    }
+        })
 
 
 }

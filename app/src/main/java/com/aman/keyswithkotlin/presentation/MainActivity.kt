@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
 
     private fun navigateToProfileScreen() {
         navController.popBackStack()
-        navController.navigate(BottomBarScreen.Home.route)
+        navController.navigate(Graph.HOME)
     }
 
 }
