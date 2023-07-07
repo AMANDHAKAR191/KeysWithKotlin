@@ -29,6 +29,8 @@ fun RootNavGraph(
             navController = navController,
             sharedPasswordViewModel = sharedPasswordViewModel
         )
+        chatNavGraph(navController, sharedPasswordViewModel)
+        noteNavGraph(navController, sharedPasswordViewModel)
         settingNavGraph(navController)
     }
 }

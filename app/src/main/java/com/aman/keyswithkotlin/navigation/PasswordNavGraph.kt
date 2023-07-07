@@ -1,18 +1,17 @@
 package com.aman.keyswithkotlin.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.aman.keyswithkotlin.auth.presentation.profile.ProfileScreen
 import com.aman.keyswithkotlin.chats.presentation.ChatsScreen
 import com.aman.keyswithkotlin.notes.presentation.NotesScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordScreen
+import com.aman.keyswithkotlin.presentation.BottomBar
 import com.aman.keyswithkotlin.presentation.BottomBarScreen
 
 fun NavGraphBuilder.passwordNavGraph(
@@ -20,10 +19,10 @@ fun NavGraphBuilder.passwordNavGraph(
     sharedPasswordViewModel: ShareGeneratedPasswordViewModel
 ) {
     navigation(
-        startDestination = BottomBarScreen.Home.route,
+        startDestination = BottomBarScreen.Password.route,
         route = Graph.HOME
     ) {
-        composable(BottomBarScreen.Home.route) {
+        composable(BottomBarScreen.Password.route) {
             PasswordScreen(
                 sharedPasswordViewModel = sharedPasswordViewModel,
                 navigateToAddEditPasswordScreen = {
@@ -34,6 +33,14 @@ fun NavGraphBuilder.passwordNavGraph(
                 },
                 navigateToProfileScreen = {
                     navController.navigate(Graph.SETTING)
+                },
+                bottomBar = {
+                    BottomBar(navController, navigateTo = {
+                        navController.navigate(it) {
+                            popUpTo(navController.graph.findStartDestination().id)
+                            launchSingleTop = true
+                        }
+                    })
                 }
             )
         }
@@ -41,8 +48,8 @@ fun NavGraphBuilder.passwordNavGraph(
             AddEditPasswordScreen(
                 sharedPasswordViewModel = sharedPasswordViewModel,
                 navigateToPasswordScreen = {
-                    navController.navigate(BottomBarScreen.Home.route) {
-                        popUpTo(BottomBarScreen.Home.route)
+                    navController.navigate(BottomBarScreen.Password.route) {
+                        popUpTo(BottomBarScreen.Password.route)
                     }
                 },
                 navigateToGeneratePasswordScreen = {
@@ -61,26 +68,6 @@ fun NavGraphBuilder.passwordNavGraph(
                 }
             )
         }
-
-        composable(BottomBarScreen.Chats.route) {
-            ChatsScreen()
-        }
-        composable(BottomBarScreen.Notes.route) {
-            NotesScreen()
-        }
-//        composable(BottomBarScreen.Settings.route) {
-//            ProfileScreen(
-//                navigateToAuthScreen = {
-//                    navController.popBackStack()
-//                    navController.navigate(Screen.AuthScreen.route)
-//                },
-//                navigateToPasswordScreen = {
-//                    navController.navigate(BottomBarScreen.Home.route) {
-//                        popUpTo(BottomBarScreen.Home.route)
-//                    }
-//                }
-//            )
-//        }
     }
 
 }

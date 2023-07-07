@@ -3,6 +3,7 @@ package com.aman.keyswithkotlin.navigation
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
@@ -13,6 +14,7 @@ import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditP
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordScreen
+import com.aman.keyswithkotlin.presentation.BottomBar
 import com.aman.keyswithkotlin.presentation.BottomBarScreen
 
 fun NavGraphBuilder.noteNavGraph(
@@ -23,8 +25,18 @@ fun NavGraphBuilder.noteNavGraph(
         startDestination = BottomBarScreen.Notes.route,
         route = Graph.NOTE
     ) {
-        composable(BottomBarScreen.Notes.route) {
-            NotesScreen()
+        composable(BottomBarScreen.Chats.route) {
+            ChatsScreen(
+                title = BottomBarScreen.Chats.title,
+                bottomBar = {
+                    BottomBar(navController, navigateTo = {
+                        navController.navigate(it) {
+                            popUpTo(navController.graph.findStartDestination().id)
+                            launchSingleTop = true
+                        }
+                    })
+                }
+            )
         }
     }
 

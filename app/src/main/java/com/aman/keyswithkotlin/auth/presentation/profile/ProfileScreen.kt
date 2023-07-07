@@ -11,10 +11,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aman.keyswithkotlin.auth.presentation.profile.components.ProfileContent
 import com.aman.keyswithkotlin.auth.presentation.profile.components.ProfileTopBar
-import com.aman.keyswithkotlin.core.Constants.REVOKE_ACCESS_MESSAGE
-import com.aman.keyswithkotlin.core.Constants.SIGN_OUT
 import com.aman.keyswithkotlin.auth.presentation.profile.components.RevokeAccess
 import com.aman.keyswithkotlin.auth.presentation.profile.components.SignOut
+import com.aman.keyswithkotlin.core.Constants.REVOKE_ACCESS_MESSAGE
+import com.aman.keyswithkotlin.core.Constants.SIGN_OUT
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,6 +23,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     navigateToAuthScreen: () -> Unit,
     navigateToPasswordScreen: () -> Unit,
+    bottomBar: @Composable (() -> Unit)
 ) {
     val snackBarHostState = remember {
         SnackbarHostState()
@@ -43,6 +44,9 @@ fun ProfileScreen(
                     navigateToPasswordScreen()
                 }
             )
+        },
+        bottomBar = {
+            bottomBar()
         },
         content = { padding ->
             ProfileContent(

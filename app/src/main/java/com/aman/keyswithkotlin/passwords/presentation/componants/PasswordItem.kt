@@ -10,7 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -43,26 +44,31 @@ fun PasswordItem(
             tonalElevation = 5.dp,
             shadowElevation = 5.dp,
             modifier = Modifier
-                .weight(2f)
-                .aspectRatio(1f)
+                .weight(2.5f)
+                .wrapContentSize()
                 .clickable {
                     onItemClick()
-                }.align(CenterVertically),
-            color = MaterialTheme.colorScheme.surface
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (password != null) {
-                    Text(
-                        text = password.websiteName,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
+                }
+                .align(CenterVertically),
+            color = MaterialTheme.colorScheme.primary,
+            content = {
+                Box(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(vertical = 5.dp, horizontal = 10.dp)
+                        .aspectRatio(1f),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (password != null) {
+                        Text(
+                            text = password.websiteName,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
-        }
+        )
 
         Column(
             modifier = Modifier
@@ -93,7 +99,14 @@ fun PasswordItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            if (password != null) {
+                CustomProgressIndicator(
+                    totalBudgetAmount = 40f,
+                    progress = (100f - password.password.length.toFloat())
+                )
+            }
         }
+
         IconButton(
             onClick = {onDeleteClick()},
             modifier = Modifier.weight(1f)

@@ -1,12 +1,10 @@
 package com.aman.keyswithkotlin.presentation
 
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -14,16 +12,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
 fun BottomBar(
-    navController: NavController
+    navController: NavController,
+    navigateTo: (String) -> Unit
 ) {
     val screens = listOf(
-        BottomBarScreen.Home,
+        BottomBarScreen.Password,
         BottomBarScreen.Chats,
         BottomBarScreen.Notes,
         BottomBarScreen.Settings,
@@ -36,7 +33,10 @@ fun BottomBar(
             AddItem(
                 screen = itemScreen,
                 currentDestination = currentDestination,
-                navController = navController
+                onClicked = {
+                    println("itemScreen.route: ${itemScreen.route}")
+                    navigateTo(itemScreen.route)
+                }
             )
         }
 
@@ -47,7 +47,7 @@ fun BottomBar(
 fun RowScope.AddItem(
     screen: BottomBarScreen,
     currentDestination: NavDestination?,
-    navController: NavController
+    onClicked: () -> Unit
 ) {
     NavigationBarItem(
         selected = currentDestination?.hierarchy?.any {
@@ -63,10 +63,7 @@ fun RowScope.AddItem(
             unselectedIconColor = Color.LightGray
         ),
         onClick = {
-            navController.navigate(screen.route) {
-                popUpTo(navController.graph.findStartDestination().id)
-                launchSingleTop = true
-            }
+            onClicked()
         }
     )
 }
