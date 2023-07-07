@@ -29,8 +29,8 @@ fun NavGraphBuilder.settingNavGraph(
                 },
                 bottomBar = {
                     BottomBar(navController, navigateTo = {
+                        navController.popBackStack()
                         navController.navigate(it) {
-                            popUpTo(navController.graph.findStartDestination().id)
                             launchSingleTop = true
                         }
                     })

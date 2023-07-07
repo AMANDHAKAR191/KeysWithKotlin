@@ -25,13 +25,13 @@ fun NavGraphBuilder.noteNavGraph(
         startDestination = BottomBarScreen.Notes.route,
         route = Graph.NOTE
     ) {
-        composable(BottomBarScreen.Chats.route) {
-            ChatsScreen(
-                title = BottomBarScreen.Chats.title,
+        composable(BottomBarScreen.Notes.route) {
+            NotesScreen(
+                title = BottomBarScreen.Notes.title,
                 bottomBar = {
                     BottomBar(navController, navigateTo = {
+                        navController.popBackStack()
                         navController.navigate(it) {
-                            popUpTo(navController.graph.findStartDestination().id)
                             launchSingleTop = true
                         }
                     })

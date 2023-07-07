@@ -34,7 +34,6 @@ fun BottomBar(
                 screen = itemScreen,
                 currentDestination = currentDestination,
                 onClicked = {
-                    println("itemScreen.route: ${itemScreen.route}")
                     navigateTo(itemScreen.route)
                 }
             )

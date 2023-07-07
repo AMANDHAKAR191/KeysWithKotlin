@@ -37,7 +37,6 @@ fun NavGraphBuilder.passwordNavGraph(
                 bottomBar = {
                     BottomBar(navController, navigateTo = {
                         navController.navigate(it) {
-                            popUpTo(navController.graph.findStartDestination().id)
                             launchSingleTop = true
                         }
                     })
