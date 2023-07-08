@@ -1,4 +1,4 @@
-package com.aman.keyswithkotlin.presentation
+package com.aman.keyswithkotlin.core.components
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Icon
@@ -13,6 +13,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.aman.keyswithkotlin.navigation.BottomBarScreen
 
 @Composable
 fun BottomBar(

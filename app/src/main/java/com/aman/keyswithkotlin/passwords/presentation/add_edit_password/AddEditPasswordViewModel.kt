@@ -21,50 +21,26 @@ class AddEditPasswordViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    private val _userName = mutableStateOf(
-        TextFieldState(
-            hint = "User name"
-        )
-    )
-    val userName: State<TextFieldState> = _userName
-
-    private val _password = mutableStateOf(
-        TextFieldState(
-            hint = "Password"
-        )
-    )
-    val password: State<TextFieldState> = _password
-
-    private val _websiteName = mutableStateOf(
-        TextFieldState(
-            hint = "Website name"
-        )
-    )
-    val websiteName: State<TextFieldState> = _websiteName
-    private val _websiteLink = mutableStateOf(
-        TextFieldState(
-            hint = "Website Link (optional)"
-        )
-    )
-    val websiteLink: State<TextFieldState> = _websiteLink
+    private val _state = mutableStateOf(AddEditPasswordState())
+    val state:State<AddEditPasswordState> = _state
 
     fun onEvent(event: PasswordEvent) {
         when (event) {
             is PasswordEvent.EnteredUsername -> {
-                _userName.value = userName.value.copy(
-                    text = event.value
+                _state.value = state.value.copy(
+                    username = event.value
                 )
             }
 
             is PasswordEvent.EnteredPassword -> {
-                _password.value = password.value.copy(
-                    text = event.value
+                _state.value = state.value.copy(
+                    password = event.value
                 )
             }
 
             is PasswordEvent.EnteredWebsiteName -> {
-                _websiteName.value = websiteName.value.copy(
-                    text = event.value
+                _state.value = state.value.copy(
+                    websiteName = event.value
                 )
             }
 
@@ -74,9 +50,9 @@ class AddEditPasswordViewModel @Inject constructor(
                     try {
                         passwordUseCases.addPassword(
                             Password(
-                                userName = userName.value.text,
-                                password = password.value.text,
-                                websiteName = websiteName.value.text,
+                                userName = state.value.username,
+                                password = state.value.password,
+                                websiteName = state.value.websiteName,
                                 websiteLink = ""
                             )
                         ).collect { response ->
@@ -85,7 +61,7 @@ class AddEditPasswordViewModel @Inject constructor(
 
                                 }
 
-                                is Response.Success -> {
+                                is Response.Success<*, *> -> {
                                     _eventFlow.emit(
                                         UiEvent.ShowSnackBar(
                                             message = response.data.toString()

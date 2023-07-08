@@ -17,6 +17,9 @@ class ShareGeneratedPasswordViewModel @Inject constructor(
     private val _itemToEdit = mutableStateOf(SharedPasswordState())
     val itemToEdit:State<SharedPasswordState> = _itemToEdit
 
+    private val _itemToShare = mutableStateOf(SharedPasswordState())
+    val itemToShare:State<SharedPasswordState> = _itemToShare
+
 
     init {
         println("inside: ${generatedPassword.value.generatedPassword}")
@@ -43,6 +46,11 @@ class ShareGeneratedPasswordViewModel @Inject constructor(
                     passwordItem = null
                 )
             }
+            is  SharedPasswordEvent.onSharePassword->{
+                _itemToShare.value = itemToShare.value.copy(
+                    passwordItem = event.value
+                )
+            }
         }
     }
 }
@@ -50,6 +58,8 @@ class ShareGeneratedPasswordViewModel @Inject constructor(
 sealed class SharedPasswordEvent{
     data class onPasswordGenerated(val value:String): SharedPasswordEvent()
     data class onEditItem(val value: Password):SharedPasswordEvent()
+
+    data class onSharePassword(val value: Password):SharedPasswordEvent()
 
     object resetViewmodel:SharedPasswordEvent()
 }

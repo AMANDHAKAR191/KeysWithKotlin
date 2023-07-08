@@ -1,12 +1,14 @@
 package com.aman.keyswithkotlin.passwords.domain.model
 
+import com.aman.keyswithkotlin.core.AES
+
 data class Password constructor(
     val userName: String = "",
     val password: String = "",
     val websiteName: String = "",
     val websiteLink: String = ""
-){
-    fun doesMatchSearchQuery(query:String):Boolean{
+) {
+    fun doesMatchSearchQuery(query: String): Boolean {
         val matchingCombination = listOf(
             "$websiteName",
             "$userName",

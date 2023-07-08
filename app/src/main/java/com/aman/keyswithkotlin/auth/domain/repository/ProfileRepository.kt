@@ -2,8 +2,8 @@ package com.aman.keyswithkotlin.auth.domain.repository
 
 import com.aman.keyswithkotlin.core.util.Response
 
-typealias SignOutResponse = Response<Boolean>
-typealias RevokeAccessResponse = Response<Boolean>
+typealias SignOutResponse = Response<Pair<Boolean?, Boolean?>>
+typealias RevokeAccessResponse = Response<Pair<Boolean?, Boolean?>>
 
 
 interface ProfileRepository {

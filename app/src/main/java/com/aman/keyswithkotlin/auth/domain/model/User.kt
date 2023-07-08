@@ -1,9 +1,14 @@
 package com.aman.keyswithkotlin.auth.domain.model
 
+import com.aman.keyswithkotlin.core.AES
+
 data class User(
-    val displayName:String?,
-    val email:String?,
-    val publicUID:String?,
-    val photoUrl:String?,
-    val createdAt:String?
+    var displayName: String? = "",
+    var email: String? = "",
+    var photoUrl: String? = "",
+    var aesKey: String? = "",
+    var aesIV: String? = "",
+    var privateUID: String? = "",
+    var publicUID: String? = "",
+    var createdAt: String? = ""
 )

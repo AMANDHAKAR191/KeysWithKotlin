@@ -64,7 +64,7 @@ class PasswordViewModel @Inject constructor(
                     passwordUseCases.addPassword(event.password)
                         .collect { response ->
                             when (response) {
-                                is Response.Success -> {
+                                is Response.Success<*, *> -> {
                                     println("check: password deleted")
 //                                _eventFlow.emit(
 //                                    AddEditPasswordViewModel.UiEvent.ShowSnackBar(
@@ -83,11 +83,11 @@ class PasswordViewModel @Inject constructor(
                     passwordUseCases.deletePassword(event.password).collect{response->
                         println("check1: password deleted $response")
                         when (response) {
-                            is Response.Success -> {
+                            is Response.Success<*, *> -> {
                                 println("check: password deleted")
                                 _eventFlow.emit(
                                     AddEditPasswordViewModel.UiEvent.ShowSnackBar(
-                                        message = response.data!!
+                                        message = response.data.toString()
                                     )
                                 )
                             }
@@ -113,9 +113,9 @@ class PasswordViewModel @Inject constructor(
                 withContext(Dispatchers.Main){
                     println(this.coroutineContext)
                     when (response) {
-                        is Response.Success -> {
+                        is Response.Success<*, *> -> {
                             _state.value = state.value.copy(
-                                passwords = response.data!!,
+                                passwords = response.data as List<Password>,
                                 isLoading = false
                             )
                             _passwords.value = response.data

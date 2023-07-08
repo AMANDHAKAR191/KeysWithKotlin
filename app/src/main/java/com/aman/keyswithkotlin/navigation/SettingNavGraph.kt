@@ -1,14 +1,13 @@
 package com.aman.keyswithkotlin.navigation
 
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.aman.keyswithkotlin.auth.presentation.profile.ProfileScreen
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
-import com.aman.keyswithkotlin.presentation.BottomBar
-import com.aman.keyswithkotlin.presentation.BottomBarScreen
+import com.aman.keyswithkotlin.auth.presentation.profile.ProfileViewModel
+import com.aman.keyswithkotlin.core.components.BottomBar
 
 fun NavGraphBuilder.settingNavGraph(
     navController: NavController) {
@@ -17,7 +16,18 @@ fun NavGraphBuilder.settingNavGraph(
         route = Graph.SETTING
     ) {
         composable(BottomBarScreen.Settings.route) {
+            val viewModel: ProfileViewModel = hiltViewModel()
             ProfileScreen(
+                displayName = viewModel.displayName,
+                photoUrl = viewModel.photoUrl,
+                signOutResponse = viewModel.signOutResponse,
+                revokeAccessResponse = viewModel.revokeAccessResponse,
+                onSignOut = {
+                    viewModel.signOut()
+                },
+                onRevokeAccess = {
+                    viewModel.revokeAccess()
+                },
                 navigateToAuthScreen = {
                     navController.popBackStack()
                     navController.navigate(Graph.AUTHENTICATION)

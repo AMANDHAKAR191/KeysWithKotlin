@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 class GetPasswords (
     private val passwordRepository: PasswordRepository
 ) {
-    operator fun invoke():Flow<Response<List<Password>>>{
+    operator fun invoke():Flow<Response<Pair<MutableList<Password>?, Boolean?>>>{
         println("check: GetPasswords")
         return passwordRepository.getPasswords()
     }

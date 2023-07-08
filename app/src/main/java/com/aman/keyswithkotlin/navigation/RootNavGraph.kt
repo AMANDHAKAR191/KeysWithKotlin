@@ -7,10 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.aman.keyswithkotlin.auth.presentation.auth.AuthScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
-import com.aman.keyswithkotlin.presentation.BottomBarScreen
 
 @Composable
 @ExperimentalAnimationApi

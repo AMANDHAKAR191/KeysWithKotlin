@@ -19,25 +19,26 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditPasswordScreen(
-    viewModel: AddEditPasswordViewModel = hiltViewModel(),
+    state: AddEditPasswordState,
+    eventFlow:SharedFlow<AddEditPasswordViewModel.UiEvent>,
+    onEvent:(PasswordEvent)->Unit,
     sharedPasswordViewModel: ShareGeneratedPasswordViewModel,
     navigateToPasswordScreen: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit
 ) {
-    val userName = viewModel.userName.value
-    val password = viewModel.password.value
-    val websiteName = viewModel.websiteName.value
-    val websiteLink = viewModel.websiteLink.value
-    val eventFlow = viewModel.eventFlow
+
     val generatedPassword = sharedPasswordViewModel.generatedPassword.value.generatedPassword
     val passwordItem = sharedPasswordViewModel.itemToEdit.value.passwordItem
 
@@ -47,22 +48,22 @@ fun AddEditPasswordScreen(
     //if generatedPassword is not null then we are coming from GeneratePasswordScreen
     println("generatedPassword: ${generatedPassword}")
     if (generatedPassword != "") {
-        viewModel.onEvent(PasswordEvent.EnteredPassword(generatedPassword))
+        onEvent(PasswordEvent.EnteredPassword(generatedPassword))
     }
 
     //if
     println("generatedPassword: ${generatedPassword}")
     if (passwordItem != null) {
-        viewModel.onEvent(PasswordEvent.EnteredUsername(passwordItem.userName))
-        viewModel.onEvent(PasswordEvent.EnteredPassword(passwordItem.password))
-        viewModel.onEvent(PasswordEvent.EnteredWebsiteName(passwordItem.websiteName))
+        onEvent(PasswordEvent.EnteredUsername(passwordItem.userName))
+        onEvent(PasswordEvent.EnteredPassword(passwordItem.password))
+        onEvent(PasswordEvent.EnteredWebsiteName(passwordItem.websiteName))
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
     //for showing the snackBar
-    LaunchedEffect(key1 = viewModel.eventFlow) {
-        viewModel.eventFlow.collect { event ->
+    LaunchedEffect(key1 = eventFlow) {
+        eventFlow.collect { event ->
             when (event) {
                 is AddEditPasswordViewModel.UiEvent.ShowSnackBar -> {
                     snackbarHostState.showSnackbar(event.message)
@@ -102,9 +103,9 @@ fun AddEditPasswordScreen(
                     .padding(it)
             ) {
                 CustomTextField(
-                    text = userName.text,
-                    label = userName.hint,
-                    onValueChange = { viewModel.onEvent(PasswordEvent.EnteredUsername(it)) },
+                    text = state.username,
+                    label = "Username",
+                    onValueChange = { onEvent(PasswordEvent.EnteredUsername(it)) },
                     enabled = true,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
@@ -112,9 +113,9 @@ fun AddEditPasswordScreen(
                     )
                 )
                 CustomTextField(
-                    text = password.text,
-                    label = password.hint,
-                    onValueChange = { viewModel.onEvent(PasswordEvent.EnteredPassword(it)) },
+                    text = state.password,
+                    label = "Password",
+                    onValueChange = { onEvent(PasswordEvent.EnteredPassword(it)) },
                     enabled = true,
                     singleLine = true,
                     trailingIcon = {
@@ -134,9 +135,9 @@ fun AddEditPasswordScreen(
                     )
                 )
                 CustomTextField(
-                    text = websiteName.text,
-                    label = websiteName.hint,
-                    onValueChange = { viewModel.onEvent(PasswordEvent.EnteredWebsiteName(it)) },
+                    text = state.websiteName,
+                    label = "Website Name",
+                    onValueChange = { onEvent(PasswordEvent.EnteredWebsiteName(it)) },
                     enabled = true,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
@@ -144,9 +145,9 @@ fun AddEditPasswordScreen(
                     )
                 )
                 CustomTextField(
-                    text = websiteLink.text,
-                    label = websiteLink.hint,
-                    onValueChange = { viewModel.onEvent(PasswordEvent.EnteredWebsiteName(it)) },
+                    text = state.websiteLink,
+                    label = "Website Link (optional)",
+                    onValueChange = { onEvent(PasswordEvent.EnteredWebsiteName(it)) },
                     enabled = true,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
@@ -154,7 +155,7 @@ fun AddEditPasswordScreen(
                     )
                 )
                 Button(onClick = {
-                    viewModel.onEvent(PasswordEvent.SavePassword)
+                    onEvent(PasswordEvent.SavePassword)
                 }) {
                     Text(text = "Save")
                 }

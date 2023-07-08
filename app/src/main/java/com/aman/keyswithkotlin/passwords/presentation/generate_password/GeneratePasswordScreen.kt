@@ -25,9 +25,12 @@ import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.aman.keyswithkotlin.auth.presentation.profile.ProfileScreen
 import com.aman.keyswithkotlin.core.Constants
+import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.CustomSwitch
@@ -35,12 +38,12 @@ import com.aman.keyswithkotlin.passwords.presentation.componants.CustomSwitch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeneratePasswordScreen(
-    viewModel: GeneratePasswordViewModel = hiltViewModel(),
-    sharedPasswordViewModel:ShareGeneratedPasswordViewModel,
+    state:GeneratePasswordState,
+    onEvent:(GeneratePasswordEvent)->Unit,
+    onSharedPasswordEvent:(SharedPasswordEvent)->Unit,
     navigateToPasswordScreen:()->Unit,
     navigateToAddEditPasswordScreen:(String)->Unit
 ) {
-    val state = viewModel.state.value
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -66,19 +69,19 @@ fun GeneratePasswordScreen(
                 modifier = Modifier.semantics { contentDescription = "Localized Description" },
                 value = state.slider.toFloat(),
                 onValueChange = {
-                    viewModel.onEvent(GeneratePasswordEvent.ChangeSliderValueChange(it.toInt()))
+                    onEvent(GeneratePasswordEvent.ChangeSliderValueChange(it.toInt()))
                 },
                 steps = 8,
                 valueRange = 4f..40f,
                 onValueChangeFinished = {
-                    viewModel.onEvent(GeneratePasswordEvent.GeneratePassword)
+                    onEvent(GeneratePasswordEvent.GeneratePassword)
                 }
             )
             CustomSwitch(
                 label = Constants.IDENTIFIER_UPPER_CASE,
                 checked = state.upperCaseAlphabet,
                 onCheckedChange = {
-                    viewModel.onEvent(
+                    onEvent(
                         GeneratePasswordEvent.ChangeSwitchValueChange(
                             !state.upperCaseAlphabet,
                             Constants.IDENTIFIER_UPPER_CASE
@@ -90,7 +93,7 @@ fun GeneratePasswordScreen(
                 label = Constants.IDENTIFIER_LOWER_CASE,
                 checked = state.lowerCaseAlphabet,
                 onCheckedChange = {
-                    viewModel.onEvent(
+                    onEvent(
                         GeneratePasswordEvent.ChangeSwitchValueChange(
                             !state.lowerCaseAlphabet,
                             Constants.IDENTIFIER_LOWER_CASE
@@ -102,7 +105,7 @@ fun GeneratePasswordScreen(
                 label = Constants.IDENTIFIER_NUMBER,
                 checked = state.number,
                 onCheckedChange = {
-                    viewModel.onEvent(
+                    onEvent(
                         GeneratePasswordEvent.ChangeSwitchValueChange(
                             !state.number,
                             Constants.IDENTIFIER_NUMBER
@@ -114,7 +117,7 @@ fun GeneratePasswordScreen(
                 label = Constants.IDENTIFIER_SPECIAL_CHAR,
                 checked = state.specialCharacter,
                 onCheckedChange = {
-                    viewModel.onEvent(
+                    onEvent(
                         GeneratePasswordEvent.ChangeSwitchValueChange(
                             !state.specialCharacter,
                             Constants.IDENTIFIER_SPECIAL_CHAR
@@ -128,13 +131,13 @@ fun GeneratePasswordScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 OutlinedButton(onClick = {
-                    viewModel.onEvent(GeneratePasswordEvent.CopyPassword(clipboardManager))
+                    onEvent(GeneratePasswordEvent.CopyPassword(clipboardManager))
                 }) {
                     Text(text = "Copy")
                 }
                 Button(onClick = {
                     println("generatedPassword1: ${state.generatedPassword}")
-                    sharedPasswordViewModel.onEvent(SharedPasswordEvent.onPasswordGenerated(state.generatedPassword))
+                    onSharedPasswordEvent(SharedPasswordEvent.onPasswordGenerated(state.generatedPassword))
                     navigateToAddEditPasswordScreen(state.generatedPassword)
                 }) {
                     Text(text = "Use")
@@ -143,4 +146,23 @@ fun GeneratePasswordScreen(
         }
     }
 
+}
+
+@Preview
+@Composable
+fun preview(){
+    GeneratePasswordScreen(
+        state = GeneratePasswordState(
+            generatedPassword = "djdkfjdkfn",
+            slider = 20,
+            upperCaseAlphabet = true,
+            lowerCaseAlphabet = true,
+            number = true,
+            specialCharacter = true
+        ),
+        onEvent = {},
+        onSharedPasswordEvent = {},
+        navigateToPasswordScreen = { /*TODO*/ },
+        navigateToAddEditPasswordScreen = {}
+    )
 }

@@ -16,7 +16,7 @@ class PasswordRepositoryImpl(
 ) : PasswordRepository {
 
     private val _passwordsItems = mutableListOf<Password>()
-    override fun getPasswords(): Flow<Response<List<Password>>> =
+    override fun getPasswords(): Flow<Response<Pair<MutableList<Password>?, Boolean?>>> =
         callbackFlow {
             val reference = database.reference.child("Passwords")
             reference.keepSynced(true)
@@ -33,7 +33,7 @@ class PasswordRepositoryImpl(
                             }
                         }
                     }
-                    trySend(Response.Success(_passwordsItems))
+                    trySend(Response.Success(data = _passwordsItems))
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -49,7 +49,9 @@ class PasswordRepositoryImpl(
         }
 
 
-override fun insertPassword(password: Password): Flow<Response<String>> = callbackFlow {
+override fun insertPassword(
+    password: Password
+): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
     val reference = database.reference.child("Passwords")
     reference.keepSynced(true)
     trySend(Response.Loading)
@@ -68,14 +70,14 @@ override fun insertPassword(password: Password): Flow<Response<String>> = callba
     }
 }
 
-override fun deletePassword(password: Password): Flow<Response<String>> = callbackFlow {
+override fun deletePassword(password: Password): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
     val reference = database.reference.child("Passwords")
     reference.keepSynced(true)
     trySend(Response.Loading)
     reference.child(password.websiteName).child(password.userName)
         .removeValue()
         .addOnCompleteListener {
-            trySend(Response.Success("Password is successfully deleted"))
+            trySend(Response.Success(data = "Password is successfully deleted"))
         }
         .addOnFailureListener {
             trySend(Response.Failure(it))

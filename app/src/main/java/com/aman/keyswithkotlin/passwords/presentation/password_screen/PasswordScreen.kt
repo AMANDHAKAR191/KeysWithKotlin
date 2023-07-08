@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -34,38 +32,37 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.*
-import com.aman.keyswithkotlin.presentation.BottomBar
+import kotlinx.coroutines.flow.SharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordScreen(
-    viewModel: PasswordViewModel = hiltViewModel(),
-    sharedPasswordViewModel: ShareGeneratedPasswordViewModel,
+    state: PasswordState,
+    eventFlowState:SharedFlow<AddEditPasswordViewModel.UiEvent>,
+    searchedPasswordState:State<List<Password>>,
+    onEvent:(PasswordEvent)->Unit,
+    onSharedPasswordEvent:(SharedPasswordEvent)->Unit,
     navigateToAddEditPasswordScreen: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit,
     navigateToProfileScreen: () -> Unit,
     bottomBar:@Composable (()->Unit)
 ) {
-    val state = viewModel.state.value
-    val searchedPasswords = viewModel.searchedPasswords.collectAsState()
+    val searchedPasswords = searchedPasswordState.value
     val snackBarHostState = remember { SnackbarHostState() }
     var multiFloatingState by remember { mutableStateOf(MultiFloatingState.Collapsed) }
     val items = listOf(
@@ -106,7 +103,7 @@ fun PasswordScreen(
                     text = "Yes,delete",
                     modifier = Modifier.clickable {
                         itemToDelete.value?.let {
-                            viewModel.onEvent(PasswordEvent.DeletePassword(it))
+                            onEvent(PasswordEvent.DeletePassword(it))
                         }
                         openDialog.value = false
                     })
@@ -122,8 +119,8 @@ fun PasswordScreen(
     }
 
     //for showing the snackBar
-    LaunchedEffect(key1 = viewModel.eventFlow) {
-        viewModel.eventFlow.collect { event ->
+    LaunchedEffect(key1 = eventFlowState) {
+        eventFlowState.collect { event ->
             when (event) {
                 is AddEditPasswordViewModel.UiEvent.ShowSnackBar -> {
                     val result = snackBarHostState.showSnackbar(
@@ -133,7 +130,7 @@ fun PasswordScreen(
                         duration = SnackbarDuration.Indefinite
                     )
                     if (result == SnackbarResult.ActionPerformed) {
-                        viewModel.onEvent(PasswordEvent.RestorePassword(itemToDelete.value!!))
+                        onEvent(PasswordEvent.RestorePassword(itemToDelete.value!!))
                     }
                 }
 
@@ -194,7 +191,7 @@ fun PasswordScreen(
                             modifier = Modifier.padding(horizontal = 10.dp),
                             query = searchtext.value,
                             onQueryChange = {
-                                viewModel.onEvent(PasswordEvent.OnSearchTextChange(it))
+                                onEvent(PasswordEvent.OnSearchTextChange(it))
                                 searchtext.value = it },
                             onSearch = {
 
@@ -225,7 +222,7 @@ fun PasswordScreen(
                             }
                         ) {
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                items(searchedPasswords.value) { password ->
+                                items(searchedPasswords) { password ->
                                     PasswordItem(
                                         password = password,
                                         onItemClick = {
@@ -281,11 +278,17 @@ fun PasswordScreen(
                             viewPassword = false
                         },
                         onEditButtonClick = {
-                            sharedPasswordViewModel.onEvent(SharedPasswordEvent.onEditItem(itemToView.value!!))
+                            onSharedPasswordEvent(SharedPasswordEvent.onEditItem(itemToView.value!!))
                             navigateToAddEditPasswordScreen()
                         })
                 }
             }
         }
     )
+}
+
+@Preview
+@Composable
+fun preview(){
+
 }

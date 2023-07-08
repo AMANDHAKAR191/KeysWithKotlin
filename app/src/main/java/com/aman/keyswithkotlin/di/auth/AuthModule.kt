@@ -7,6 +7,7 @@ import com.aman.keyswithkotlin.auth.data.repository.AuthRepositoryImpl
 import com.aman.keyswithkotlin.auth.data.repository.ProfileRepositoryImpl
 import com.aman.keyswithkotlin.auth.domain.repository.AuthRepository
 import com.aman.keyswithkotlin.auth.domain.repository.ProfileRepository
+import com.aman.keyswithkotlin.core.AES
 import com.aman.keyswithkotlin.core.Constants
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
@@ -39,6 +40,9 @@ class AuthModule {
         @ApplicationContext
         context: Context
     ) = Identity.getSignInClient(context)
+
+    @Provides
+    fun provideAES():AES = AES.getInstance("", "")!!
 
     @Provides
     @Named(Constants.SIGN_IN_REQUEST)

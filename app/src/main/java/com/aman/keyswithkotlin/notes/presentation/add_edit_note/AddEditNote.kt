@@ -1,4 +1,4 @@
-package com.aman.keyswithkotlin.notes.presentation
+package com.aman.keyswithkotlin.notes.presentation.add_edit_note
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold

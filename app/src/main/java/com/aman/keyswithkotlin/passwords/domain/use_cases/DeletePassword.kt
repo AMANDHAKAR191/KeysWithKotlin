@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 class DeletePassword(
     private val passwordRepository: PasswordRepository
 ) {
-    suspend operator fun invoke(password: Password): Flow<Response<String>> {
+    suspend operator fun invoke(password: Password): Flow<Response<Pair<String?, Boolean?>>> {
         return passwordRepository.deletePassword(password)
     }
 }

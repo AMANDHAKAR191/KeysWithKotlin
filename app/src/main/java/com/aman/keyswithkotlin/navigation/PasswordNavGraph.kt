@@ -1,18 +1,19 @@
 package com.aman.keyswithkotlin.navigation
 
+import androidx.compose.runtime.collectAsState
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.aman.keyswithkotlin.chats.presentation.ChatsScreen
-import com.aman.keyswithkotlin.notes.presentation.NotesScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordScreen
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordScreen
+import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordScreen
-import com.aman.keyswithkotlin.presentation.BottomBar
-import com.aman.keyswithkotlin.presentation.BottomBarScreen
+import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordViewModel
+import com.aman.keyswithkotlin.core.components.BottomBar
 
 fun NavGraphBuilder.passwordNavGraph(
     navController: NavController,
@@ -23,8 +24,13 @@ fun NavGraphBuilder.passwordNavGraph(
         route = Graph.HOME
     ) {
         composable(BottomBarScreen.Password.route) {
+            val viewModel: PasswordViewModel = hiltViewModel()
             PasswordScreen(
-                sharedPasswordViewModel = sharedPasswordViewModel,
+                state = viewModel.state.value,
+                eventFlowState = viewModel.eventFlow,
+                searchedPasswordState = viewModel.searchedPasswords.collectAsState(),
+                onEvent= viewModel::onEvent,
+                onSharedPasswordEvent = sharedPasswordViewModel::onEvent,
                 navigateToAddEditPasswordScreen = {
                     navController.navigate(Screen.AddEditPasswordScreen.route)
                 },
@@ -44,7 +50,11 @@ fun NavGraphBuilder.passwordNavGraph(
             )
         }
         composable(Screen.AddEditPasswordScreen.route) { entry ->
+            val viewModel: AddEditPasswordViewModel = hiltViewModel()
             AddEditPasswordScreen(
+                state = viewModel.state.value,
+                eventFlow = viewModel.eventFlow,
+                onEvent = viewModel::onEvent,
                 sharedPasswordViewModel = sharedPasswordViewModel,
                 navigateToPasswordScreen = {
                     navController.navigate(BottomBarScreen.Password.route) {
@@ -57,8 +67,11 @@ fun NavGraphBuilder.passwordNavGraph(
             )
         }
         composable(Screen.GeneratePasswordScreen.route) {
+            val viewModel: GeneratePasswordViewModel = hiltViewModel()
             GeneratePasswordScreen(
-                sharedPasswordViewModel = sharedPasswordViewModel,
+                state = viewModel.state.value,
+                onEvent = viewModel::onEvent,
+                onSharedPasswordEvent = sharedPasswordViewModel::onEvent,
                 navigateToPasswordScreen = {
                     navController.popBackStack()
                 },

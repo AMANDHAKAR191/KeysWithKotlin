@@ -8,19 +8,29 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.aman.keyswithkotlin.auth.domain.repository.RevokeAccessResponse
+import com.aman.keyswithkotlin.auth.domain.repository.SignOutResponse
+import com.aman.keyswithkotlin.auth.presentation.auth.AuthScreen
 import com.aman.keyswithkotlin.auth.presentation.profile.components.ProfileContent
 import com.aman.keyswithkotlin.auth.presentation.profile.components.ProfileTopBar
 import com.aman.keyswithkotlin.auth.presentation.profile.components.RevokeAccess
 import com.aman.keyswithkotlin.auth.presentation.profile.components.SignOut
 import com.aman.keyswithkotlin.core.Constants.REVOKE_ACCESS_MESSAGE
 import com.aman.keyswithkotlin.core.Constants.SIGN_OUT
+import com.aman.keyswithkotlin.core.util.Response
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = hiltViewModel(),
+    displayName:String,
+    photoUrl:String,
+    revokeAccessResponse:RevokeAccessResponse,
+    signOutResponse:SignOutResponse,
+    onSignOut:()->Unit,
+    onRevokeAccess:()->Unit,
     navigateToAuthScreen: () -> Unit,
     navigateToPasswordScreen: () -> Unit,
     bottomBar: @Composable (() -> Unit)
@@ -35,10 +45,10 @@ fun ProfileScreen(
         topBar = {
             ProfileTopBar(
                 signOut = {
-                    viewModel.signOut()
+                    onSignOut()
                 },
                 revokeAccess = {
-                    viewModel.revokeAccess()
+                    onRevokeAccess()
                 },
                 navigateToPasswordScreen = {
                     navigateToPasswordScreen()
@@ -51,13 +61,14 @@ fun ProfileScreen(
         content = { padding ->
             ProfileContent(
                 padding = padding,
-                photoUrl = viewModel.photoUrl,
-                displayName = viewModel.displayName
+                photoUrl = photoUrl,
+                displayName = displayName
             )
         }
     )
 
     SignOut(
+        signOutResponse = signOutResponse,
         navigateToAuthScreen = { signedOut ->
             if (signedOut) {
                 navigateToAuthScreen()
@@ -71,11 +82,12 @@ fun ProfileScreen(
             actionLabel = SIGN_OUT
         )
         if (result == SnackbarResult.ActionPerformed) {
-            viewModel.signOut()
+            onSignOut()
         }
     }
 
     RevokeAccess(
+        revokeAccessResponse = revokeAccessResponse,
         navigateToAuthScreen = { accessRevoked ->
             if (accessRevoked) {
                 navigateToAuthScreen()
@@ -85,4 +97,20 @@ fun ProfileScreen(
             showSnackBar()
         }
     )
+}
+
+@Preview
+@Composable
+fun preview(){
+    ProfileScreen(
+        displayName = "Aman dhaker",
+        photoUrl = "",
+        signOutResponse = Response.Success(false),
+        revokeAccessResponse = Response.Success(false),
+        onSignOut = { /*TODO*/ },
+        onRevokeAccess = { /*TODO*/ },
+        navigateToAuthScreen = { /*TODO*/ },
+        navigateToPasswordScreen = { /*TODO*/ }) {
+        
+    }
 }

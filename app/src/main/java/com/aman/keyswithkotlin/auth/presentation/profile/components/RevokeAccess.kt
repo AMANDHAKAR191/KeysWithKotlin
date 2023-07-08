@@ -3,6 +3,7 @@ package com.aman.keyswithkotlin.auth.presentation.profile.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.aman.keyswithkotlin.auth.domain.repository.RevokeAccessResponse
 import com.aman.keyswithkotlin.core.util.Response.Failure
 import com.aman.keyswithkotlin.core.util.Response.Loading
 import com.aman.keyswithkotlin.core.util.Response.Success
@@ -11,11 +12,11 @@ import com.aman.keyswithkotlin.auth.presentation.profile.ProfileViewModel
 
 @Composable
 fun RevokeAccess(
-    viewModel: ProfileViewModel = hiltViewModel(),
+    revokeAccessResponse:RevokeAccessResponse,
     navigateToAuthScreen: (accessRevoked: Boolean) -> Unit,
     showSnackBar: () -> Unit
 ) {
-    when (val revokeAccessResponse = viewModel.revokeAccessResponse) {
+    when (revokeAccessResponse) {
         is Loading -> ProgressBar()
         is Success -> revokeAccessResponse.data?.let { accessRevoked ->
             LaunchedEffect(accessRevoked) {

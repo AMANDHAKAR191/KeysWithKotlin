@@ -11,7 +11,7 @@ class AddPassword(
     private val passwordRepository: PasswordRepository
 ) {
     @Throws(InvalidPasswordException::class)
-    suspend operator fun invoke(password: Password): Flow<Response<String>> {
+    suspend operator fun invoke(password: Password): Flow<Response<Pair<String?, Boolean?>>> {
         if (password.userName.isBlank()){
             throw InvalidPasswordException("The username can't be empty.")
         }

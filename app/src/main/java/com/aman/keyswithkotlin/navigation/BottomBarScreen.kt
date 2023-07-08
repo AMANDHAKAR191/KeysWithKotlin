@@ -1,11 +1,10 @@
-package com.aman.keyswithkotlin.presentation
+package com.aman.keyswithkotlin.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.aman.keyswithkotlin.navigation.Graph
 
 sealed class BottomBarScreen(
     val route: String,
