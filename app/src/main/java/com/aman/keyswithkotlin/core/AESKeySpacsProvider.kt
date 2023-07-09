@@ -1,0 +1,33 @@
+package com.aman.keyswithkotlin.core
+
+import com.aman.keyswithkotlin.di.AESKeySpacs
+import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+
+class AESKeySpacsProvider() {
+    suspend operator fun invoke(UID: String, db: FirebaseDatabase): AESKeySpacs {
+        val keys = AESKeySpacs()
+        val aesKeyRef = db.reference.child("users").child(UID).child("aesKey")
+        val aesIVRef = db.reference.child("users").child(UID).child("aesIV")
+
+        val aesKeySnapshot = withContext(Dispatchers.IO) { aesKeyRef.get().await() }
+        val aesIVSnapshot = withContext(Dispatchers.IO) { aesIVRef.get().await() }
+
+        val aesKey = aesKeySnapshot.getValue(String::class.java)
+        val aesIV = aesIVSnapshot.getValue(String::class.java)
+
+        aesKey?.let {
+            println("aesKey $it")
+            keys.aesKey = it
+        }
+
+        aesIV?.let {
+            println("aesIV $it")
+            keys.aesIV = it
+        }
+
+        return keys
+    }
+}

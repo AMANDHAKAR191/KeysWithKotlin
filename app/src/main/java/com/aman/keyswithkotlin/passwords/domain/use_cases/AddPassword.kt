@@ -1,26 +1,41 @@
 package com.aman.keyswithkotlin.passwords.domain.use_cases
 
+import com.aman.keyswithkotlin.core.AES
+import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.di.AESKeySpacs
 import com.aman.keyswithkotlin.passwords.domain.model.InvalidPasswordException
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
-import com.aman.keyswithkotlin.core.util.Response
 import kotlinx.coroutines.flow.Flow
-import kotlin.jvm.Throws
 
 class AddPassword(
-    private val passwordRepository: PasswordRepository
+    private val passwordRepository: PasswordRepository,
+    private val aesKeySpacs: AESKeySpacs
 ) {
     @Throws(InvalidPasswordException::class)
     suspend operator fun invoke(password: Password): Flow<Response<Pair<String?, Boolean?>>> {
-        if (password.userName.isBlank()){
+        if (password.userName.isBlank()) {
             throw InvalidPasswordException("The username can't be empty.")
         }
-        if (password.password.isBlank()){
+        if (password.password.isBlank()) {
             throw InvalidPasswordException("The password can't be empty.")
         }
-        if (password.websiteName.isBlank()){
+        if (password.websiteName.isBlank()) {
             throw InvalidPasswordException("The website name can't be empty.")
         }
-        return passwordRepository.insertPassword(password)
+        val aes = AES.getInstance(aesKeySpacs.aesKey, aesKeySpacs.aesIV)
+            ?: throw IllegalStateException("Failed to initialize AES instance.")
+
+        val encryptedPassword = encryptPassword(password, aes)
+        return passwordRepository.insertPassword(encryptedPassword)
+    }
+
+    private fun encryptPassword(password: Password, aes: AES): Password {
+        val encryptedPassword = password.copy()
+        encryptedPassword.userName = aes.singleEncryption(password.userName)
+        encryptedPassword.password = aes.singleEncryption(password.password)
+        // Encrypt any other user properties as needed
+
+        return encryptedPassword
     }
 }

@@ -7,8 +7,8 @@ import com.aman.keyswithkotlin.auth.data.repository.AuthRepositoryImpl
 import com.aman.keyswithkotlin.auth.data.repository.ProfileRepositoryImpl
 import com.aman.keyswithkotlin.auth.domain.repository.AuthRepository
 import com.aman.keyswithkotlin.auth.domain.repository.ProfileRepository
-import com.aman.keyswithkotlin.core.AES
 import com.aman.keyswithkotlin.core.Constants
+import com.aman.keyswithkotlin.di.AESKeySpacs
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -33,16 +33,11 @@ class AuthModule {
     @Provides
     fun provideFirebaseAuth() = Firebase.auth
 
-
-
     @Provides
     fun provideOneTapClient(
         @ApplicationContext
         context: Context
     ) = Identity.getSignInClient(context)
-
-    @Provides
-    fun provideAES():AES = AES.getInstance("", "")!!
 
     @Provides
     @Named(Constants.SIGN_IN_REQUEST)
@@ -95,13 +90,15 @@ class AuthModule {
         signInRequest: BeginSignInRequest,
         @Named(Constants.SIGN_UP_REQUEST)
         signUpRequest: BeginSignInRequest,
-        db: FirebaseDatabase
+        db: FirebaseDatabase,
+        aesKeySpacs: AESKeySpacs
     ): AuthRepository = AuthRepositoryImpl(
         auth = auth,
         oneTapClient = oneTapClient,
         signInRequest = signInRequest,
         signUpRequest = signUpRequest,
-        db = db
+        db = db,
+        aesKeySpacs = aesKeySpacs
     )
 
     @Provides
@@ -118,3 +115,4 @@ class AuthModule {
     )
 
 }
+

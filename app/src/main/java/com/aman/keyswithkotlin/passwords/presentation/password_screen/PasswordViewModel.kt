@@ -139,4 +139,37 @@ class PasswordViewModel @Inject constructor(
             }
         }
     }
+//    private fun getPasswords() {
+//        viewModelScope.launch(Dispatchers.IO) {
+//            passwordUseCases.getPasswords().collect { response ->
+//                println(this.coroutineContext)
+//                withContext(Dispatchers.Main){
+//                    println(this.coroutineContext)
+//                    when (response) {
+//                        is Response.Success -> {
+//                            _state.value = state.value.copy(
+//                                passwords = response.data!!,
+//                                isLoading = false
+//                            )
+//                            _passwords.value = response.data
+//                        }
+//
+//                        is Response.Failure -> {
+//                            _state.value = state.value.copy(
+//                                error  = response.e.message ?: "Unexpected error occurred",
+//                                isLoading = false
+//                            )
+//                        }
+//
+//                        is Response.Loading -> {
+//                            _state.value = PasswordState(
+//                                isLoading = true
+//                            )
+//                        }
+//                    }
+//                    println("password: ${state.value.passwords}")
+//                }
+//            }
+//        }
+//    }
 }
