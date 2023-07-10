@@ -31,14 +31,40 @@ class NotesViewModel @Inject constructor(
         when (event) {
             is NotesEvent.DeleteNote -> {
                 viewModelScope.launch {
-                    noteUseCases.deleteNote(event.note)
-                    recentlyDeletedNote = event.note
+                    noteUseCases.deleteNote(event.note).collect { response ->
+                        println(this.coroutineContext)
+                        withContext(Dispatchers.Main) {
+                            println(this.coroutineContext)
+                            when (response) {
+                                is Response.Success<*, *> -> {
+                                    recentlyDeletedNote = event.note
+                                }
+
+                                is Response.Failure -> {
+                                    _state.value = state.value.copy(
+                                        error = response.e.message ?: "Unexpected error occurred",
+                                        isLoading = false
+                                    )
+                                }
+
+                                is Response.Loading -> {
+                                    _state.value = NotesState(
+                                        isLoading = true
+                                    )
+                                }
+                            }
+                        }
+
+                    }
                 }
             }
 
             is NotesEvent.RestoreNote -> {
                 viewModelScope.launch {
                     noteUseCases.addNote(recentlyDeletedNote ?: return@launch)
+                        .collect {
+
+                        }
                     recentlyDeletedNote = null
                 }
             }

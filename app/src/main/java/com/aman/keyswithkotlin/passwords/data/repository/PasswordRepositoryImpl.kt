@@ -10,6 +10,8 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class PasswordRepositoryImpl(
     private val database: FirebaseDatabase,
@@ -30,7 +32,7 @@ class PasswordRepositoryImpl(
                     println("dataSnapshot: $dataSnapshot")
                     for (ds in dataSnapshot.children) {
                         for (ds1 in ds.children) {
-                            println("ds1: $ds1")
+                            println("ds1: $ds")
                             val items = ds1.getValue(Password::class.java)
                             if (items != null) {
                                 println("items: $items")
@@ -58,17 +60,22 @@ class PasswordRepositoryImpl(
     override fun insertPassword(
         password: Password
     ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
+        val formatted = current.format(formatter)
+
         val reference = database.reference.child("Passwords").child(UID)
-        reference.keepSynced(true)
         trySend(Response.Loading)
         val _password = Password(
             userName = password.userName,
             password = password.password,
             websiteName = password.websiteName,
-            websiteLink = password.websiteLink
+            websiteLink = password.websiteLink,
+            timestamp = formatted
         )
         try {
-            reference.child(password.websiteName).push()
+            println("password.timestamp :${password.timestamp}")
+            reference.child(password.websiteName).child(_password.timestamp)
                 .setValue(_password)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
@@ -88,17 +95,32 @@ class PasswordRepositoryImpl(
 
     override fun deletePassword(password: Password): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
+            println("inside: deletePassword")
             val reference = database.reference.child("Passwords").child(UID)
-            reference.keepSynced(true)
             trySend(Response.Loading)
-            reference.child(password.websiteName).child(password.userName)
-                .removeValue()
-                .addOnCompleteListener {
-                    trySend(Response.Success(data = "Password is successfully deleted"))
-                }
-                .addOnFailureListener {
-                    trySend(Response.Failure(it))
-                }
+            reference.child(password.websiteName).orderByChild("timestamp")
+                .equalTo(password.timestamp)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        for (childSnapshot in dataSnapshot.children) {
+                            val noteKey = childSnapshot.key
+                            println("passwordKey: $noteKey")
+                            reference.child(noteKey!!)
+                                .removeValue()
+                                .addOnCompleteListener {
+                                    trySend(Response.Success(data = "password is successfully deleted"))
+                                }
+                                .addOnFailureListener {
+                                    trySend(Response.Failure(it))
+                                }
+                            break
+                        }
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {
+                        trySend(Response.Failure(databaseError.toException()))
+                    }
+                })
             awaitClose {
                 close()
             }

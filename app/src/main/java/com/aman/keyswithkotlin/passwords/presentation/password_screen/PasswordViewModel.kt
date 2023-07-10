@@ -35,6 +35,8 @@ class PasswordViewModel @Inject constructor(
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asSharedFlow()
 
+    private var recentlyDeletedPassword: Password? = null
+
     //check this why this _passwords.value is empty
     private val _passwords = MutableStateFlow<List<Password>>(emptyList())
 
@@ -62,34 +64,18 @@ class PasswordViewModel @Inject constructor(
             is PasswordEvent.RestorePassword -> {
                 viewModelScope.launch {
                     passwordUseCases.addPassword(event.password)
-                        .collect { response ->
-                            when (response) {
-                                is Response.Success<*, *> -> {
-                                    println("check: password deleted")
-//                                _eventFlow.emit(
-//                                    AddEditPasswordViewModel.UiEvent.ShowSnackBar(
-//                                        message = "Password restored"
-//                                    )
-//                                )
-                            }
-
-                            else -> {}
+                        .collect {
+                            recentlyDeletedPassword = null
                         }
-                    }
                 }
             }
             is PasswordEvent.DeletePassword->{
                 viewModelScope.launch {
                     passwordUseCases.deletePassword(event.password).collect{response->
-                        println("check1: password deleted $response")
                         when (response) {
                             is Response.Success<*, *> -> {
-                                println("check: password deleted")
-                                _eventFlow.emit(
-                                    AddEditPasswordViewModel.UiEvent.ShowSnackBar(
-                                        message = response.data.toString()
-                                    )
-                                )
+                                println("check1: password deleted $response")
+                                recentlyDeletedPassword = event.password
                             }
 
                             else -> {}

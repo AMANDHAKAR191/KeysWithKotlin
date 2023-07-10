@@ -70,7 +70,6 @@ fun NotesScreen(
                     .padding(innerPadding)
                     .layoutId("columnParent")
             ) {
-
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(state.notes) { note ->
                         NoteItem(

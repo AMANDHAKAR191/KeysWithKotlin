@@ -80,19 +80,21 @@ class NoteRepositoryImpl(
             println("check2")
             println("inside: insertNote $note")
             val current = LocalDateTime.now()
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+            val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
             val formatted = current.format(formatter)
             val reference = database.reference.child("Notes").child(UID)
-            reference.keepSynced(true)
             trySend(Response.Loading)
+            if (note.timestamp.isEmpty()) {
+                if (isActive) trySend(Response.Failure(Exception("timestamp is empty")))
+            }
             val _note = Note(
-                date = note.date,
                 noteTitle = note.noteTitle,
                 noteBody = note.noteBody,
-                timestamp = formatted
+                timestamp = formatted,
+                color = note.color
             )
             println("check3")
-            reference.push()
+            reference.child(_note.timestamp)
                 .setValue(_note)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
@@ -131,19 +133,34 @@ class NoteRepositoryImpl(
     override fun deleteNote(note: Note): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
             val reference = database.reference.child("Notes").child(UID)
-            reference.keepSynced(true)
             trySend(Response.Loading)
-            reference.child(note.noteTitle)
-                .removeValue()
-                .addOnCompleteListener {
-                    trySend(Response.Success(data = "Note is successfully deleted"))
-                }
-                .addOnFailureListener {
-                    trySend(Response.Failure(it))
-                }
+            reference.orderByChild("timestamp")
+                .equalTo(note.timestamp)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        for (childSnapshot in dataSnapshot.children) {
+                            val noteKey = childSnapshot.key
+                            println("noteKey: $noteKey")
+                            reference.child(noteKey!!)
+                                .removeValue()
+                                .addOnCompleteListener {
+                                    trySend(Response.Success(data = "Note is successfully deleted"))
+                                }
+                                .addOnFailureListener {
+                                    trySend(Response.Failure(it))
+                                }
+                            break
+                        }
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {
+                        trySend(Response.Failure(databaseError.toException()))
+                    }
+                })
             awaitClose {
                 close()
             }
         }
+
 
 }

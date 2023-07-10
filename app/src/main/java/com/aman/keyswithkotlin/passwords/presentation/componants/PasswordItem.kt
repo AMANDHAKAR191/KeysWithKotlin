@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 
@@ -72,7 +72,7 @@ fun PasswordItem(
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .wrapContentSize()
                 .padding(16.dp)
                 .padding(end = 32.dp)
                 .weight(5f)
@@ -83,7 +83,7 @@ fun PasswordItem(
             if (password != null) {
                 Text(
                     text = password.websiteName,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -93,7 +93,7 @@ fun PasswordItem(
             if (password != null) {
                 Text(
                     text = password.userName,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 10,
                     overflow = TextOverflow.Ellipsis
@@ -102,7 +102,7 @@ fun PasswordItem(
             if (password != null) {
                 CustomProgressIndicator(
                     totalBudgetAmount = 40f,
-                    progress = (100f - password.password.length.toFloat())
+                    progress = (password.password.length.toFloat())
                 )
             }
         }
@@ -119,4 +119,13 @@ fun PasswordItem(
         }
     }
     Divider()
+}
+
+@Composable
+@Preview
+fun Preview() {
+    PasswordItem(
+        password = Password("AMAN", "DFSFS", "AMAN", "", "CDJSCJSOI"),
+        onItemClick = { /*TODO*/ },
+        onDeleteClick = {})
 }
