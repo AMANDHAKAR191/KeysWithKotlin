@@ -20,10 +20,13 @@ class NoteModule {
 
 
     @Provides
-    fun provideNoteUseCases(repository: NoteRepository): NoteUseCases {
+    fun provideNoteUseCases(
+        repository: NoteRepository,
+        aesKeySpecs: AESKeySpecs
+    ): NoteUseCases {
         return NoteUseCases(
-            getNotes = GetNotes(repository),
-            addNote = AddNote(repository),
+            getNotes = GetNotes(repository, aesKeySpecs),
+            addNote = AddNote(repository, aesKeySpecs),
             deleteNote = DeleteNote(repository),
             shareNote = ShareNote(repository)
         )

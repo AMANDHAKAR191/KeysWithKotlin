@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.toColorInt
 import com.aman.keyswithkotlin.notes.domain.model.Note
 
 @Composable
@@ -50,13 +51,13 @@ fun NoteItem(
 
             clipPath(clipPath) {
                 drawRoundRect(
-                    color = Color(note.color),
+                    color = Color(note.color.toColorInt()),
                     size = size,
                     cornerRadius = CornerRadius(cornerRadius.toPx())
                 )
                 drawRoundRect(
                     color = Color(
-                        ColorUtils.blendARGB(note.color, 0x000000, 0.2f)
+                        ColorUtils.blendARGB(note.color.toColorInt(), 0x000000, 0.2f)
                     ),
                     topLeft = Offset(size.width - cutCornerSize.toPx(), -100f),
                     size = Size(cutCornerSize.toPx() + 100f, cutCornerSize.toPx() + 100f),

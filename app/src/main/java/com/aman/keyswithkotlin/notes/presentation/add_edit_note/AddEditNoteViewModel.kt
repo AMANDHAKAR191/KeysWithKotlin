@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.notes.domain.model.InvalidNoteException
 import com.aman.keyswithkotlin.notes.domain.model.Note
 import com.aman.keyswithkotlin.notes.domain.use_cases.NoteUseCases
@@ -40,7 +41,7 @@ class AddEditNoteViewModel @Inject constructor(
 
             is AddEditNoteEvent.ChangeColor -> {
                 _state.value = state.value.copy(
-                    color = event.color
+                    color = "#" + event.color
                 )
             }
 
@@ -55,11 +56,33 @@ class AddEditNoteViewModel @Inject constructor(
                                 timestamp = state.value.timestamp,
                                 color = state.value.color,
                             )
-                        )
+                        ).collect { response ->
+                            when (response) {
+                                is Response.Success<*, *> -> {
+                                    _eventFlow.emit(
+                                        UiEvent.ShowSnackBar(
+                                            message = response.data.toString()
+                                        )
+                                    )
+                                    _eventFlow.emit(
+                                        UiEvent.SaveNote
+                                    )
+                                }
+
+                                is Response.Failure -> {
+                                    UiEvent.ShowSnackBar(
+                                        message = response.e.message.toString()
+                                    )
+                                }
+
+                                else -> {}
+                            }
+
+                        }
                         _eventFlow.emit(UiEvent.SaveNote)
                     } catch (e: InvalidNoteException) {
                         _eventFlow.emit(
-                            UiEvent.ShowSnackbar(
+                            UiEvent.ShowSnackBar(
                                 message = e.message ?: "Couldn't save note"
                             )
                         )
@@ -70,7 +93,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     sealed class UiEvent {
-        data class ShowSnackbar(val message: String) : UiEvent()
+        data class ShowSnackBar(val message: String) : UiEvent()
         object SaveNote : UiEvent()
     }
 }

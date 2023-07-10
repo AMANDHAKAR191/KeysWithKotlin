@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import com.aman.keyswithkotlin.notes.domain.model.Note
 import com.aman.keyswithkotlin.notes.presentation.add_edit_note.components.TransparentHintTextField
 import kotlinx.coroutines.flow.SharedFlow
@@ -50,7 +51,7 @@ fun AddEditNoteScreen(
 
     val noteBackgroundAnimatable = remember {
         Animatable(
-            Color(if (state.color != -1) state.color else state.color)
+            Color(if (state.color.toColorInt() != -1) state.color.toColorInt() else state.color.toColorInt())
         )
     }
     val scope = rememberCoroutineScope()
@@ -58,7 +59,7 @@ fun AddEditNoteScreen(
     LaunchedEffect(key1 = true) {
         eventFlow.collectLatest { event ->
             when (event) {
-                is AddEditNoteViewModel.UiEvent.ShowSnackbar -> {
+                is AddEditNoteViewModel.UiEvent.ShowSnackBar -> {
                     snackBarHostState.showSnackbar(
                         message = event.message
                     )
@@ -115,7 +116,7 @@ fun AddEditNoteScreen(
                                 .background(color)
                                 .border(
                                     width = 3.dp,
-                                    color = if (state.color == colorInt) {
+                                    color = if (state.color.toColorInt() == colorInt) {
                                         Color.Black
                                     } else Color.Transparent,
                                     shape = CircleShape
@@ -129,7 +130,7 @@ fun AddEditNoteScreen(
                                             )
                                         )
                                     }
-                                    onEvent(AddEditNoteEvent.ChangeColor(colorInt))
+                                    onEvent(AddEditNoteEvent.ChangeColor(colorInt.toString()))
                                 }
                         )
                     }

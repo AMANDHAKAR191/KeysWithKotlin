@@ -12,6 +12,7 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.isActive
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -31,7 +32,7 @@ class NoteRepositoryImpl(
             aesKEY = aesKeySpecs.aesKey
             aesIV = aesKeySpecs.aesIV
             var isNoteRetrieved = false
-            val reference = database.reference.child("notes").child(UID)
+            val reference = database.reference.child("Notes").child(UID)
             reference.keepSynced(true)
             trySend(Response.Loading)
             val listener = object : ValueEventListener {
@@ -90,27 +91,21 @@ class NoteRepositoryImpl(
                 noteBody = note.noteBody,
                 timestamp = formatted
             )
-
-            AES.getInstance(aesKeySpecs.aesKey, aesKeySpecs.aesIV)?.let { aes ->
-                val encryptedPassword = encryptPassword(_note, aes)
-                try {
-                    reference.child(note.noteTitle)
-                        .setValue(encryptedPassword)
-                        .addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                trySend(Response.Success("Note is successfully saved"))
-                            }
-                        }
-                        .addOnFailureListener {
-                            trySend(Response.Failure(it))
-                        }
-                    awaitClose {
-                        close()
+            println("check3")
+            reference.push()
+                .setValue(_note)
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        println("check3")
+                        if (isActive) trySend(Response.Success("Note is successfully saved"))
                     }
-                } catch (e: Exception) {
-                    Response.Failure(e)
                 }
-            } ?: Response.Failure(Exception("AES initialization failed."))
+                .addOnFailureListener {
+                    if (isActive) trySend(Response.Failure(it))
+                }
+            awaitClose {
+                close()
+            }
 
         }
 
