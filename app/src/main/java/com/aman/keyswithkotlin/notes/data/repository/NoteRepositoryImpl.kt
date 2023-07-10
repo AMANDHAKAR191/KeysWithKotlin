@@ -2,7 +2,7 @@ package com.aman.keyswithkotlin.notes.data.repository
 
 import com.aman.keyswithkotlin.core.AES
 import com.aman.keyswithkotlin.core.util.Response
-import com.aman.keyswithkotlin.di.AESKeySpacs
+import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.aman.keyswithkotlin.notes.domain.model.Note
 import com.aman.keyswithkotlin.notes.domain.repository.NoteRepository
 import com.google.firebase.database.DataSnapshot
@@ -12,22 +12,26 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class NoteRepositoryImpl(
     private val database: FirebaseDatabase,
     private val UID: String,
-    private val aesKeySpacs: AESKeySpacs
+    private val aesKeySpecs: AESKeySpecs
 ) : NoteRepository {
     private val _notesItemsTemp = mutableListOf<Note>()
     private val _notesItems = mutableListOf<Note>()
     var aesKEY: String = ""
-    var aesIV = ""
+    var aesIV: String = ""
 
     override fun getNotes(): Flow<Response<Pair<MutableList<Note>?, Boolean?>>> =
         callbackFlow {
             println("aesKEY: $aesKEY || aesIV: $aesIV")
+            aesKEY = aesKeySpecs.aesKey
+            aesIV = aesKeySpecs.aesIV
             var isNoteRetrieved = false
-            val reference = database.reference.child("Notes").child(UID)
+            val reference = database.reference.child("notes").child(UID)
             reference.keepSynced(true)
             trySend(Response.Loading)
             val listener = object : ValueEventListener {
@@ -72,17 +76,22 @@ class NoteRepositoryImpl(
 
     override fun insertNote(note: Note): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
-
+            println("check2")
+            println("inside: insertNote $note")
+            val current = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+            val formatted = current.format(formatter)
             val reference = database.reference.child("Notes").child(UID)
             reference.keepSynced(true)
             trySend(Response.Loading)
             val _note = Note(
                 date = note.date,
                 noteTitle = note.noteTitle,
-                noteBody = note.noteBody
+                noteBody = note.noteBody,
+                timestamp = formatted
             )
 
-            AES.getInstance(aesKeySpacs.aesKey, aesKeySpacs.aesIV)?.let { aes ->
+            AES.getInstance(aesKeySpecs.aesKey, aesKeySpecs.aesIV)?.let { aes ->
                 val encryptedPassword = encryptPassword(_note, aes)
                 try {
                     reference.child(note.noteTitle)

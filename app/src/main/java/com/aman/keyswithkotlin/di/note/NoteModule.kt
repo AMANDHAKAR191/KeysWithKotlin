@@ -1,6 +1,6 @@
 package com.aman.keyswithkotlin.di.note
 
-import com.aman.keyswithkotlin.di.AESKeySpacs
+import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.aman.keyswithkotlin.notes.data.repository.NoteRepositoryImpl
 import com.aman.keyswithkotlin.notes.domain.repository.NoteRepository
 import com.aman.keyswithkotlin.notes.domain.use_cases.AddNote
@@ -33,8 +33,8 @@ class NoteModule {
     fun provideNoteRepository(
         database: FirebaseDatabase,
         UID: String,
-        aesKeySpacs: AESKeySpacs
+        aesKeySpecs: AESKeySpecs
     ): NoteRepository {
-        return NoteRepositoryImpl(database, UID = UID, aesKeySpacs)
+        return NoteRepositoryImpl(database, UID = UID, aesKeySpecs)
     }
 }

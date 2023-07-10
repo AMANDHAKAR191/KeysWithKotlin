@@ -8,7 +8,7 @@ import com.aman.keyswithkotlin.auth.data.repository.ProfileRepositoryImpl
 import com.aman.keyswithkotlin.auth.domain.repository.AuthRepository
 import com.aman.keyswithkotlin.auth.domain.repository.ProfileRepository
 import com.aman.keyswithkotlin.core.Constants
-import com.aman.keyswithkotlin.di.AESKeySpacs
+import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -91,14 +91,14 @@ class AuthModule {
         @Named(Constants.SIGN_UP_REQUEST)
         signUpRequest: BeginSignInRequest,
         db: FirebaseDatabase,
-        aesKeySpacs: AESKeySpacs
+        aesKeySpecs: AESKeySpecs
     ): AuthRepository = AuthRepositoryImpl(
         auth = auth,
         oneTapClient = oneTapClient,
         signInRequest = signInRequest,
         signUpRequest = signUpRequest,
         db = db,
-        aesKeySpacs = aesKeySpacs
+        aesKeySpecs = aesKeySpecs
     )
 
     @Provides

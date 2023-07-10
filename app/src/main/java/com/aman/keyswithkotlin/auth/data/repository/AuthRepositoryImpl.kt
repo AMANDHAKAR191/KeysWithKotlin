@@ -9,7 +9,7 @@ import com.aman.keyswithkotlin.core.Constants.SIGN_IN_REQUEST
 import com.aman.keyswithkotlin.core.Constants.SIGN_UP_REQUEST
 import com.aman.keyswithkotlin.core.Constants.USERS
 import com.aman.keyswithkotlin.core.util.Response
-import com.aman.keyswithkotlin.di.AESKeySpacs
+import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.AuthCredential
@@ -39,7 +39,7 @@ class AuthRepositoryImpl @Inject constructor(
     @Named(SIGN_UP_REQUEST)
     private var signUpRequest: BeginSignInRequest,
     private val db: FirebaseDatabase,
-    private val aesKeySpacs: AESKeySpacs
+    private val aesKeySpecs: AESKeySpecs
 ) : AuthRepository {
     override val isUserAuthenticatedInFirebase = auth.currentUser != null
     private val _userData: User? = null

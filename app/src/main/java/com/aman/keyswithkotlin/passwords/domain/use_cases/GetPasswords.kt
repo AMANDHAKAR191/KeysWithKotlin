@@ -2,7 +2,7 @@ package com.aman.keyswithkotlin.passwords.domain.use_cases
 
 import com.aman.keyswithkotlin.core.AES
 import com.aman.keyswithkotlin.core.util.Response
-import com.aman.keyswithkotlin.di.AESKeySpacs
+import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
 import kotlinx.coroutines.flow.Flow
@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.map
 
 class GetPasswords(
     private val passwordRepository: PasswordRepository,
-    private val aesKeySpacs: AESKeySpacs
+    private val aesKeySpecs: AESKeySpecs
 ) {
     operator fun invoke(): Flow<Response<Pair<MutableList<Password>?, Boolean?>>> {
-        val aes = AES.getInstance(aesKeySpacs.aesKey, aesKeySpacs.aesIV)
+        val aes = AES.getInstance(aesKeySpecs.aesKey, aesKeySpecs.aesIV)
             ?: throw IllegalStateException("Failed to initialize AES instance.")
         return passwordRepository.getPasswords()
             .map { response ->

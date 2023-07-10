@@ -2,7 +2,7 @@ package com.aman.keyswithkotlin.passwords.domain.use_cases
 
 import com.aman.keyswithkotlin.core.AES
 import com.aman.keyswithkotlin.core.util.Response
-import com.aman.keyswithkotlin.di.AESKeySpacs
+import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.aman.keyswithkotlin.passwords.domain.model.InvalidPasswordException
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 
 class AddPassword(
     private val passwordRepository: PasswordRepository,
-    private val aesKeySpacs: AESKeySpacs
+    private val aesKeySpecs: AESKeySpecs
 ) {
     @Throws(InvalidPasswordException::class)
-    suspend operator fun invoke(password: Password): Flow<Response<Pair<String?, Boolean?>>> {
+    operator fun invoke(password: Password): Flow<Response<Pair<String?, Boolean?>>> {
         if (password.userName.isBlank()) {
             throw InvalidPasswordException("The username can't be empty.")
         }
@@ -23,7 +23,7 @@ class AddPassword(
         if (password.websiteName.isBlank()) {
             throw InvalidPasswordException("The website name can't be empty.")
         }
-        val aes = AES.getInstance(aesKeySpacs.aesKey, aesKeySpacs.aesIV)
+        val aes = AES.getInstance(aesKeySpecs.aesKey, aesKeySpecs.aesIV)
             ?: throw IllegalStateException("Failed to initialize AES instance.")
 
         val encryptedPassword = encryptPassword(password, aes)

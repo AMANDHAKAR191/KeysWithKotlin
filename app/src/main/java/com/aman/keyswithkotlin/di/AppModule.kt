@@ -2,7 +2,6 @@ package com.aman.keyswithkotlin.di
 
 import com.aman.keyswithkotlin.core.AESKeySpacsProvider
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import dagger.Module
@@ -24,7 +23,8 @@ class AppModule {
     fun provideAESProvider() = AESKeySpacsProvider()
 
     @Provides
-    fun provideAESKeySpacs():AESKeySpacs = AESKeySpacs("Xv6mxim2Blr58AzECQxQbz==","Ou8n2PI2X4mJc4m9Zx3Ljb")
+    fun provideAESKeySpacs(): AESKeySpecs =
+        AESKeySpecs("Xv6mxim2Blr58AzECQxQbz==", "Ou8n2PI2X4mJc4m9Zx3Ljb")
 
     //todo resolve this issue
 //    @Provides
@@ -32,13 +32,13 @@ class AppModule {
 //        UID: String,
 //        db: FirebaseDatabase,
 //        aesKeySpacsProvider: AESKeySpacsProvider
-//    ): AESKeySpacs {
+//    ): AESKeySpecs {
 //        println("check1")
 //        return aesKeySpacsProvider(UID, db)
 //    }
 }
 
-data class AESKeySpacs(
+data class AESKeySpecs(
     var aesKey: String = "",
     var aesIV: String = "",
 )

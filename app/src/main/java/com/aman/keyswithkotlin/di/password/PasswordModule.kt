@@ -1,6 +1,6 @@
 package com.aman.keyswithkotlin.di.password
 
-import com.aman.keyswithkotlin.di.AESKeySpacs
+import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.aman.keyswithkotlin.passwords.data.repository.PasswordRepositoryImpl
 import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
 import com.aman.keyswithkotlin.passwords.domain.use_cases.AddPassword
@@ -20,11 +20,11 @@ class PasswordModule {
     @Provides
     fun providePasswordUseCases(
         repository: PasswordRepository,
-        aesKeySpacs: AESKeySpacs
+        aesKeySpecs: AESKeySpecs
     ): PasswordUseCases {
         return PasswordUseCases(
-            getPasswords = GetPasswords(repository, aesKeySpacs),
-            addPassword = AddPassword(repository, aesKeySpacs),
+            getPasswords = GetPasswords(repository, aesKeySpecs),
+            addPassword = AddPassword(repository, aesKeySpecs),
             deletePassword = DeletePassword(repository),
             generatePassword = GeneratePassword(repository)
         )
