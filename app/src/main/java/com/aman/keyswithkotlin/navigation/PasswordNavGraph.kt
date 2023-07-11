@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.aman.keyswithkotlin.core.components.BottomBar
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
@@ -13,7 +14,6 @@ import com.aman.keyswithkotlin.passwords.presentation.generate_password.Generate
 import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordViewModel
-import com.aman.keyswithkotlin.core.components.BottomBar
 
 fun NavGraphBuilder.passwordNavGraph(
     navController: NavController,
@@ -55,7 +55,9 @@ fun NavGraphBuilder.passwordNavGraph(
                 state = viewModel.state.value,
                 eventFlow = viewModel.eventFlow,
                 onEvent = viewModel::onEvent,
-                sharedPasswordViewModel = sharedPasswordViewModel,
+                onSharedPasswordEvent = sharedPasswordViewModel::onEvent,
+                passwordItem = sharedPasswordViewModel.itemToEdit.value.passwordItem,
+                generatedPassword = sharedPasswordViewModel.generatedPassword.value.generatedPassword,
                 navigateToPasswordScreen = {
                     navController.navigate(BottomBarScreen.Password.route) {
                         popUpTo(BottomBarScreen.Password.route)

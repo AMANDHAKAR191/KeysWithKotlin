@@ -9,11 +9,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
@@ -31,10 +32,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import com.aman.keyswithkotlin.notes.domain.model.Note
 import com.aman.keyswithkotlin.notes.presentation.add_edit_note.components.TransparentHintTextField
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -77,6 +80,13 @@ fun AddEditNoteScreen(
         topBar = {
             MediumTopAppBar(
                 title = { Text(text = "My Note") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navigateToNoteScreen()
+                    }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "")
+                    }
+                },
                 scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
                 colors = TopAppBarDefaults.mediumTopAppBarColors()
             )
@@ -139,25 +149,48 @@ fun AddEditNoteScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 TransparentHintTextField(
                     text = state.noteTitle,
+                    label = "Title",
                     hint = "Title",
                     onValueChange = {
                         onEvent(AddEditNoteEvent.EnteredTitle(it))
                     },
                     singleLine = true,
+                    showIndicator = true,
                     textStyle = MaterialTheme.typography.headlineSmall
                 )
-                Divider()
                 Spacer(modifier = Modifier.height(16.dp))
                 TransparentHintTextField(
                     text = state.noteBody,
-                    hint = "Content",
+                    label = "Content",
+                    hint = "Write here...",
                     onValueChange = {
                         onEvent(AddEditNoteEvent.EnteredContent(it))
                     },
                     textStyle = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.fillMaxHeight()
+                    modifier = Modifier.fillMaxHeight(),
+                    minLines = 5,
+                    showIndicator = false,
                 )
             }
         }
+    )
+}
+
+
+@Preview
+@Composable
+fun Preview() {
+    val state = AddEditNoteState() // Provide the desired state object
+    val eventFlow =
+        remember { MutableSharedFlow<AddEditNoteViewModel.UiEvent>() } // Create an instance of MutableSharedFlow
+    val onEvent: (AddEditNoteEvent) -> Unit = {} // Provide an empty lambda function for onEvent
+    val navigateToNoteScreen: () -> Unit =
+        {} // Provide an empty lambda function for navigateToNoteScreen
+
+    AddEditNoteScreen(
+        state = state,
+        eventFlow = eventFlow,
+        onEvent = onEvent,
+        navigateToNoteScreen = navigateToNoteScreen
     )
 }

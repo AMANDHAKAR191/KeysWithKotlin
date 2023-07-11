@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -19,12 +18,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.aman.keyswithkotlin.notes.presentation.add_edit_note.components.TransparentHintTextField
+import com.aman.keyswithkotlin.passwords.domain.model.Password
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
@@ -32,28 +32,26 @@ import kotlinx.coroutines.flow.SharedFlow
 @Composable
 fun AddEditPasswordScreen(
     state: AddEditPasswordState,
-    eventFlow:SharedFlow<AddEditPasswordViewModel.UiEvent>,
-    onEvent:(PasswordEvent)->Unit,
-    sharedPasswordViewModel: ShareGeneratedPasswordViewModel,
+    eventFlow: SharedFlow<AddEditPasswordViewModel.UiEvent>,
+    onEvent: (PasswordEvent) -> Unit,
+    onSharedPasswordEvent: (SharedPasswordEvent) -> Unit,
+    generatedPassword: String? = "",
+    passwordItem: Password?,
     navigateToPasswordScreen: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit
 ) {
-
-    val generatedPassword = sharedPasswordViewModel.generatedPassword.value.generatedPassword
-    val passwordItem = sharedPasswordViewModel.itemToEdit.value.passwordItem
 
     val focusState = remember {
         mutableStateOf(false)
     }
     //if generatedPassword is not null then we are coming from GeneratePasswordScreen
     println("generatedPassword: ${generatedPassword}")
-    if (generatedPassword != "") {
-        onEvent(PasswordEvent.EnteredPassword(generatedPassword))
+    generatedPassword?.let {
+        onEvent(PasswordEvent.EnteredPassword(it))
     }
 
-    //if
     println("generatedPassword: ${generatedPassword}")
-    if (passwordItem != null) {
+    passwordItem?.let {
         onEvent(PasswordEvent.EnteredUsername(passwordItem.userName))
         onEvent(PasswordEvent.EnteredPassword(passwordItem.password))
         onEvent(PasswordEvent.EnteredWebsiteName(passwordItem.websiteName))
@@ -90,7 +88,7 @@ fun AddEditPasswordScreen(
                         Icons.Default.ArrowBack,
                         contentDescription = null,
                         modifier = Modifier.clickable {
-                            sharedPasswordViewModel.onEvent(SharedPasswordEvent.resetViewmodel)
+                            onSharedPasswordEvent(SharedPasswordEvent.resetViewmodel)
                             navigateToPasswordScreen()
                         }
                     )
@@ -102,22 +100,24 @@ fun AddEditPasswordScreen(
                     .fillMaxSize()
                     .padding(it)
             ) {
-                CustomTextField(
+                TransparentHintTextField(
                     text = state.username,
                     label = "Username",
-                    onValueChange = { onEvent(PasswordEvent.EnteredUsername(it)) },
-                    enabled = true,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
+                    hint = "Enter userName",
+                    onValueChange = {
+                        onEvent(PasswordEvent.EnteredUsername(it))
+                    },
+                    showIndicator = false,
+
                     )
-                )
-                CustomTextField(
-                    text = state.password,
-                    label = "Password",
-                    onValueChange = { onEvent(PasswordEvent.EnteredPassword(it)) },
-                    enabled = true,
-                    singleLine = true,
+                TransparentHintTextField(
+                    text = state.username,
+                    label = "Username",
+                    hint = "Enter userName",
+                    onValueChange = {
+                        onEvent(PasswordEvent.EnteredPassword(it))
+                    },
+                    showIndicator = false,
                     trailingIcon = {
                         if (focusState.value) {
                             TextButton(onClick = {
@@ -129,38 +129,57 @@ fun AddEditPasswordScreen(
                     },
                     onFocusChange = {
                         focusState.value = it.isFocused
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
-                    )
+                    }
                 )
-                CustomTextField(
+                TransparentHintTextField(
                     text = state.websiteName,
-                    label = "Website Name",
-                    onValueChange = { onEvent(PasswordEvent.EnteredWebsiteName(it)) },
-                    enabled = true,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
-                    )
+                    label = "Website name",
+                    hint = "Enter website name",
+                    onValueChange = {
+                        onEvent(PasswordEvent.EnteredWebsiteName(it))
+                    },
+                    showIndicator = false,
                 )
-                CustomTextField(
+                TransparentHintTextField(
                     text = state.websiteLink,
                     label = "Website Link (optional)",
-                    onValueChange = { onEvent(PasswordEvent.EnteredWebsiteName(it)) },
-                    enabled = true,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
-                    )
+                    hint = "Enter userName",
+                    onValueChange = {
+                        onEvent(PasswordEvent.EnteredUsername(it))
+                    },
+                    showIndicator = false,
                 )
-                Button(onClick = {
-                    onEvent(PasswordEvent.SavePassword)
-                }) {
+                Button(
+                    onClick = {
+                        onEvent(PasswordEvent.SavePassword)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 100.dp)
+                        .padding(top = 20.dp)
+                ) {
                     Text(text = "Save")
                 }
             }
         })
 
 
+}
+
+
+@Preview
+@Composable
+fun Preview() {
+    val state = AddEditPasswordState() // Provide the desired state object
+    val eventFlow =
+        remember { MutableSharedFlow<AddEditPasswordViewModel.UiEvent>() } // Create an instance of MutableSharedFlow
+    val onEvent: (PasswordEvent) -> Unit = {} // Provide an empty lambda function for onEvent
+    AddEditPasswordScreen(
+        state = state,
+        eventFlow = eventFlow,
+        onEvent = onEvent,
+        onSharedPasswordEvent = {},
+        passwordItem = Password(),
+        navigateToPasswordScreen = { /*TODO*/ },
+        navigateToGeneratePasswordScreen = {})
 }
