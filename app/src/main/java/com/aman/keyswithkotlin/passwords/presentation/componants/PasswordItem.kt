@@ -63,7 +63,7 @@ fun PasswordItem(
                         Text(
                             text = password.websiteName,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
                         )
                     }
                 }

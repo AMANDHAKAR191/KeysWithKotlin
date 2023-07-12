@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
@@ -40,7 +41,11 @@ fun NoteItem(
     Box(
         modifier = modifier
     ) {
-        Canvas(modifier = Modifier.matchParentSize()) {
+        Canvas(
+            modifier = Modifier
+                .width(170.dp)
+                .height(250.dp)
+        ) {
             val clipPath = Path().apply {
                 lineTo(size.width - cutCornerSize.toPx(), 0f)
                 lineTo(size.width, cutCornerSize.toPx())

@@ -2,13 +2,15 @@ package com.aman.keyswithkotlin.notes.presentation.note_screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -55,7 +57,6 @@ fun NotesScreen(
                 },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
-                    .layoutId("floatingActionButtonAddNote")
                     .padding(all = 20.dp),
                 shape = FloatingActionButtonDefaults.shape
             ) {
@@ -71,12 +72,16 @@ fun NotesScreen(
                     .padding(innerPadding)
                     .layoutId("columnParent")
             ) {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(2),
+                    contentPadding = PaddingValues(8.dp)
+                ) {
                     items(state.notes) { note ->
                         NoteItem(
                             note = note,
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .width(170.dp)
+                                .padding(8.dp)
                                 .clickable {
                                     //todo code for viewing the note
                                 },
@@ -99,6 +104,34 @@ fun NotesScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
+//                LazyColumn(modifier = Modifier.fillMaxSize()) {
+//                    items(state.notes) { note ->
+//                        NoteItem(
+//                            note = note,
+//                            modifier = Modifier
+//                                .width(170.dp)
+//                                .clickable {
+//                                    //todo code for viewing the note
+//                                },
+//                            onDeleteClick = {
+//                                onEvent(NotesEvent.DeleteNote(note))
+//
+//                                scope.launch {
+//                                    val result = snackBarHostState.showSnackbar(
+//                                        message = "Note deleted",
+//                                        actionLabel = "Undo",
+//                                        withDismissAction = true,
+//                                        duration = SnackbarDuration.Short
+//                                    )
+//                                    if (result == SnackbarResult.ActionPerformed) {
+//                                        onEvent(NotesEvent.RestoreNote)
+//                                    }
+//                                }
+//                            }
+//                        )
+//                        Spacer(modifier = Modifier.height(16.dp))
+//                    }
+//                }
             }
         }
     )

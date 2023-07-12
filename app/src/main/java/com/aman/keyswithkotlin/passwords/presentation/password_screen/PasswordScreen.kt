@@ -1,11 +1,14 @@
 package com.aman.keyswithkotlin.passwords.presentation.password_screen
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,8 +39,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,11 +50,17 @@ import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
-import com.aman.keyswithkotlin.passwords.presentation.componants.*
+import com.aman.keyswithkotlin.passwords.presentation.componants.Identifier
+import com.aman.keyswithkotlin.passwords.presentation.componants.MinFabItem
+import com.aman.keyswithkotlin.passwords.presentation.componants.MultiFloatingButton
+import com.aman.keyswithkotlin.passwords.presentation.componants.MultiFloatingState
+import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordItem
+import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
+import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PasswordScreen(
     state: PasswordState,
@@ -129,13 +140,10 @@ fun PasswordScreen(
         },
         content = { innerPadding ->
             Surface(
-                shape = RoundedCornerShape(20f),
-                tonalElevation = 5.dp,
-                shadowElevation = 5.dp,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                color = MaterialTheme.colorScheme.surface,
+                color = Color.Transparent,
                 content = {
                     Column(modifier = Modifier.fillMaxSize()) {
                         SearchBar(
@@ -143,7 +151,8 @@ fun PasswordScreen(
                             query = searchtext.value,
                             onQueryChange = {
                                 onEvent(PasswordEvent.OnSearchTextChange(it))
-                                searchtext.value = it },
+                                searchtext.value = it
+                            },
                             onSearch = {
 
                             },
@@ -187,7 +196,18 @@ fun PasswordScreen(
                                 }
                             }
                         }
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 10.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                                )
+                                .padding(top = 10.dp)
+                                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                        ) {
                             items(state.passwords) { password ->
                                 PasswordItem(
                                     password = password,
@@ -210,6 +230,16 @@ fun PasswordScreen(
                                         }
                                     }
                                 )
+                            }
+                            item {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .width(100.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(text = "This is end of passwords")
+                                }
                             }
                         }
                     }

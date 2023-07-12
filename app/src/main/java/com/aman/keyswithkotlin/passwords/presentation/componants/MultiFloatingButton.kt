@@ -7,7 +7,7 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -17,10 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
@@ -81,7 +78,9 @@ fun MultiFloatingButton(
 
     Column(
         horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.Bottom
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier
+            .padding(end = 20.dp)
     ) {
         if (transition.currentState == MultiFloatingState.Expended) {
             item.forEach {
@@ -107,7 +106,9 @@ fun MultiFloatingButton(
                         MultiFloatingState.Expended
                     }
                 )
-            }
+            },
+            modifier = Modifier
+                .padding(bottom = 20.dp)
         ) {
             Icon(
                 Icons.Default.Add,
