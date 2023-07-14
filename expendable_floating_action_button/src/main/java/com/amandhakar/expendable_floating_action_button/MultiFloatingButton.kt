@@ -47,7 +47,7 @@ enum class Identifier {
 }
 
 @Composable
-fun MultiFloatingButton(
+fun ExpendableFloatingButton(
     multiFloatingState: MultiFloatingState,
     onMultiFabStateChange: (MultiFloatingState) -> Unit,
     item: List<MinFabItem>,
@@ -156,7 +156,7 @@ fun MultiFloatingButtonPreview() {
             identifier = Identifier.AddEditPassword.name
         )
     )
-    MultiFloatingButton(
+    ExpendableFloatingButton(
         multiFloatingState = multiFloatingState,
         onMultiFabStateChange = {
             multiFloatingState = it

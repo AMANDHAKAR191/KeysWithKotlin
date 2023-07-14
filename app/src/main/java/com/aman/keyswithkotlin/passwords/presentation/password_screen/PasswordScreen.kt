@@ -55,6 +55,7 @@ import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPa
 import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
+import com.amandhakar.expendable_floating_action_button.ExpendableFloatingButton
 import com.amandhakar.expendable_floating_action_button.Identifier
 import com.amandhakar.expendable_floating_action_button.MinFabItem
 import com.amandhakar.expendable_floating_action_button.MultiFloatingState
@@ -114,7 +115,7 @@ fun PasswordScreen(
             )
         },
         floatingActionButton = {
-            com.amandhakar.expendable_floating_action_button.MultiFloatingButton(
+            ExpendableFloatingButton(
                 multiFloatingState = multiFloatingState,
                 onMultiFabStateChange = {
                     multiFloatingState = it
