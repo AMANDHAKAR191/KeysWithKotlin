@@ -10,11 +10,11 @@ import com.aman.keyswithkotlin.notes.presentation.add_edit_note.AddEditNoteScree
 import com.aman.keyswithkotlin.notes.presentation.add_edit_note.AddEditNoteViewModel
 import com.aman.keyswithkotlin.notes.presentation.note_screen.NotesScreen
 import com.aman.keyswithkotlin.notes.presentation.note_screen.NotesViewModel
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePasswordViewModel
 
 fun NavGraphBuilder.noteNavGraph(
     navController: NavController,
-    sharedPasswordViewModel: ShareGeneratedPasswordViewModel
+    sharedPasswordViewModel: SharePasswordViewModel
 ) {
     navigation(
         startDestination = BottomBarScreen.Notes.route,

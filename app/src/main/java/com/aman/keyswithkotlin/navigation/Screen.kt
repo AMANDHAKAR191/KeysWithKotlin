@@ -4,6 +4,7 @@ import com.aman.keyswithkotlin.core.Constants.ADD_EDIT_NOTE_SCREEN
 import com.aman.keyswithkotlin.core.Constants.ADD_EDIT_PASSWORD_SCREEN
 import com.aman.keyswithkotlin.core.Constants.AUTH_SCREEN
 import com.aman.keyswithkotlin.core.Constants.GENERATE_PASSWORD_SCREEN
+import com.aman.keyswithkotlin.core.Constants.INDIVIDUAL_CHAT_SCREEN
 import com.aman.keyswithkotlin.core.Constants.PROFILE_SCREEN
 
 sealed class Screen(val route: String) {
@@ -14,4 +15,6 @@ sealed class Screen(val route: String) {
     object GeneratePasswordScreen : Screen(GENERATE_PASSWORD_SCREEN)
 
     object AddEditNoteScreen : Screen(ADD_EDIT_NOTE_SCREEN)
+
+    object IndividualChatScreen : Screen(INDIVIDUAL_CHAT_SCREEN)
 }

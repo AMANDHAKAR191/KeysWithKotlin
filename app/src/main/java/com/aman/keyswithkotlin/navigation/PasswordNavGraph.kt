@@ -9,7 +9,7 @@ import androidx.navigation.navigation
 import com.aman.keyswithkotlin.core.components.BottomBar
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordScreen
@@ -17,7 +17,7 @@ import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordVi
 
 fun NavGraphBuilder.passwordNavGraph(
     navController: NavController,
-    sharedPasswordViewModel: ShareGeneratedPasswordViewModel
+    sharedPasswordViewModel: SharePasswordViewModel
 ) {
     navigation(
         startDestination = BottomBarScreen.Password.route,

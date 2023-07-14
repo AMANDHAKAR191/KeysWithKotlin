@@ -29,6 +29,7 @@ object Constants {
     const val ADD_EDIT_PASSWORD_SCREEN = "AddEditPasswordScreen"
     const val GENERATE_PASSWORD_SCREEN = "GeneratePasswordScreen"
     const val ADD_EDIT_NOTE_SCREEN = "AddEditNoteScreen"
+    const val INDIVIDUAL_CHAT_SCREEN = "IndividualChatScreen"
 
     //identifier
     const val IDENTIFIER_UPPER_CASE = "upperCaseAlphabet"

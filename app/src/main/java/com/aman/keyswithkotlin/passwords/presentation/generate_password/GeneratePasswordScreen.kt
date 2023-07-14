@@ -27,11 +27,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.aman.keyswithkotlin.auth.presentation.profile.ProfileScreen
 import com.aman.keyswithkotlin.core.Constants
-import com.aman.keyswithkotlin.core.util.Response
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.CustomSwitch
 

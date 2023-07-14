@@ -1,5 +1,6 @@
-package com.aman.keyswithkotlin.passwords.presentation.componants
+package com.amandhakar.expendable_floating_action_button
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -11,14 +12,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 enum class MultiFloatingState {
@@ -59,6 +67,13 @@ fun MultiFloatingButton(
     val fabImageScale by transition.animateDp(label = "fabImageScale") {
         if (it == MultiFloatingState.Expended) 50.dp else 0.dp
     }
+    val translateY by transition.animateDp(
+        label = "translateY",
+        transitionSpec = {
+            tween(durationMillis = 100, easing = FastOutSlowInEasing)
+        }) {
+        if (it == MultiFloatingState.Expended) 0.dp else 100.dp
+    }
 
     val alpha by transition.animateFloat(
         label = "alpha",
@@ -88,6 +103,7 @@ fun MultiFloatingButton(
                     item = it,
                     alpha = alpha,
                     textShadow = textShadow,
+                    translateY = translateY,
                     fabScale = fabScale,
                     fabImageScale = fabImageScale,
                     onMinFabItemClick = { minFabItem ->
@@ -117,6 +133,52 @@ fun MultiFloatingButton(
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun MultiFloatingButtonPreview() {
+    var multiFloatingState by remember { mutableStateOf(MultiFloatingState.Collapsed) }
+    val items = listOf(
+        MinFabItem(
+            icon = Icons.Default.Person,
+            label = "Profile",
+            identifier = Identifier.Profile.name
+        ),
+        MinFabItem(
+            icon = Icons.Default.Password,
+            label = "Generate Password",
+            identifier = Identifier.GeneratePassword.name
+        ),
+        MinFabItem(
+            icon = Icons.Default.Create,
+            label = "Add Password",
+            identifier = Identifier.AddEditPassword.name
+        )
+    )
+    MultiFloatingButton(
+        multiFloatingState = multiFloatingState,
+        onMultiFabStateChange = {
+            multiFloatingState = it
+        },
+        item = items,
+        onMinFabItemClick = { minFabItem ->
+            when (minFabItem.identifier) {
+                Identifier.AddEditPassword.name -> {
+//                    navigateToAddEditPasswordScreen()
+                }
+
+                Identifier.GeneratePassword.name -> {
+//                    navigateToGeneratePasswordScreen()
+                }
+
+                Identifier.Profile.name -> {
+//                    navigateToProfileScreen()
+                }
+
+            }
+        }
+    )
 }
 
 

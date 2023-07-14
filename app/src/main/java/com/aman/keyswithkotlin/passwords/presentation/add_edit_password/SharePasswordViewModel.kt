@@ -3,22 +3,21 @@ package com.aman.keyswithkotlin.passwords.presentation.add_edit_password
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class ShareGeneratedPasswordViewModel @Inject constructor(
-): ViewModel(){
+class SharePasswordViewModel @Inject constructor(
+) : ViewModel() {
     private val _generatedPassword = mutableStateOf(SharedPasswordState())
-    val generatedPassword:State<SharedPasswordState> = _generatedPassword
+    val generatedPassword: State<SharedPasswordState> = _generatedPassword
 
     private val _itemToEdit = mutableStateOf(SharedPasswordState())
-    val itemToEdit:State<SharedPasswordState> = _itemToEdit
+    val itemToEdit: State<SharedPasswordState> = _itemToEdit
 
     private val _itemToShare = mutableStateOf(SharedPasswordState())
-    val itemToShare:State<SharedPasswordState> = _itemToShare
+    val itemToShare: State<SharedPasswordState> = _itemToShare
 
 
     init {

@@ -41,22 +41,24 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
-import com.aman.keyswithkotlin.passwords.presentation.componants.Identifier
-import com.aman.keyswithkotlin.passwords.presentation.componants.MinFabItem
-import com.aman.keyswithkotlin.passwords.presentation.componants.MultiFloatingButton
-import com.aman.keyswithkotlin.passwords.presentation.componants.MultiFloatingState
 import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
+import com.amandhakar.expendable_floating_action_button.Identifier
+import com.amandhakar.expendable_floating_action_button.MinFabItem
+import com.amandhakar.expendable_floating_action_button.MultiFloatingState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
@@ -64,14 +66,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun PasswordScreen(
     state: PasswordState,
-    eventFlowState:SharedFlow<AddEditPasswordViewModel.UiEvent>,
-    searchedPasswordState:State<List<Password>>,
-    onEvent:(PasswordEvent)->Unit,
-    onSharedPasswordEvent:(SharedPasswordEvent)->Unit,
+    eventFlowState: SharedFlow<AddEditPasswordViewModel.UiEvent>,
+    searchedPasswordState: State<List<Password>>,
+    onEvent: (PasswordEvent) -> Unit,
+    onSharedPasswordEvent: (SharedPasswordEvent) -> Unit,
     navigateToAddEditPasswordScreen: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit,
     navigateToProfileScreen: () -> Unit,
-    bottomBar:@Composable (()->Unit)
+    bottomBar: @Composable (() -> Unit)
 ) {
     val scope = rememberCoroutineScope()
     val searchedPasswords = searchedPasswordState.value
@@ -83,15 +85,15 @@ fun PasswordScreen(
             label = "Profile",
             identifier = Identifier.Profile.name
         ),
-        MinFabItem(
+        com.amandhakar.expendable_floating_action_button.MinFabItem(
             icon = Icons.Default.Password,
             label = "Generate Password",
-            identifier = Identifier.GeneratePassword.name
+            identifier = com.amandhakar.expendable_floating_action_button.Identifier.GeneratePassword.name
         ),
-        MinFabItem(
+        com.amandhakar.expendable_floating_action_button.MinFabItem(
             icon = Icons.Default.Create,
             label = "Add Password",
-            identifier = Identifier.AddEditPassword.name
+            identifier = com.amandhakar.expendable_floating_action_button.Identifier.AddEditPassword.name
         )
     )
 
@@ -112,22 +114,23 @@ fun PasswordScreen(
             )
         },
         floatingActionButton = {
-            MultiFloatingButton(
+            com.amandhakar.expendable_floating_action_button.MultiFloatingButton(
                 multiFloatingState = multiFloatingState,
                 onMultiFabStateChange = {
                     multiFloatingState = it
                 },
                 item = items,
-                onMinFabItemClick = {minFabItem ->
-                    when(minFabItem.identifier){
-                        Identifier.AddEditPassword.name->{
+                onMinFabItemClick = { minFabItem ->
+                    when (minFabItem.identifier) {
+                        com.amandhakar.expendable_floating_action_button.Identifier.AddEditPassword.name -> {
                             navigateToAddEditPasswordScreen()
                         }
-                        Identifier.GeneratePassword.name->{
+
+                        com.amandhakar.expendable_floating_action_button.Identifier.GeneratePassword.name -> {
                             navigateToGeneratePasswordScreen()
                         }
 
-                        Identifier.Profile.name -> {
+                        com.amandhakar.expendable_floating_action_button.Identifier.Profile.name -> {
                             navigateToProfileScreen()
                         }
 
@@ -136,14 +139,14 @@ fun PasswordScreen(
             )
         },
         bottomBar = {
-                    bottomBar()
+            bottomBar()
         },
         content = { innerPadding ->
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                color = Color.Transparent,
+                color = Color.Black,
                 content = {
                     Column(modifier = Modifier.fillMaxSize()) {
                         SearchBar(
@@ -197,51 +200,58 @@ fun PasswordScreen(
                             }
                         }
 
-                        LazyColumn(
+                        Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(top = 10.dp)
                                 .background(
                                     MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                                    shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
                                 )
-                                .padding(top = 10.dp)
-                                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                                .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                         ) {
-                            items(state.passwords) { password ->
-                                PasswordItem(
-                                    password = password,
-                                    onItemClick = {
-                                        itemToView.value = password
-                                        viewPassword = true
-                                    },
-                                    onDeleteClick = {
-                                        onEvent(PasswordEvent.DeletePassword(password = password))
-                                        scope.launch {
-                                            val result = snackBarHostState.showSnackbar(
-                                                message = "Password deleted",
-                                                actionLabel = "Restore",
-                                                withDismissAction = true,
-                                                duration = SnackbarDuration.Short
-                                            )
-                                            if (result == SnackbarResult.ActionPerformed) {
-                                                onEvent(PasswordEvent.RestorePassword(password = password))
+                            BottomSheetSwipeUp(
+                                modifier = Modifier
+                                    .align(TopCenter)
+                                    .padding(top = 15.dp)
+                            )
+                            LazyColumn(modifier = Modifier.padding(top = 30.dp)) {
+                                items(state.passwords) { password ->
+                                    PasswordItem(
+                                        password = password,
+                                        onItemClick = {
+                                            itemToView.value = password
+                                            viewPassword = true
+                                        },
+                                        onDeleteClick = {
+                                            onEvent(PasswordEvent.DeletePassword(password = password))
+                                            scope.launch {
+                                                val result = snackBarHostState.showSnackbar(
+                                                    message = "Password deleted",
+                                                    actionLabel = "Restore",
+                                                    withDismissAction = true,
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                                if (result == SnackbarResult.ActionPerformed) {
+                                                    onEvent(PasswordEvent.RestorePassword(password = password))
+                                                }
                                             }
                                         }
+                                    )
+                                }
+                                item {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .width(100.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(text = "This is end of passwords")
                                     }
-                                )
-                            }
-                            item {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .width(100.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(text = "This is end of passwords")
                                 }
                             }
                         }
+
                     }
                 }
             )
@@ -278,8 +288,42 @@ fun PasswordScreen(
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun preview(){
-
+fun preview() {
+    PasswordScreen(
+        state = PasswordState(),
+        eventFlowState = MutableSharedFlow(), // Using MutableSharedFlow as dummy value
+        searchedPasswordState = remember {
+            mutableStateOf(
+                listOf(
+                    Password(),
+                    Password()
+                )
+            )
+        }, // Using a list of dummy passwords
+        onEvent = { event ->
+            // Here we'll just print the event for the preview.
+            println("Event received: $event")
+        },
+        onSharedPasswordEvent = { event ->
+            // Here we'll just print the event for the preview.
+            println("SharedPasswordEvent received: $event")
+        },
+        navigateToAddEditPasswordScreen = {
+            // For the preview, we'll just print a message.
+            println("Navigating to AddEditPasswordScreen")
+        },
+        navigateToGeneratePasswordScreen = {
+            // For the preview, we'll just print a message.
+            println("Navigating to GeneratePasswordScreen")
+        },
+        navigateToProfileScreen = {
+            // For the preview, we'll just print a message.
+            println("Navigating to ProfileScreen")
+        }
+    ) {
+        // Implement the bottomBar composable
+        Text("This is the bottom bar.") // Using a Text composable as a placeholder
+    }
 }

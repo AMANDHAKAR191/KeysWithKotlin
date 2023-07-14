@@ -10,9 +10,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 
 enum class SearchBarState {
     Expended,
@@ -35,6 +37,12 @@ fun TopBar(
                 Text(text = title)
             }
         },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Black,
+            titleContentColor = Color.White,
+            actionIconContentColor = Color.White,
+            navigationIconContentColor = Color.White
+        ),
         modifier = Modifier.fillMaxWidth(),
         actions = {
             IconButton(onClick = {

@@ -7,14 +7,16 @@ import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.ShareGeneratedPasswordViewModel
+import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePasswordViewModel
 
 @Composable
 @ExperimentalAnimationApi
 fun RootNavGraph(
     navController: NavHostController
 ) {
-    val sharedPasswordViewModel: ShareGeneratedPasswordViewModel = hiltViewModel()
+    val sharedPasswordViewModel: SharePasswordViewModel = hiltViewModel()
+    val sharedChatViewModel: SharedChatViewModel = hiltViewModel()
     NavHost(
         navController = navController,
         startDestination = Graph.AUTHENTICATION,
@@ -26,7 +28,7 @@ fun RootNavGraph(
             navController = navController,
             sharedPasswordViewModel = sharedPasswordViewModel
         )
-        chatNavGraph(navController, sharedPasswordViewModel)
+        chatNavGraph(navController, sharedPasswordViewModel, sharedChatViewModel)
         noteNavGraph(navController, sharedPasswordViewModel)
         settingNavGraph(navController)
     }

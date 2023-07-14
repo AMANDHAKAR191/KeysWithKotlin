@@ -88,7 +88,12 @@ fun AddEditNoteScreen(
                     }
                 },
                 scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
-                colors = TopAppBarDefaults.mediumTopAppBarColors()
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = Color.Black,
+                    titleContentColor = Color.White,
+                    actionIconContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
             )
         },
         floatingActionButton = {

@@ -1,4 +1,4 @@
-package com.aman.keyswithkotlin.passwords.presentation.componants
+package com.amandhakar.expendable_floating_action_button
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -7,11 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,14 +30,15 @@ fun MinFab(
     item: MinFabItem,
     alpha: Float,
     textShadow: Dp,
+    translateY: Dp,
     fabScale: Float,
     fabImageScale: Dp,
     showLabel: Boolean = true,
     onMinFabItemClick: (MinFabItem) -> Unit
 ) {
-    val buttonColor = FloatingActionButtonDefaults.containerColor
+    val buttonColor = MaterialTheme.colorScheme.primaryContainer
     val shadow = Color.Black.copy(0.2f)
-    Row {
+    Row(modifier = Modifier.offset(y = translateY)) {
         Text(
             text = item.label,
             modifier = Modifier

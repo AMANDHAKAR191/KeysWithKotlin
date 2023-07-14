@@ -60,8 +60,8 @@ class PasswordRepositoryImpl(
     override fun insertPassword(
         password: Password
     ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
-        val current = LocalDateTime.now()
         val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
+        val current = LocalDateTime.now()
         val formatted = current.format(formatter)
 
         val reference = database.reference.child("Passwords").child(UID)
