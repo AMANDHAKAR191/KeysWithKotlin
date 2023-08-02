@@ -1,7 +1,6 @@
 package com.aman.keyswithkotlin.chats.presentation
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,18 +25,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
-import com.aman.keyswithkotlin.chats.domain.model.Person
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 
@@ -91,15 +89,14 @@ fun ChatsScreen(
                         LazyColumn(
                             modifier = Modifier.padding(bottom = 15.dp, top = 30.dp)
                         ) {
-                            if (!chatUsersList.isNullOrEmpty()){
-                                items(items = chatUsersList){person->
+                            if (!chatUsersList.isNullOrEmpty()) {
+                                items(items = chatUsersList) { person ->
                                     UserEachRow(person = person, onClick = {
                                         onEvent(SharedChatEvent.OpenSharedChat(person))
                                         navigateToChatScreen()
                                     })
                                 }
-                            }
-                            else{
+                            } else {
                                 //todo wrote code to show loading bar
                             }
 //                            items(personList, key = { it.id }) { person ->
@@ -174,7 +171,16 @@ fun UserEachRow(
             ) {
                 Row {
                     println("{person.otherUserProfileUrl}: ${person.otherUserProfileUrl}")
-                    AsyncImage(model = person.otherUserProfileUrl, contentDescription = "")
+                    AsyncImage(
+                        model = person.otherUserProfileUrl,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .clip(
+                                CircleShape
+                            ).background(Color.Yellow)
+                            .padding(2.dp)
+                            .clip(CircleShape)
+                    )
                     SpacerWidth()
                     Column {
                         Text(

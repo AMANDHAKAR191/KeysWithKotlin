@@ -57,7 +57,7 @@ fun IndividualChatScreen(
     navigateToPasswordScreen: () -> Unit
 ) {
 //    val state = _state.collectAsState()
-    val chatMessages:List<ChatModelClass>? = state.chatMessagesList
+    val chatMessages: List<ChatModelClass>? = state.chatMessagesList
     val messageTextValue = state.chatMessage
     val lazyColumnState = rememberLazyListState()
     Scaffold(
@@ -122,8 +122,8 @@ fun IndividualChatScreen(
                             ),
                             state = lazyColumnState
                         ) {
-                            if (!chatMessages.isNullOrEmpty()){
-                                items(chatMessages){
+                            if (!chatMessages.isNullOrEmpty()) {
+                                items(chatMessages) {
                                     ChatRow(chat = it)
                                 }
                             }
@@ -136,7 +136,7 @@ fun IndividualChatScreen(
                         onChatEvent(ChatEvent.OnMessageEntered(it))
                     },
                     modifier = Modifier
-                        .padding(horizontal = 20.dp, vertical = 20.dp)
+                        .padding(horizontal = 10.dp, vertical = 10.dp)
                         .align(Alignment.BottomCenter),
                     onTrailingIconButtonClicked = {
                         onChatEvent(ChatEvent.SendMessage)
@@ -212,54 +212,56 @@ fun CustomTextField(
     onValueChange: (String) -> Unit,
     onTrailingIconButtonClicked: () -> Unit
 ) {
-    TextField(
-        value = text, onValueChange = { onValueChange(it) },
-        placeholder = {
-            Text(
-                text = "Type",
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    color = Color.Black
-                ),
-                textAlign = TextAlign.Center
-            )
-        },
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.Gray,
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent
-        ),
-        leadingIcon = {
-            IconButton(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(100.dp))
-                    .background(Color.Yellow)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "", modifier = Modifier.size(16.dp))
-            }
-        },
-        trailingIcon = {
-            IconButton(
-                onClick = {
-                    onTrailingIconButtonClicked()
-                },
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(Color.Yellow)
-            ) {
-                Icon(Icons.Default.Send, contentDescription = "", modifier = Modifier.size(16.dp))
-            }
-        },
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done
-        ),
-        modifier = modifier.fillMaxWidth(),
-        maxLines = 5,
-        shape = CircleShape
-    )
+    Row(
+        modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        IconButton(
+            onClick = { /*TODO*/ },
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(100.dp))
+                .background(Color.Yellow)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "", modifier = Modifier.size(16.dp))
+        }
+        TextField(
+            value = text, onValueChange = { onValueChange(it) },
+            placeholder = {
+                Text(
+                    text = "Type",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = Color.Black
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.Gray,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent
+            ),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            modifier = Modifier.padding(horizontal = 5.dp).weight(0.8f),
+            maxLines = 5,
+            shape = CircleShape
+        )
+        IconButton(
+            onClick = {
+                onTrailingIconButtonClicked()
+            },
+            modifier = Modifier
+                .size(24.dp)
+                .clip(RoundedCornerShape(50.dp))
+                .background(Color.Yellow)
+        ) {
+            Icon(Icons.Default.Send, contentDescription = "", modifier = Modifier.size(16.dp))
+        }
+    }
 
 }
 
@@ -273,9 +275,19 @@ fun UserNameRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        person?.let { personData->
+        person?.let { personData ->
             Row {
-                AsyncImage(model = personData.otherUserProfileUrl ?: "", contentDescription = "")
+                AsyncImage(
+                    model = personData.otherUserProfileUrl ?: "",
+                    contentDescription = "",
+                    modifier = Modifier
+                        .clip(
+                            CircleShape
+                        )
+                        .background(Color.Yellow)
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                )
                 SpacerWidth()
                 Column {
                     Text(

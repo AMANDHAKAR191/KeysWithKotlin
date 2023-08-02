@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.use_cases.ChatUseCases
-import com.aman.keyswithkotlin.chats.presentation.ChatEvent
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,18 +32,19 @@ class IndividualUserChatsViewModel @Inject constructor(
         getChatUserList()
     }
 
-    fun onEvent(event: ChatEvent){
-        when(event){
+    fun onEvent(event: ChatEvent) {
+        when (event) {
             is ChatEvent.SendMessage -> {
                 println("Message: ${state.value.chatMessage}")
                 viewModelScope.launch {
                     chatUseCases.sendMessage(
+                        "kirandhaker123tushar08152002",
                         ChatModelClass(
                             message = state.value.chatMessage,
                             publicUid = "amandhaker191",
                             type = "text"
                         )
-                    ).collect{ response ->
+                    ).collect { response ->
                         when (response) {
                             is Response.Loading -> {
 
@@ -71,12 +71,14 @@ class IndividualUserChatsViewModel @Inject constructor(
                     }
                 }
             }
-            is ChatEvent.OnMessageEntered->{
+
+            is ChatEvent.OnMessageEntered -> {
                 println("${event.value}")
                 _state.value = state.value.copy(
                     chatMessage = event.value
                 )
             }
+
             else -> {}
         }
     }

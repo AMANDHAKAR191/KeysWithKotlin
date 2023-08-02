@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 class SendMessage(
     private val chatRepository: ChatRepository
 ) {
-    operator fun invoke(chat: ChatModelClass): Flow<Response<Pair<MutableList<String>?, Boolean?>>> {
-        return chatRepository.sendMessage(chat)
+    operator fun invoke(chatRoomId:String, chat: ChatModelClass): Flow<Response<Pair<String?, Boolean?>>> {
+        return chatRepository.sendMessage(chatRoomId, chat)
     }
 }

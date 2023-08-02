@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.chats.data
 
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.chats.domain.repository.ChatRepository
@@ -12,6 +13,8 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class ChatRepositoryImpl(
     private val database: FirebaseDatabase,
@@ -22,36 +25,41 @@ class ChatRepositoryImpl(
 
     private val _chatUsersList = mutableListOf<UserPersonalChatList>()
     private val _chatMessagesList = mutableListOf<ChatModelClass>()
-    override fun sendMessage(chat: ChatModelClass): Flow<Response<Pair<MutableList<String>?, Boolean?>>> =
+    override fun sendMessage(chatRoomId: String, chat: ChatModelClass): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
-//        val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
-//        val current = LocalDateTime.now()
-//        val formatted = current.format(formatter)
-//
-//        val reference = database.reference.child("Passwords").child(UID)
-//        trySend(Response.Loading)
-//        val _chat = Chat(
-//
-//        )
-//
-//        try {
-//            println("password.timestamp :${password.timestamp}")
-//            reference.child(password.websiteName).child(_password.timestamp)
-//                .setValue(_password)
-//                .addOnCompleteListener {
-//                    if (it.isSuccessful) {
-//                        trySend(Response.Success("Password is successfully saved"))
-//                    }
-//                }
-//                .addOnFailureListener {
-//                    trySend(Response.Failure(it))
-//                }
-//            awaitClose {
-//                close()
-//            }
-//        } catch (e: Exception) {
-//            Response.Failure(e)
-//        }
+            val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
+            val current = LocalDateTime.now()
+            val formatted = current.format(formatter)
+
+            val reference = database.reference.child("messages").child(chatRoomId)
+            trySend(Response.Success("Sending..."))
+
+            val _message = ChatModelClass(
+                message = chat.message,
+                dateAndTime = formatted,
+                publicUid = chat.publicUid,
+                type = chat.type,
+                status = chat.status,
+                passwordModelClass = chat.passwordModelClass,
+                noteModelClass = chat.noteModelClass
+            )
+
+            chat.let {
+                reference.child((formatted)).setValue(_message)
+                    .addOnCompleteListener{
+                        if (it.isSuccessful){
+                            trySend(Response.Success("sent"))
+                        }else{
+                            trySend(Response.Success("Failed!"))
+                        }
+                    }
+                    .addOnFailureListener{
+                        trySend(Response.Failure(it))
+                    }
+            }
+            awaitClose {
+                close()
+            }
         }
 
     override fun getChatUsers(): Flow<Response<Pair<MutableList<UserPersonalChatList>?, Boolean?>>> =
