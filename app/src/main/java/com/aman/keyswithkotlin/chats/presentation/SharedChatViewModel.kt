@@ -8,20 +8,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SharedChatViewModel @Inject constructor() : ViewModel() {
-    private val _state = mutableStateOf(ChatState())
-    val state: State<ChatState> = _state
+    private val _state = mutableStateOf(SharedChatState())
+    val state: State<SharedChatState> = _state
 
-    fun onEvent(event: ChatEvent) {
+    fun onEvent(event: SharedChatEvent) {
         when (event) {
-            is ChatEvent.OpenChat -> {
+            is SharedChatEvent.OpenSharedChat -> {
                 state.value.person = event.person
             }
 
-            is ChatEvent.resetSharedViewModel -> {
-                _state.value = state.value.copy(
-                    person = null
-                )
-            }
+            else -> {}
         }
     }
 }

@@ -1,9 +1,12 @@
 package com.aman.keyswithkotlin.chats.domain.repository
 
-import com.aman.keyswithkotlin.chats.domain.model.Chat
+import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
+import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.core.util.Response
 import kotlinx.coroutines.flow.Flow
 
 interface ChatRepository {
-    fun sendMessage(chat: Chat): Flow<Response<Pair<MutableList<String>?, Boolean?>>>
+    fun sendMessage(chat: ChatModelClass): Flow<Response<Pair<MutableList<String>?, Boolean?>>>
+    fun getChatUsers(): Flow<Response<Pair<MutableList<UserPersonalChatList>?, Boolean?>>>
+    fun getUserChatMessages(chatRoomId:String): Flow<Response<Pair<MutableList<ChatModelClass>?, Boolean?>>>
 }

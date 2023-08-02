@@ -5,10 +5,10 @@ import com.aman.keyswithkotlin.chats.domain.repository.ChatRepository
 import com.aman.keyswithkotlin.core.util.Response
 import kotlinx.coroutines.flow.Flow
 
-class SendMessage(
-    private val chatRepository: ChatRepository
+class GetUserChatMessages(
+    private val repository: ChatRepository
 ) {
-    operator fun invoke(chat: ChatModelClass): Flow<Response<Pair<MutableList<String>?, Boolean?>>> {
-        return chatRepository.sendMessage(chat)
+    operator fun invoke(chatRoomId:String): Flow<Response<Pair<MutableList<ChatModelClass>?, Boolean?>>> {
+        return repository.getUserChatMessages(chatRoomId)
     }
 }

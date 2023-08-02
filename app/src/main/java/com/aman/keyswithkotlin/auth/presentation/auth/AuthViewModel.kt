@@ -29,6 +29,7 @@ class AuthViewModel @Inject constructor(
         private set
 
     fun oneTapSignIn() = viewModelScope.launch {
+        println("check1")
         oneTapSignInResponse = Loading
         oneTapSignInResponse = repo.oneTapSignInWithGoogle()
     }

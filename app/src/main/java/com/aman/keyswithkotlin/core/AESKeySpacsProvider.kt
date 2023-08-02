@@ -12,8 +12,8 @@ class AESKeySpacsProvider() {
         val aesKeyRef = db.reference.child("users").child(UID).child("aesKey")
         val aesIVRef = db.reference.child("users").child(UID).child("aesIV")
 
-        val aesKeySnapshot = withContext(Dispatchers.IO) { aesKeyRef.get().await() }
-        val aesIVSnapshot = withContext(Dispatchers.IO) { aesIVRef.get().await() }
+        val aesKeySnapshot = withContext(Dispatchers.Main) { aesKeyRef.get().await() }
+        val aesIVSnapshot = withContext(Dispatchers.Main) { aesIVRef.get().await() }
 
         val aesKey = aesKeySnapshot.getValue(String::class.java)
         val aesIV = aesIVSnapshot.getValue(String::class.java)

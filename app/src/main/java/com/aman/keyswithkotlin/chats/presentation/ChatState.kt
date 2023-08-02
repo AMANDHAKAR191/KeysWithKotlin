@@ -1,7 +1,9 @@
 package com.aman.keyswithkotlin.chats.presentation
 
-import com.aman.keyswithkotlin.chats.domain.model.Person
+import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 
-data class ChatState(
-    var person: Person? = null
+data class ChatState (
+    var chatUsersList:List<UserPersonalChatList>? = null,
+    val error:String?  = "",
+    val isLoading:Boolean = false
 )

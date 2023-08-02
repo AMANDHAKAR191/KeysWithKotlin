@@ -1,6 +1,5 @@
 package com.aman.keyswithkotlin.chats.presentation
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,14 +12,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,37 +30,36 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aman.keyswithkotlin.R
-import com.aman.keyswithkotlin.chats.domain.model.Chat
-import com.aman.keyswithkotlin.chats.domain.model.Person
-import com.aman.keyswithkotlin.chats.domain.model.UserType
-import com.aman.keyswithkotlin.chats.domain.model.chatList
+import coil.compose.AsyncImage
+import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
+import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.ui.theme.Pink80
 import com.aman.keyswithkotlin.ui.theme.RedOrange
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IndividualChatScreen(
-    data: Person,
-    onSharedChatEvent: (ChatEvent) -> Unit,
+    data: UserPersonalChatList? = null,
+    state: ChatMessagesState,
+//    _state: StateFlow<ChatMessagesState>,
+    onChatEvent: (ChatEvent) -> Unit,
     navigateToPasswordScreen: () -> Unit
 ) {
-    var message by remember { mutableStateOf("") }
+//    val state = _state.collectAsState()
+    val chatMessages:List<ChatModelClass>? = state.chatMessagesList
+    val messageTextValue = state.chatMessage
+    val lazyColumnState = rememberLazyListState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -109,8 +110,8 @@ fun IndividualChatScreen(
                                     topStart = 30.dp, topEnd = 30.dp
                                 )
                             )
-                            .padding(top = 25.dp)
-
+                            .padding(top = 25.dp),
+                        contentAlignment = Alignment.BottomCenter
                     ) {
                         LazyColumn(
                             modifier = Modifier.padding(
@@ -118,54 +119,72 @@ fun IndividualChatScreen(
                                 top = 25.dp,
                                 end = 15.dp,
                                 bottom = 75.dp
-                            )
+                            ),
+                            state = lazyColumnState
                         ) {
-                            items(chatList) {
-                                ChatRow(chat = it)
+                            if (!chatMessages.isNullOrEmpty()){
+                                items(chatMessages){
+                                    ChatRow(chat = it)
+                                }
                             }
                         }
                     }
                 }
 
                 CustomTextField(
-                    text = message, onValueChange = { message = it },
+                    text = messageTextValue, onValueChange = {
+                        onChatEvent(ChatEvent.OnMessageEntered(it))
+                    },
                     modifier = Modifier
                         .padding(horizontal = 20.dp, vertical = 20.dp)
-                        .align(Alignment.BottomCenter)
+                        .align(Alignment.BottomCenter),
+                    onTrailingIconButtonClicked = {
+                        onChatEvent(ChatEvent.SendMessage)
+                    }
                 )
             }
         }
     )
+    // Scroll to the bottom of the LazyColumn when a new item is added
+    LaunchedEffect(chatMessages) {
+        if (chatMessages.isNullOrEmpty()) {
+            //todo do nothing
+        } else {
+            lazyColumnState.scrollToItem(1)
+            lazyColumnState.animateScrollToItem(lazyColumnState.layoutInfo.totalItemsCount)
+        }
+    }
 }
 
-@Preview
-@Composable
-fun IndividualChatScreenPreivew() {
-    IndividualChatScreen(
-        data = Person(),
-        onSharedChatEvent = {},
-        navigateToPasswordScreen = {}
-    )
-}
+//@Preview
+//@Composable
+//fun IndividualChatScreenPreivew() {
+//    IndividualChatScreen(
+//        data = Person(),
+//        onSharedChatEvent = {},
+//        navigateToPasswordScreen = {}
+//    )
+//}
 
 @Composable
 fun ChatRow(
-    chat: Chat
+    chat: ChatModelClass
 ) {
+    println("chat: ${chat.publicUid} :: message: ${chat.message}")
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = if (chat.userType == UserType.RECEIVER.toString()) Alignment.Start else Alignment.End
+        horizontalAlignment = if (chat.publicUid == "kirandhaker123") Alignment.Start else Alignment.End
     ) {
         Box(
             modifier = Modifier
                 .background(
-                    if (chat.userType == UserType.RECEIVER.toString()) RedOrange else Pink80,
+                    if (chat.publicUid == "kirandhaker123") RedOrange else Pink80,
                     RoundedCornerShape(100.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = chat.message, style = TextStyle(
+                text = chat.message!!, style = TextStyle(
                     color = Color.Black,
                     fontSize = 15.sp
                 ),
@@ -174,7 +193,7 @@ fun ChatRow(
             )
         }
         Text(
-            text = chat.time,
+            text = chat.dateAndTime!!,
             style = TextStyle(
                 color = Color.Gray,
                 fontSize = 12.sp
@@ -190,7 +209,8 @@ fun ChatRow(
 fun CustomTextField(
     text: String,
     modifier: Modifier = Modifier,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    onTrailingIconButtonClicked: () -> Unit
 ) {
     TextField(
         value = text, onValueChange = { onValueChange(it) },
@@ -209,8 +229,33 @@ fun CustomTextField(
             unfocusedIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent
         ),
-        leadingIcon = { CommonIconButton(imageVector = Icons.Default.Add) },
-        trailingIcon = { CommonIconButtonDrawable(R.drawable.mic) },
+        leadingIcon = {
+            IconButton(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(100.dp))
+                    .background(Color.Yellow)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "", modifier = Modifier.size(16.dp))
+            }
+        },
+        trailingIcon = {
+            IconButton(
+                onClick = {
+                    onTrailingIconButtonClicked()
+                },
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(RoundedCornerShape(50.dp))
+                    .background(Color.Yellow)
+            ) {
+                Icon(Icons.Default.Send, contentDescription = "", modifier = Modifier.size(16.dp))
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done
+        ),
         modifier = modifier.fillMaxWidth(),
         maxLines = 5,
         shape = CircleShape
@@ -218,70 +263,36 @@ fun CustomTextField(
 
 }
 
-@Composable
-fun CommonIconButton(
-    imageVector: ImageVector
-) {
-
-    Box(
-        modifier = Modifier
-            .background(Color.Yellow, CircleShape)
-            .size(33.dp), contentAlignment = Alignment.Center
-    ) {
-        IconComponentImageVector(icon = imageVector, size = 15.dp, tint = Color.Black)
-    }
-
-}
-
-@Composable
-fun CommonIconButtonDrawable(
-    @DrawableRes icon: Int
-) {
-    Box(
-        modifier = Modifier
-            .background(Color.Yellow, CircleShape)
-            .size(33.dp), contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(id = icon), contentDescription = "",
-            tint = Color.Black,
-            modifier = Modifier.size(15.dp)
-        )
-    }
-
-}
 
 @Composable
 fun UserNameRow(
     modifier: Modifier = Modifier,
-    person: Person
+    person: UserPersonalChatList? = null
 ) {
-
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row {
-
-            IconComponentDrawable(icon = person.icon, size = 42.dp)
-            SpacerWidth()
-            Column {
-                Text(
-                    text = person.name, style = TextStyle(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+        person?.let { personData->
+            Row {
+                AsyncImage(model = personData.otherUserProfileUrl ?: "", contentDescription = "")
+                SpacerWidth()
+                Column {
+                    Text(
+                        text = personData.otherUserPublicUname ?: "Username", style = TextStyle(
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
                     )
-                )
-                Text(
-                    text = "Online", style = TextStyle(
-                        color = Color.White,
-                        fontSize = 14.sp
+                    Text(
+                        text = "Online", style = TextStyle(
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
                     )
-                )
+                }
             }
         }
-        IconComponentImageVector(icon = Icons.Default.MoreVert, size = 24.dp, tint = Color.White)
     }
-
 }

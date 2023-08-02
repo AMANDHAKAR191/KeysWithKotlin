@@ -1,6 +1,7 @@
 package com.aman.keyswithkotlin.chats.presentation
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,15 +34,18 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.model.Person
-import com.aman.keyswithkotlin.chats.domain.model.personList
+import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsScreen(
     title: String,
-    onEvent: (ChatEvent) -> Unit,
+    chatUsersList: List<UserPersonalChatList>? = emptyList(),
+    onEvent: (SharedChatEvent) -> Unit,
     bottomBar: @Composable (() -> Unit),
     navigateToChatScreen: () -> Unit
 ) {
@@ -87,12 +91,23 @@ fun ChatsScreen(
                         LazyColumn(
                             modifier = Modifier.padding(bottom = 15.dp, top = 30.dp)
                         ) {
-                            items(personList, key = { it.id }) { person ->
-                                UserEachRow(person = person, onClick = {
-                                    onEvent(ChatEvent.OpenChat(person))
-                                    navigateToChatScreen()
-                                })
+                            if (!chatUsersList.isNullOrEmpty()){
+                                items(items = chatUsersList){person->
+                                    UserEachRow(person = person, onClick = {
+                                        onEvent(SharedChatEvent.OpenSharedChat(person))
+                                        navigateToChatScreen()
+                                    })
+                                }
                             }
+                            else{
+                                //todo wrote code to show loading bar
+                            }
+//                            items(personList, key = { it.id }) { person ->
+//                                UserEachRow(person = person, onClick = {
+//                                    onEvent(SharedChatEvent.OpenSharedChat(person))
+//                                    navigateToChatScreen()
+//                                })
+//                            }
                         }
                     }
                 }
@@ -102,13 +117,13 @@ fun ChatsScreen(
     )
 }
 
-@Preview
-@Composable
-fun Preview() {
-    ChatsScreen(title = "Aman", onEvent = {}, bottomBar = { /*TODO*/ }) {
-
-    }
-}
+//@Preview
+//@Composable
+//fun Preview() {
+//    ChatsScreen(title = "Aman", onEvent = {}, bottomBar = { /*TODO*/ }) {
+//
+//    }
+//}
 
 @Composable
 fun HeaderOrViewStory() {
@@ -141,7 +156,7 @@ fun BottomSheetSwipeUp(
 
 @Composable
 fun UserEachRow(
-    person: Person,
+    person: UserPersonalChatList,
     onClick: () -> Unit
 ) {
 
@@ -158,11 +173,12 @@ fun UserEachRow(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row {
-                    IconComponentDrawable(icon = person.icon, size = 60.dp)
+                    println("{person.otherUserProfileUrl}: ${person.otherUserProfileUrl}")
+                    AsyncImage(model = person.otherUserProfileUrl, contentDescription = "")
                     SpacerWidth()
                     Column {
                         Text(
-                            text = person.name, style = TextStyle(
+                            text = person.otherUserPublicUname!!, style = TextStyle(
                                 color = Color.Black, fontSize = 15.sp, fontWeight = FontWeight.Bold
                             )
                         )
