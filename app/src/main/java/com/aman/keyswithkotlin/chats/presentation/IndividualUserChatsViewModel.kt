@@ -11,7 +11,10 @@ import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditP
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -21,8 +24,8 @@ class IndividualUserChatsViewModel @Inject constructor(
     private val chatUseCases: ChatUseCases
 ) : ViewModel() {
 
-    private val _state = mutableStateOf<ChatMessagesState>(ChatMessagesState())
-    val state: State<ChatMessagesState> = _state
+    private val _state = MutableStateFlow<ChatMessagesState>(ChatMessagesState())
+    val state: StateFlow<ChatMessagesState> = _state.asStateFlow()
 
     private val _eventFlow = MutableSharedFlow<AddEditPasswordViewModel.UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()

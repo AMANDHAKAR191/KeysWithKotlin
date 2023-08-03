@@ -5,6 +5,7 @@ import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.chats.domain.repository.ChatRepository
 import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.core.util.TimeStampUtil
 import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -27,16 +28,14 @@ class ChatRepositoryImpl(
     private val _chatMessagesList = mutableListOf<ChatModelClass>()
     override fun sendMessage(chatRoomId: String, chat: ChatModelClass): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
-            val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
-            val current = LocalDateTime.now()
-            val formatted = current.format(formatter)
+            val timeStampUtil =  TimeStampUtil()
 
             val reference = database.reference.child("messages").child(chatRoomId)
             trySend(Response.Success("Sending..."))
 
             val _message = ChatModelClass(
                 message = chat.message,
-                dateAndTime = formatted,
+                dateAndTime = timeStampUtil.generateTimestamp(),
                 publicUid = chat.publicUid,
                 type = chat.type,
                 status = chat.status,
@@ -44,8 +43,8 @@ class ChatRepositoryImpl(
                 noteModelClass = chat.noteModelClass
             )
 
-            chat.let {
-                reference.child((formatted)).setValue(_message)
+            _message.dateAndTime?.let {timeStamp->
+                reference.child((timeStamp)).setValue(_message)
                     .addOnCompleteListener{
                         if (it.isSuccessful){
                             trySend(Response.Success("sent"))

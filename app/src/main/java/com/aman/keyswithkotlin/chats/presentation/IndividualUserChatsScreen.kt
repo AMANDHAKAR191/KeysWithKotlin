@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,21 +45,25 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
+import com.aman.keyswithkotlin.core.util.TimeStampUtil
 import com.aman.keyswithkotlin.ui.theme.Pink80
 import com.aman.keyswithkotlin.ui.theme.RedOrange
+import kotlinx.coroutines.flow.StateFlow
+import java.time.format.DateTimeParseException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IndividualChatScreen(
     data: UserPersonalChatList? = null,
-    state: ChatMessagesState,
-//    _state: StateFlow<ChatMessagesState>,
+//    state: ChatMessagesState,
+    _state: StateFlow<ChatMessagesState>,
     onChatEvent: (ChatEvent) -> Unit,
     navigateToPasswordScreen: () -> Unit
 ) {
-//    val state = _state.collectAsState()
-    val chatMessages: List<ChatModelClass>? = state.chatMessagesList
-    val messageTextValue = state.chatMessage
+    val state = _state.collectAsState()
+    val chatMessages:List<ChatModelClass>? = state.value.chatMessagesList
+//    val chatMessages: List<ChatModelClass>? by state.value.chatMessagesList
+    val messageTextValue = state.value.chatMessage
     val lazyColumnState = rememberLazyListState()
     Scaffold(
         topBar = {
@@ -123,8 +128,9 @@ fun IndividualChatScreen(
                             state = lazyColumnState
                         ) {
                             if (!chatMessages.isNullOrEmpty()) {
+                                val timeStampUtil = TimeStampUtil()
                                 items(chatMessages) {
-                                    ChatRow(chat = it)
+                                    ChatRow(chat = it, timeStampUtil)
                                 }
                             }
                         }
@@ -146,31 +152,22 @@ fun IndividualChatScreen(
         }
     )
     // Scroll to the bottom of the LazyColumn when a new item is added
-    LaunchedEffect(chatMessages) {
+    LaunchedEffect(state.value) {
+        println("chatMessage: $chatMessages")
         if (chatMessages.isNullOrEmpty()) {
             //todo do nothing
         } else {
-            lazyColumnState.scrollToItem(1)
+//            lazyColumnState.scrollToItem(1)
             lazyColumnState.animateScrollToItem(lazyColumnState.layoutInfo.totalItemsCount)
         }
     }
 }
 
-//@Preview
-//@Composable
-//fun IndividualChatScreenPreivew() {
-//    IndividualChatScreen(
-//        data = Person(),
-//        onSharedChatEvent = {},
-//        navigateToPasswordScreen = {}
-//    )
-//}
-
 @Composable
 fun ChatRow(
-    chat: ChatModelClass
+    chat: ChatModelClass,
+    timeStampUtil: TimeStampUtil
 ) {
-    println("chat: ${chat.publicUid} :: message: ${chat.message}")
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = if (chat.publicUid == "kirandhaker123") Alignment.Start else Alignment.End
@@ -193,7 +190,7 @@ fun ChatRow(
             )
         }
         Text(
-            text = chat.dateAndTime!!,
+            text = timeStampUtil.getTime(chat.dateAndTime!!),
             style = TextStyle(
                 color = Color.Gray,
                 fontSize = 12.sp
@@ -246,7 +243,9 @@ fun CustomTextField(
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Done
             ),
-            modifier = Modifier.padding(horizontal = 5.dp).weight(0.8f),
+            modifier = Modifier
+                .padding(horizontal = 5.dp)
+                .weight(0.8f),
             maxLines = 5,
             shape = CircleShape
         )
@@ -308,3 +307,14 @@ fun UserNameRow(
         }
     }
 }
+
+
+//@Preview
+//@Composable
+//fun IndividualChatScreenPreivew() {
+//    IndividualChatScreen(
+//        data = Person(),
+//        onSharedChatEvent = {},
+//        navigateToPasswordScreen = {}
+//    )
+//}

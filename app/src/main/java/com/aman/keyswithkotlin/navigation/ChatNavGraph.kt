@@ -45,7 +45,7 @@ fun NavGraphBuilder.chatNavGraph(
             val viewModel: IndividualUserChatsViewModel = hiltViewModel()
             IndividualChatScreen(
                 data = sharedChatViewModel.state.value.person,
-                state = viewModel.state.value,
+                _state = viewModel.state,
                 onChatEvent = viewModel::onEvent,
                 navigateToPasswordScreen = {
                     navController.popBackStack()
