@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -54,9 +55,8 @@ class PasswordViewModel @Inject constructor(
         )
 
     init {
-        println("inside the ViewModel")
         getPasswords()
-        println("all passwords: ${_passwords.value}")
+        getRecentlyUsedPasswords()
     }
 
     fun onEvent(event: PasswordEvent) {
@@ -69,12 +69,12 @@ class PasswordViewModel @Inject constructor(
                         }
                 }
             }
-            is PasswordEvent.DeletePassword->{
+
+            is PasswordEvent.DeletePassword -> {
                 viewModelScope.launch {
-                    passwordUseCases.deletePassword(event.password).collect{response->
+                    passwordUseCases.deletePassword(event.password).collect { response ->
                         when (response) {
                             is Response.Success<*, *> -> {
-                                println("check1: password deleted $response")
                                 recentlyDeletedPassword = event.password
                             }
 
@@ -87,6 +87,25 @@ class PasswordViewModel @Inject constructor(
             is PasswordEvent.OnSearchTextChange -> {
                 _searchText.value = event.value
             }
+            is PasswordEvent.UpdateLastUsedPasswordTimeStamp->{
+                viewModelScope.launch {
+                    passwordUseCases.updateLastUsedPasswordTimeStamp(event.password).collect{response->
+                        when (response) {
+                            is Response.Success<*, *> -> {
+
+                            }
+
+                            is Response.Failure -> {
+
+                            }
+
+                            is Response.Loading -> {
+
+                            }
+                        }
+                    }
+                }
+            }
 
             else -> {}
         }
@@ -96,7 +115,7 @@ class PasswordViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             passwordUseCases.getPasswords().collect { response ->
                 println(this.coroutineContext)
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     println(this.coroutineContext)
                     when (response) {
                         is Response.Success<*, *> -> {
@@ -109,7 +128,7 @@ class PasswordViewModel @Inject constructor(
 
                         is Response.Failure -> {
                             _state.value = state.value.copy(
-                                error  = response.e.message ?: "Unexpected error occurred",
+                                error = response.e.message ?: "Unexpected error occurred",
                                 isLoading = false
                             )
                         }
@@ -120,42 +139,45 @@ class PasswordViewModel @Inject constructor(
                             )
                         }
                     }
-                    println("password: ${state.value.passwords}")
+                    println("passwords: ${state.value.passwords}")
                 }
             }
         }
     }
-//    private fun getPasswords() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            passwordUseCases.getPasswords().collect { response ->
-//                println(this.coroutineContext)
-//                withContext(Dispatchers.Main){
-//                    println(this.coroutineContext)
-//                    when (response) {
-//                        is Response.Success -> {
-//                            _state.value = state.value.copy(
-//                                passwords = response.data!!,
-//                                isLoading = false
-//                            )
-//                            _passwords.value = response.data
-//                        }
-//
-//                        is Response.Failure -> {
-//                            _state.value = state.value.copy(
-//                                error  = response.e.message ?: "Unexpected error occurred",
-//                                isLoading = false
-//                            )
-//                        }
-//
-//                        is Response.Loading -> {
-//                            _state.value = PasswordState(
-//                                isLoading = true
-//                            )
-//                        }
-//                    }
-//                    println("password: ${state.value.passwords}")
-//                }
-//            }
-//        }
-//    }
+
+    private fun getRecentlyUsedPasswords() {
+/*       this Unconfined Dispatchers added because
+         if i use same io Dispatchers then either
+         one of the data is loading other data couldn't loaded */
+        viewModelScope.launch(Dispatchers.Unconfined) {
+            passwordUseCases.getRecentlyUsedPasswords().collect { response ->
+                println(this.coroutineContext)
+                withContext(Dispatchers.Main) {
+                    println(this.coroutineContext)
+                    when (response) {
+                        is Response.Success<*, *> -> {
+                            _state.value = state.value.copy(
+                                recentlyUsedPasswords = response.data as List<Password>,
+                                isLoading = false
+                            )
+                        }
+
+                        is Response.Failure -> {
+                            _state.value = state.value.copy(
+                                error = response.e.message ?: "Unexpected error occurred",
+                                isLoading = false
+                            )
+                        }
+
+                        is Response.Loading -> {
+                            _state.value = PasswordState(
+                                isLoading = true
+                            )
+                        }
+                    }
+                    println("recentlyUsedPasswords: ${state.value.recentlyUsedPasswords}")
+                }
+            }
+        }
+    }
 }

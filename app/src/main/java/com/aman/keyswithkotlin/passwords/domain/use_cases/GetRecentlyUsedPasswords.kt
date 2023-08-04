@@ -8,18 +8,18 @@ import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class GetPasswords(
+class GetRecentlyUsedPasswords(
     private val passwordRepository: PasswordRepository,
     private val aesKeySpecs: AESKeySpecs
 ) {
     operator fun invoke(): Flow<Response<Pair<MutableList<Password>?, Boolean?>>> {
         val aes = AES.getInstance(aesKeySpecs.aesKey, aesKeySpecs.aesIV)
             ?: throw IllegalStateException("Failed to initialize AES instance.")
-        return passwordRepository.getPasswords()
+        return passwordRepository.getRecentlyUsedPasswords()
             .map { response ->
                 when (response) {
                     is Response.Success -> {
-                        println("response: ${response.data}")
+                        println("response1: ${response.data}")
                         val decryptedPasswords = response.data?.map { encryptedPassword ->
                             if (encryptedPassword.userName.isBlank()) {
                                 encryptedPassword
@@ -27,7 +27,7 @@ class GetPasswords(
                                 decryptPassword(encryptedPassword, aes)
                             }
                         }
-                        response.copy(data = decryptedPasswords?.sortedBy { it.websiteName }?.toMutableList() as MutableList<Password>?)
+                        response.copy(data = decryptedPasswords?.sortedByDescending { it.lastUsedTimeStamp }?.toMutableList() as MutableList<Password>?)
                     }
                     else -> response
                 }

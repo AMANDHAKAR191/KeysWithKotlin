@@ -1,6 +1,7 @@
 package com.aman.keyswithkotlin.passwords.data.repository
 
 import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.core.util.TimeStampUtil
 import com.aman.keyswithkotlin.passwords.domain.model.GeneratedPasswordModelClass
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
@@ -11,9 +12,6 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class PasswordRepositoryImpl(
     private val database: FirebaseDatabase,
@@ -31,18 +29,46 @@ class PasswordRepositoryImpl(
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     _passwordsItems.clear()
-                    println("dataSnapshot: $dataSnapshot")
                     for (ds in dataSnapshot.children) {
                         for (ds1 in ds.children) {
-                            println("ds1: $ds")
                             val items = ds1.getValue(Password::class.java)
                             if (items != null) {
-                                println("items: $items")
                                 _passwordsItems.add(items)
                             }
                         }
                     }
-                    println("passwords: $_passwordsItems")
+                    trySend(Response.Success(data = _passwordsItems))
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    trySend(Response.Failure(error.toException()))
+                }
+            }
+
+            reference.addValueEventListener(listener)
+            awaitClose {
+                reference.removeEventListener(listener)
+                close()
+            }
+        }
+
+    override fun getRecentlyUsedPasswords(): Flow<Response<Pair<MutableList<Password>?, Boolean?>>> =
+        callbackFlow {
+            val reference = database.reference.child("Passwords").child(UID)
+            reference.keepSynced(true)
+            trySend(Response.Loading)
+            val listener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    _passwordsItems.clear()
+                    for (ds in dataSnapshot.children) {
+                        for (ds1 in ds.children) {
+                            val items = ds1.getValue(Password::class.java)
+                            if (items != null) {
+                                _passwordsItems.add(items)
+                            }
+                        }
+                    }
                     trySend(Response.Success(data = _passwordsItems))
 
                 }
@@ -63,9 +89,7 @@ class PasswordRepositoryImpl(
     override fun insertPassword(
         password: Password
     ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
-        val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
-        val current = LocalDateTime.now()
-        val formatted = current.format(formatter)
+        val timeStampUtil = TimeStampUtil()
 
         val reference = database.reference.child("Passwords").child(UID)
         trySend(Response.Loading)
@@ -74,7 +98,7 @@ class PasswordRepositoryImpl(
             password = password.password,
             websiteName = password.websiteName,
             websiteLink = password.websiteLink,
-            timestamp = formatted
+            timestamp = timeStampUtil.generateTimestamp()
         )
         try {
             println("password.timestamp :${password.timestamp}")
@@ -136,7 +160,8 @@ class PasswordRepositoryImpl(
         callbackFlow {
             trySend(Response.Loading)
             // Add the new password to the beginning of the list
-            val  recentPassword = GeneratedPasswordModelClass(generatePassword, recentPasswordsList.size)
+            val recentPassword =
+                GeneratedPasswordModelClass(generatePassword, recentPasswordsList.size)
             recentPasswordsList.add(0, recentPassword)
             recentPassword.passwordCount = 0
 
@@ -153,10 +178,10 @@ class PasswordRepositoryImpl(
             // TODO: Update the Firebase real-time database with the updated list of passwords
             database.reference.child("RecentGeneratedPasswords").child(UID)
                 .setValue(recentPasswordsList)
-                .addOnCompleteListener{
-                    if (it.isSuccessful){
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
                         trySend(Response.Success(data = "done"))
-                    }else{
+                    } else {
                         trySend(Response.Failure(Throwable("Failed to add")))
                     }
                 }
@@ -172,16 +197,16 @@ class PasswordRepositoryImpl(
                 database.getReference("RecentGeneratedPasswords").child(UID)
             val passwordList = mutableListOf<GeneratedPasswordModelClass>()
 
-            val listner = object: ValueEventListener{
+            val listner = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    for(ds in dataSnapshot.children){
+                    for (ds in dataSnapshot.children) {
                         val items = ds.getValue(GeneratedPasswordModelClass::class.java)
                         if (items != null) {
                             println("items: $items")
-                            passwordList .add(items)
+                            passwordList.add(items)
                         }
                     }
-                    trySend(Response.Success(data = passwordList,true))
+                    trySend(Response.Success(data = passwordList, true))
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -194,6 +219,27 @@ class PasswordRepositoryImpl(
             awaitClose {
                 close()
                 reference.removeEventListener(listner)
+            }
+        }
+
+    override fun updateRecentUsedPasswordTimeStamp(password: Password): Flow<Response<Pair<String?, Boolean?>>> =
+        callbackFlow {
+            val timeStampUtil = TimeStampUtil()
+            database.reference.child("Passwords").child(UID).child(password.websiteName).child(password.timestamp)
+                .child("lastUsedTimeStamp")
+                .setValue(timeStampUtil.generateTimestamp())
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        trySend(Response.Success(data = "Done", true))
+                    } else {
+                        trySend(Response.Failure(Throwable("Failed")))
+                    }
+                }
+                .addOnFailureListener {
+                    trySend(Response.Failure(it))
+                }
+            awaitClose {
+                close()
             }
         }
 

@@ -5,6 +5,7 @@ import com.aman.keyswithkotlin.passwords.domain.model.RealtimeModelResponse
 
 data class PasswordState (
     val passwords:List<Password> = emptyList(),
+    val recentlyUsedPasswords:List<Password> = emptyList(),
     val error:String?  = "",
     val isLoading:Boolean = false
 )

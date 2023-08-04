@@ -46,8 +46,10 @@ fun AddEditPasswordScreen(
     }
     //if generatedPassword is not null then we are coming from GeneratePasswordScreen
     println("generatedPassword: ${generatedPassword}")
-    generatedPassword?.let {
-        onEvent(PasswordEvent.EnteredPassword(it))
+    if (!generatedPassword.equals("")){
+        generatedPassword?.let {
+            onEvent(PasswordEvent.EnteredPassword(it))
+        }
     }
 
     println("generatedPassword: ${generatedPassword}")
@@ -94,11 +96,11 @@ fun AddEditPasswordScreen(
                     )
                 }
             )
-        }, content = {
+        }, content = {innerPadding->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it)
+                    .padding(innerPadding)
             ) {
                 TransparentHintTextField(
                     text = state.username,
@@ -111,9 +113,9 @@ fun AddEditPasswordScreen(
 
                     )
                 TransparentHintTextField(
-                    text = state.username,
-                    label = "Username",
-                    hint = "Enter userName",
+                    text = state.password,
+                    label = "Password",
+                    hint = "Enter Password",
                     onValueChange = {
                         onEvent(PasswordEvent.EnteredPassword(it))
                     },
@@ -141,11 +143,11 @@ fun AddEditPasswordScreen(
                     showIndicator = false,
                 )
                 TransparentHintTextField(
-                    text = state.websiteLink,
+                    text = state.username,
                     label = "Website Link (optional)",
                     hint = "Enter userName",
                     onValueChange = {
-                        onEvent(PasswordEvent.EnteredUsername(it))
+//                        onEvent(PasswordEvent.EnteredUsername(it))
                     },
                     showIndicator = false,
                 )

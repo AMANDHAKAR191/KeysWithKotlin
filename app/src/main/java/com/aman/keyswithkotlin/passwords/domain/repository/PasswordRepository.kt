@@ -8,11 +8,13 @@ import kotlinx.coroutines.flow.Flow
 interface PasswordRepository {
 
     fun getPasswords(): Flow<Response<Pair<MutableList<Password>?, Boolean?>>>
+    fun getRecentlyUsedPasswords(): Flow<Response<Pair<MutableList<Password>?, Boolean?>>>
 
     fun insertPassword(password: Password): Flow<Response<Pair<String?, Boolean?>>>
-
     fun deletePassword(password: Password): Flow<Response<Pair<String?, Boolean?>>>
 
     fun saveGeneratedPassword(generatePassword: String, recentPasswordsList: MutableList<GeneratedPasswordModelClass>): Flow<Response<Pair<String?, Boolean?>>>
+
     fun getRecentGeneratedPasswords(): Flow<Response<Pair<MutableList<GeneratedPasswordModelClass>?, Boolean?>>>
+    fun updateRecentUsedPasswordTimeStamp(password: Password): Flow<Response<Pair<String?, Boolean?>>>
 }

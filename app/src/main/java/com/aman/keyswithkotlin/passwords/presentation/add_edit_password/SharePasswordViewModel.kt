@@ -27,7 +27,6 @@ class SharePasswordViewModel @Inject constructor(
     fun onEvent(event: SharedPasswordEvent){
         when(event){
             is SharedPasswordEvent.onPasswordGenerated ->{
-                println("inside: SharedViewModelPassword ${event.value}")
                 _generatedPassword.value = generatedPassword.value.copy(
                     generatedPassword = event.value
                 )

@@ -8,8 +8,10 @@ import com.aman.keyswithkotlin.passwords.domain.use_cases.DeletePassword
 import com.aman.keyswithkotlin.passwords.domain.use_cases.GeneratePassword
 import com.aman.keyswithkotlin.passwords.domain.use_cases.GetPasswords
 import com.aman.keyswithkotlin.passwords.domain.use_cases.GetRecentGeneratedPasswords
+import com.aman.keyswithkotlin.passwords.domain.use_cases.GetRecentlyUsedPasswords
 import com.aman.keyswithkotlin.passwords.domain.use_cases.PasswordUseCases
 import com.aman.keyswithkotlin.passwords.domain.use_cases.SaveRecentGeneratedPassword
+import com.aman.keyswithkotlin.passwords.domain.use_cases.UpdateLastUsedPasswordTimeStamp
 import com.google.firebase.database.FirebaseDatabase
 import dagger.Module
 import dagger.Provides
@@ -26,11 +28,13 @@ class PasswordModule {
     ): PasswordUseCases {
         return PasswordUseCases(
             getPasswords = GetPasswords(repository, aesKeySpecs),
+            getRecentlyUsedPasswords = GetRecentlyUsedPasswords(repository ,aesKeySpecs),
+            updateLastUsedPasswordTimeStamp = UpdateLastUsedPasswordTimeStamp(repository),
             addPassword = AddPassword(repository, aesKeySpecs),
             deletePassword = DeletePassword(repository),
             generatePassword = GeneratePassword(repository),
             saveRecentGeneratedPassword =  SaveRecentGeneratedPassword(repository),
-            getRecentGeneratedPasswords =  GetRecentGeneratedPasswords(repository)
+            getRecentGeneratedPasswords =  GetRecentGeneratedPasswords(repository),
         )
     }
 

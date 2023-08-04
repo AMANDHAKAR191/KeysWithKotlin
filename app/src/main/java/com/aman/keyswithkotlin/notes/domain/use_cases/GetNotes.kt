@@ -27,7 +27,7 @@ class GetNotes(
                                 decryptNote(encryptedPassword, aes)
                             }
                         }
-                        response.copy(data = decryptedPasswords?.toMutableList() as MutableList<Note>?)
+                        response.copy(data = decryptedPasswords?.sortedByDescending { it.timestamp }?.toMutableList() as MutableList<Note>?)
                     }
 
                     else -> response

@@ -6,6 +6,7 @@ data class Password constructor(
     val websiteName: String = "",
     val websiteLink: String = "",
     val timestamp: String = "",
+    val lastUsedTimeStamp: String = ""
 ) {
     fun doesMatchSearchQuery(query: String): Boolean {
         val matchingCombination = listOf(

@@ -217,7 +217,17 @@ fun PasswordScreen(
                                     .padding(top = 15.dp)
                             )
                             LazyColumn(modifier = Modifier.padding(top = 30.dp)) {
-                                items(state.passwords) { password ->
+                                item{
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .width(50.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(text = "Recently used passwords")
+                                    }
+                                }
+                                items(state.recentlyUsedPasswords.take(3)){password->
                                     PasswordItem(
                                         password = password,
                                         onItemClick = {
@@ -237,6 +247,41 @@ fun PasswordScreen(
                                                     onEvent(PasswordEvent.RestorePassword(password = password))
                                                 }
                                             }
+                                        }
+                                    )
+                                }
+                                item{
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .width(50.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(text = "All passwords")
+                                    }
+                                }
+
+                                items(state.passwords) { password ->
+                                    PasswordItem(
+                                        password = password,
+                                        onItemClick = {
+                                            itemToView.value = password
+                                            viewPassword = true
+                                        },
+                                        onDeleteClick = {
+//                                            onEvent(PasswordEvent.DeletePassword(password = password))
+                                            onEvent(PasswordEvent.UpdateLastUsedPasswordTimeStamp(password = password))
+//                                            scope.launch {
+//                                                val result = snackBarHostState.showSnackbar(
+//                                                    message = "Password deleted",
+//                                                    actionLabel = "Restore",
+//                                                    withDismissAction = true,
+//                                                    duration = SnackbarDuration.Short
+//                                                )
+//                                                if (result == SnackbarResult.ActionPerformed) {
+//                                                    onEvent(PasswordEvent.RestorePassword(password = password))
+//                                                }
+//                                            }
                                         }
                                     )
                                 }
