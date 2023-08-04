@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -28,17 +30,19 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.core.Constants
+import com.aman.keyswithkotlin.passwords.domain.model.GeneratedPasswordModelClass
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.CustomSwitch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeneratePasswordScreen(
-    state:GeneratePasswordState,
-    onEvent:(GeneratePasswordEvent)->Unit,
-    onSharedPasswordEvent:(SharedPasswordEvent)->Unit,
-    navigateToPasswordScreen:()->Unit,
-    navigateToAddEditPasswordScreen:(String)->Unit
+    state: GeneratePasswordState,
+    onEvent: (GeneratePasswordEvent) -> Unit,
+    onSharedPasswordEvent: (SharedPasswordEvent) -> Unit,
+    navigateToPasswordScreen: () -> Unit,
+    navigateToAddEditPasswordScreen: (String) -> Unit,
+    navigateToGeneratedPasswordScreen: (MutableList<GeneratedPasswordModelClass>) -> Unit
 ) {
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     Scaffold(modifier = Modifier.fillMaxSize(),
@@ -46,10 +50,14 @@ fun GeneratePasswordScreen(
             TopAppBar(
                 title = { Text(text = "Generate Password") },
                 navigationIcon = {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = null,
-                        modifier = Modifier.clickable { navigateToPasswordScreen() })
+                    IconButton(onClick = { navigateToPasswordScreen() }) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { navigateToGeneratedPasswordScreen(state.recentGeneratedPasswordList) }) {
+                        Icon(imageVector = Icons.Default.History, contentDescription = "")
+                    }
                 })
         }) { innnerPaddng ->
         Column(
@@ -146,7 +154,7 @@ fun GeneratePasswordScreen(
 
 @Preview
 @Composable
-fun preview(){
+fun preview() {
     GeneratePasswordScreen(
         state = GeneratePasswordState(
             generatedPassword = "djdkfjdkfn",
@@ -159,6 +167,7 @@ fun preview(){
         onEvent = {},
         onSharedPasswordEvent = {},
         navigateToPasswordScreen = { /*TODO*/ },
-        navigateToAddEditPasswordScreen = {}
+        navigateToAddEditPasswordScreen = {},
+        navigateToGeneratedPasswordScreen = {}
     )
 }

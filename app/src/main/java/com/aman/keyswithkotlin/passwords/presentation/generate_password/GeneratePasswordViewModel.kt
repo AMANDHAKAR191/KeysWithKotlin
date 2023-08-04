@@ -7,7 +7,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.core.Constants
+import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.passwords.domain.model.GeneratedPasswordModelClass
+import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.domain.use_cases.PasswordUseCases
+import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,7 +34,8 @@ class GeneratePasswordViewModel @Inject constructor(
             number = !state.value.number,
             specialCharacter = !state.value.specialCharacter
         )
-        println("inside: GeneratePasswordViewModel")
+        getRecentGeneratedPassword()
+        println("recentGeneratedPassword: ${state.value.recentGeneratedPasswordList}")
         generatePassword()
     }
 
@@ -81,6 +86,8 @@ class GeneratePasswordViewModel @Inject constructor(
             }
             is GeneratePasswordEvent.CopyPassword->{
                 copyPasswordToClipBoard(event.clipboardManager)
+                getRecentGeneratedPassword()
+                saveRecentGeneratedPassword(state.value.generatedPassword)
             }
         }
     }
@@ -97,6 +104,52 @@ class GeneratePasswordViewModel @Inject constructor(
                 _state.value = state.value.copy(
                     generatedPassword = it
                 )
+            }
+        }
+    }
+
+    private fun saveRecentGeneratedPassword(value:String){
+        println("lists: ${state.value.recentGeneratedPasswordList}")
+        viewModelScope.launch {
+            passwordUseCases.saveRecentGeneratedPassword(value, state.value.recentGeneratedPasswordList).collect{response->
+                when (response) {
+                    is Response.Success<*, *> -> {
+
+                    }
+
+                    is Response.Failure -> {
+
+                    }
+
+                    is Response.Loading -> {
+
+                    }
+                }
+            }
+        }
+    }
+
+    //todo passwords are duplicating when generate multiple
+    // passwords without closing the GeneratePasswordScreen
+    private fun getRecentGeneratedPassword(){
+        viewModelScope.launch {
+            passwordUseCases.getRecentGeneratedPasswords().collect{response->
+                when (response) {
+                    is Response.Success<*, *> -> {
+                        _state.value = state.value.copy(
+                            recentGeneratedPasswordList = response.data as MutableList<GeneratedPasswordModelClass>
+                        )
+                        println("response.data: ${state.value.recentGeneratedPasswordList}")
+                    }
+
+                    is Response.Failure -> {
+
+                    }
+
+                    is Response.Loading -> {
+
+                    }
+                }
             }
         }
     }

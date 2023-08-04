@@ -12,6 +12,7 @@ import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditP
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.generate_password.GeneratePasswordViewModel
+import com.aman.keyswithkotlin.passwords.presentation.generate_password.RecentGeneratePasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordViewModel
 
@@ -29,7 +30,7 @@ fun NavGraphBuilder.passwordNavGraph(
                 state = viewModel.state.value,
                 eventFlowState = viewModel.eventFlow,
                 searchedPasswordState = viewModel.searchedPasswords.collectAsState(),
-                onEvent= viewModel::onEvent,
+                onEvent = viewModel::onEvent,
                 onSharedPasswordEvent = sharedPasswordViewModel::onEvent,
                 navigateToAddEditPasswordScreen = {
                     navController.navigate(Screen.AddEditPasswordScreen.route)
@@ -79,8 +80,19 @@ fun NavGraphBuilder.passwordNavGraph(
                 },
                 navigateToAddEditPasswordScreen = {
                     navController.navigate(Screen.AddEditPasswordScreen.route)
+                },
+                navigateToGeneratedPasswordScreen = {
+                    navController.navigate(Screen.RecentGeneratedPasswordScreen.route)
                 }
             )
+        }
+        composable(Screen.RecentGeneratedPasswordScreen.route) {
+            val viewModel: GeneratePasswordViewModel = hiltViewModel()
+            RecentGeneratePasswordScreen(
+                recentGeneratedPasswordList = viewModel.state.value.recentGeneratedPasswordList,
+                navigateToGeneratePasswordScreen = {
+                    navController.popBackStack()
+                })
         }
     }
 
