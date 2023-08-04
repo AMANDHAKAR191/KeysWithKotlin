@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.passwords.presentation.password_screen
 
+import UIEvents
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -7,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.domain.use_cases.PasswordUseCases
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -27,7 +26,7 @@ class PasswordViewModel @Inject constructor(
     private val passwordUseCases: PasswordUseCases
 ) : ViewModel() {
 
-    private val _eventFlow = MutableSharedFlow<AddEditPasswordViewModel.UiEvent>()
+    private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     val _state = mutableStateOf(PasswordState())
@@ -63,7 +62,7 @@ class PasswordViewModel @Inject constructor(
         when (event) {
             is PasswordEvent.RestorePassword -> {
                 viewModelScope.launch {
-                    passwordUseCases.addPassword(event.password)
+                    passwordUseCases.addPassword(recentlyDeletedPassword!!)
                         .collect {
                             recentlyDeletedPassword = null
                         }
@@ -76,6 +75,13 @@ class PasswordViewModel @Inject constructor(
                         when (response) {
                             is Response.Success<*, *> -> {
                                 recentlyDeletedPassword = event.password
+                                _eventFlow.emit(
+                                    UIEvents.ShowSnackBar(
+                                        "Password deleted",
+                                        true,
+                                        "Restore"
+                                    )
+                                )
                             }
 
                             else -> {}
@@ -87,23 +93,25 @@ class PasswordViewModel @Inject constructor(
             is PasswordEvent.OnSearchTextChange -> {
                 _searchText.value = event.value
             }
-            is PasswordEvent.UpdateLastUsedPasswordTimeStamp->{
+
+            is PasswordEvent.UpdateLastUsedPasswordTimeStamp -> {
                 viewModelScope.launch {
-                    passwordUseCases.updateLastUsedPasswordTimeStamp(event.password).collect{response->
-                        when (response) {
-                            is Response.Success<*, *> -> {
+                    passwordUseCases.updateLastUsedPasswordTimeStamp(event.password)
+                        .collect { response ->
+                            when (response) {
+                                is Response.Success<*, *> -> {
 
-                            }
+                                }
 
-                            is Response.Failure -> {
+                                is Response.Failure -> {
 
-                            }
+                                }
 
-                            is Response.Loading -> {
+                                is Response.Loading -> {
 
+                                }
                             }
                         }
-                    }
                 }
             }
 
@@ -114,9 +122,7 @@ class PasswordViewModel @Inject constructor(
     private fun getPasswords() {
         viewModelScope.launch(Dispatchers.IO) {
             passwordUseCases.getPasswords().collect { response ->
-                println(this.coroutineContext)
                 withContext(Dispatchers.Main) {
-                    println(this.coroutineContext)
                     when (response) {
                         is Response.Success<*, *> -> {
                             _state.value = state.value.copy(
@@ -139,21 +145,18 @@ class PasswordViewModel @Inject constructor(
                             )
                         }
                     }
-                    println("passwords: ${state.value.passwords}")
                 }
             }
         }
     }
 
     private fun getRecentlyUsedPasswords() {
-/*       this Unconfined Dispatchers added because
-         if i use same io Dispatchers then either
-         one of the data is loading other data couldn't loaded */
+        /*       this Unconfined Dispatchers added because
+                 if i use same io Dispatchers then either
+                 one of the data is loading other data couldn't loaded */
         viewModelScope.launch(Dispatchers.Unconfined) {
             passwordUseCases.getRecentlyUsedPasswords().collect { response ->
-                println(this.coroutineContext)
                 withContext(Dispatchers.Main) {
-                    println(this.coroutineContext)
                     when (response) {
                         is Response.Success<*, *> -> {
                             _state.value = state.value.copy(
@@ -175,7 +178,6 @@ class PasswordViewModel @Inject constructor(
                             )
                         }
                     }
-                    println("recentlyUsedPasswords: ${state.value.recentlyUsedPasswords}")
                 }
             }
         }

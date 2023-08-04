@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.notes.presentation.note_screen
 
+import UIEvents
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,8 @@ import com.aman.keyswithkotlin.notes.domain.model.Note
 import com.aman.keyswithkotlin.notes.domain.use_cases.NoteUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -17,6 +20,9 @@ import javax.inject.Inject
 class NotesViewModel @Inject constructor(
     private val noteUseCases: NoteUseCases
 ) : ViewModel() {
+
+    private val _eventFlow = MutableSharedFlow<UIEvents>()
+    val eventFlow = _eventFlow.asSharedFlow()
 
     private val _state = mutableStateOf(NotesState())
     val state: State<NotesState> = _state
@@ -32,12 +38,17 @@ class NotesViewModel @Inject constructor(
             is NotesEvent.DeleteNote -> {
                 viewModelScope.launch {
                     noteUseCases.deleteNote(event.note).collect { response ->
-                        println(this.coroutineContext)
                         withContext(Dispatchers.Main) {
-                            println(this.coroutineContext)
                             when (response) {
                                 is Response.Success<*, *> -> {
                                     recentlyDeletedNote = event.note
+                                    _eventFlow.emit(
+                                        UIEvents.ShowSnackBar(
+                                            "Note deleted",
+                                            true,
+                                            "Restore"
+                                        )
+                                    )
                                 }
 
                                 is Response.Failure -> {

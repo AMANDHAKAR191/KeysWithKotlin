@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.passwords.presentation.password_screen
 
+import UIEvents
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +34,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +51,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
 import com.aman.keyswithkotlin.passwords.domain.model.Password
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordItem
@@ -61,13 +62,13 @@ import com.amandhakar.expendable_floating_action_button.MinFabItem
 import com.amandhakar.expendable_floating_action_button.MultiFloatingState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PasswordScreen(
     state: PasswordState,
-    eventFlowState: SharedFlow<AddEditPasswordViewModel.UiEvent>,
+    eventFlowState: SharedFlow<UIEvents>,
     searchedPasswordState: State<List<Password>>,
     onEvent: (PasswordEvent) -> Unit,
     onSharedPasswordEvent: (SharedPasswordEvent) -> Unit,
@@ -102,6 +103,27 @@ fun PasswordScreen(
     var searchtext = remember { mutableStateOf("") }
     var isSearchBarActive by remember { mutableStateOf(false) }
     var viewPassword by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = true) {
+        eventFlowState.collectLatest { event ->
+            when (event) {
+                is UIEvents.ShowSnackBar -> {
+                    val result = snackBarHostState.showSnackbar(
+                        message = event.message,
+                        actionLabel = event.actionButtonLabel,
+                        withDismissAction = event.showActionButton,
+                        duration = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        onEvent(PasswordEvent.RestorePassword)
+                    }
+                }
+
+                else -> {}
+            }
+        }
+
+    }
 
 
     Scaffold(
@@ -217,7 +239,7 @@ fun PasswordScreen(
                                     .padding(top = 15.dp)
                             )
                             LazyColumn(modifier = Modifier.padding(top = 30.dp)) {
-                                item{
+                                item {
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -227,7 +249,7 @@ fun PasswordScreen(
                                         Text(text = "Recently used passwords")
                                     }
                                 }
-                                items(state.recentlyUsedPasswords.take(3)){password->
+                                items(state.recentlyUsedPasswords.take(3)) { password ->
                                     PasswordItem(
                                         password = password,
                                         onItemClick = {
@@ -236,21 +258,21 @@ fun PasswordScreen(
                                         },
                                         onDeleteClick = {
                                             onEvent(PasswordEvent.DeletePassword(password = password))
-                                            scope.launch {
-                                                val result = snackBarHostState.showSnackbar(
-                                                    message = "Password deleted",
-                                                    actionLabel = "Restore",
-                                                    withDismissAction = true,
-                                                    duration = SnackbarDuration.Short
-                                                )
-                                                if (result == SnackbarResult.ActionPerformed) {
-                                                    onEvent(PasswordEvent.RestorePassword(password = password))
-                                                }
-                                            }
+//                                            scope.launch {
+//                                                val result = snackBarHostState.showSnackbar(
+//                                                    message = "Password deleted",
+//                                                    actionLabel = "Restore",
+//                                                    withDismissAction = true,
+//                                                    duration = SnackbarDuration.Short
+//                                                )
+//                                                if (result == SnackbarResult.ActionPerformed) {
+//                                                    onEvent(PasswordEvent.RestorePassword(password = password))
+//                                                }
+//                                            }
                                         }
                                     )
                                 }
-                                item{
+                                item {
                                     Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -270,7 +292,11 @@ fun PasswordScreen(
                                         },
                                         onDeleteClick = {
 //                                            onEvent(PasswordEvent.DeletePassword(password = password))
-                                            onEvent(PasswordEvent.UpdateLastUsedPasswordTimeStamp(password = password))
+                                            onEvent(
+                                                PasswordEvent.UpdateLastUsedPasswordTimeStamp(
+                                                    password = password
+                                                )
+                                            )
 //                                            scope.launch {
 //                                                val result = snackBarHostState.showSnackbar(
 //                                                    message = "Password deleted",
@@ -348,28 +374,10 @@ fun preview() {
                 )
             )
         }, // Using a list of dummy passwords
-        onEvent = { event ->
-            // Here we'll just print the event for the preview.
-            println("Event received: $event")
-        },
-        onSharedPasswordEvent = { event ->
-            // Here we'll just print the event for the preview.
-            println("SharedPasswordEvent received: $event")
-        },
-        navigateToAddEditPasswordScreen = {
-            // For the preview, we'll just print a message.
-            println("Navigating to AddEditPasswordScreen")
-        },
-        navigateToGeneratePasswordScreen = {
-            // For the preview, we'll just print a message.
-            println("Navigating to GeneratePasswordScreen")
-        },
-        navigateToProfileScreen = {
-            // For the preview, we'll just print a message.
-            println("Navigating to ProfileScreen")
-        }
-    ) {
-        // Implement the bottomBar composable
-        Text("This is the bottom bar.") // Using a Text composable as a placeholder
-    }
+        onEvent = {},
+        onSharedPasswordEvent = {},
+        navigateToAddEditPasswordScreen = {},
+        navigateToGeneratePasswordScreen = {},
+        navigateToProfileScreen = {}
+    ) {}
 }

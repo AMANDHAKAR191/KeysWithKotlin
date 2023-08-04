@@ -24,6 +24,7 @@ fun NavGraphBuilder.noteNavGraph(
             val viewModel: NotesViewModel = hiltViewModel()
             NotesScreen(
                 state = viewModel.state.value,
+                eventFlowState = viewModel.eventFlow,
                 onEvent = viewModel::onEvent,
                 bottomBar = {
                     BottomBar(navController, navigateTo = {

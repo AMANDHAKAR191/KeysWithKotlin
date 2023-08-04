@@ -149,7 +149,6 @@ class NoteRepositoryImpl(
                                 .addOnFailureListener {
                                     trySend(Response.Failure(it))
                                 }
-                            break
                         }
                     }
 

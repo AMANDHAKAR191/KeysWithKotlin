@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.notes.presentation.note_screen
 
+import UIEvents
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -32,18 +34,43 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.notes.presentation.note_screen.components.NoteItem
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
 fun NotesScreen(
     state: NotesState,
+    eventFlowState: SharedFlow<UIEvents>,
     onEvent: (NotesEvent) -> Unit,
     bottomBar: @Composable (() -> Unit),
     navigateToAddEditNoteScreen: () -> Unit
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = true) {
+        eventFlowState.collectLatest { event ->
+            when (event) {
+                is UIEvents.ShowSnackBar -> {
+                    val result = snackBarHostState.showSnackbar(
+                        message = event.message,
+                        actionLabel = event.actionButtonLabel,
+                        withDismissAction = event.showActionButton,
+                        duration = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        onEvent(NotesEvent.RestoreNote)
+                    }
+                }
+
+                else -> {}
+            }
+        }
+
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackBarHostState) },
@@ -97,18 +124,17 @@ fun NotesScreen(
                                 },
                             onDeleteClick = {
                                 onEvent(NotesEvent.DeleteNote(note))
-
-                                scope.launch {
-                                    val result = snackBarHostState.showSnackbar(
-                                        message = "Note deleted",
-                                        actionLabel = "Undo",
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Short
-                                    )
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        onEvent(NotesEvent.RestoreNote)
-                                    }
-                                }
+//                                scope.launch {
+//                                    val result = snackBarHostState.showSnackbar(
+//                                        message = "Note deleted",
+//                                        actionLabel = "Undo",
+//                                        withDismissAction = true,
+//                                        duration = SnackbarDuration.Short
+//                                    )
+//                                    if (result == SnackbarResult.ActionPerformed) {
+//                                        onEvent(NotesEvent.RestoreNote)
+//                                    }
+//                                }
                             }
                         )
                         Spacer(modifier = Modifier.height(16.dp))

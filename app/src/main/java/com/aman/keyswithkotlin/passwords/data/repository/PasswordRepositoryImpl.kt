@@ -101,7 +101,6 @@ class PasswordRepositoryImpl(
             timestamp = timeStampUtil.generateTimestamp()
         )
         try {
-            println("password.timestamp :${password.timestamp}")
             reference.child(password.websiteName).child(_password.timestamp)
                 .setValue(_password)
                 .addOnCompleteListener {
@@ -122,7 +121,6 @@ class PasswordRepositoryImpl(
 
     override fun deletePassword(password: Password): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
-            println("inside: deletePassword")
             val reference = database.reference.child("Passwords").child(UID)
             trySend(Response.Loading)
             reference.child(password.websiteName).orderByChild("timestamp")
@@ -131,16 +129,19 @@ class PasswordRepositoryImpl(
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         for (childSnapshot in dataSnapshot.children) {
                             val noteKey = childSnapshot.key
-                            println("passwordKey: $noteKey")
-                            reference.child(noteKey!!)
+                            println("noteKey: $noteKey")
+                            reference.child(password.websiteName).child(noteKey!!)
                                 .removeValue()
                                 .addOnCompleteListener {
-                                    trySend(Response.Success(data = "password is successfully deleted"))
+                                    println("password is successfully deleted")
+                                    if (it.isSuccessful){
+                                        println("password is successfully deleted1")
+                                        trySend(Response.Success(data = "password is successfully deleted"))
+                                    }
                                 }
                                 .addOnFailureListener {
                                     trySend(Response.Failure(it))
                                 }
-                            break
                         }
                     }
 
