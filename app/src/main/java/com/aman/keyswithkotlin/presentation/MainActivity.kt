@@ -15,11 +15,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthViewModel
+import com.aman.keyswithkotlin.core.DeviceInfo
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.navigation.Graph
 import com.aman.keyswithkotlin.navigation.RootNavGraph
 import com.google.firebase.database.ktx.database
@@ -38,11 +41,21 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         setContent {
+            val scope = rememberCoroutineScope()
             Firebase.database.setPersistenceEnabled(true)
             val context = LocalContext.current
+            val deviceInfo = DeviceInfo(context)
+
+            println("deviceInfo.getDeviceId(): ${deviceInfo.getDeviceId()}")
+            println("deviceInfo.getDeviceType(): ${deviceInfo.getDeviceType()}")
+            println("deviceInfo.getAppVersion(): ${deviceInfo.getAppVersion()}")
+            println("deviceInfo.getLastLoginTimeStamp(): ${deviceInfo.getLastLoginTimeStamp()}")
+
+
             navController = rememberNavController()
             RootNavGraph(
-                navController = navController
+                navController = navController,
+                lifecycleOwner = this
             )
             checkAuthState()
 
@@ -51,7 +64,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onRestart() {
         super.onRestart()
-        launchBiometric()
+//        launchBiometric()
     }
 
     private fun checkAuthState() {

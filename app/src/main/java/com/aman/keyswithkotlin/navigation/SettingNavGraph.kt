@@ -18,8 +18,8 @@ fun NavGraphBuilder.settingNavGraph(
         composable(BottomBarScreen.Settings.route) {
             val viewModel: ProfileViewModel = hiltViewModel()
             ProfileScreen(
-                displayName = viewModel.displayName,
-                photoUrl = viewModel.photoUrl,
+                displayName = viewModel.displayName.invoke(),
+                photoUrl = viewModel.photoUrl.invoke(),
                 signOutResponse = viewModel.signOutResponse,
                 revokeAccessResponse = viewModel.revokeAccessResponse,
                 onSignOut = {

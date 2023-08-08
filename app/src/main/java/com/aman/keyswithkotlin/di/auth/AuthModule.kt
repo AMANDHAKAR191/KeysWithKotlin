@@ -4,10 +4,17 @@ import android.app.Application
 import android.content.Context
 import com.aman.keyswithkotlin.R
 import com.aman.keyswithkotlin.auth.data.repository.AuthRepositoryImpl
-import com.aman.keyswithkotlin.auth.data.repository.ProfileRepositoryImpl
 import com.aman.keyswithkotlin.auth.domain.repository.AuthRepository
-import com.aman.keyswithkotlin.auth.domain.repository.ProfileRepository
+import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
+import com.aman.keyswithkotlin.auth.domain.use_cases.DisplayName
+import com.aman.keyswithkotlin.auth.domain.use_cases.FirebaseSignInWithGoogle
+import com.aman.keyswithkotlin.auth.domain.use_cases.IsUserAuthenticated
+import com.aman.keyswithkotlin.auth.domain.use_cases.OneTapSignInWithGoogle
+import com.aman.keyswithkotlin.auth.domain.use_cases.PhotoUrl
+import com.aman.keyswithkotlin.auth.domain.use_cases.RevokeAccess
+import com.aman.keyswithkotlin.auth.domain.use_cases.SignOut
 import com.aman.keyswithkotlin.core.Constants
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
@@ -86,33 +93,36 @@ class AuthModule {
     fun provideAuthRepository(
         auth: FirebaseAuth,
         oneTapClient: SignInClient,
+        googleSignInClient: GoogleSignInClient,
         @Named(Constants.SIGN_IN_REQUEST)
         signInRequest: BeginSignInRequest,
         @Named(Constants.SIGN_UP_REQUEST)
         signUpRequest: BeginSignInRequest,
         db: FirebaseDatabase,
-        aesKeySpecs: AESKeySpecs
+        myPreference: MyPreference
     ): AuthRepository = AuthRepositoryImpl(
         auth = auth,
         oneTapClient = oneTapClient,
+        googleSignInClient = googleSignInClient,
         signInRequest = signInRequest,
         signUpRequest = signUpRequest,
         db = db,
-        aesKeySpecs = aesKeySpecs
+        myPreference = myPreference
     )
 
     @Provides
-    fun provideProfileRepository(
-        auth: FirebaseAuth,
-        oneTapClient: SignInClient,
-        signInClient: GoogleSignInClient,
-        db: FirebaseDatabase
-    ): ProfileRepository = ProfileRepositoryImpl(
-        auth = auth,
-        oneTapClient = oneTapClient,
-        signInClient = signInClient,
-        db = db
-    )
-
+    fun provideAuthUseCases(
+        authRepository: AuthRepository
+    ):AuthUseCases{
+        return AuthUseCases(
+            isUserAuthenticated = IsUserAuthenticated(authRepository),
+            displayName = DisplayName(authRepository),
+            photoUrl = PhotoUrl(authRepository),
+            oneTapSignInWithGoogle = OneTapSignInWithGoogle(authRepository),
+            firebaseSignInWithGoogle = FirebaseSignInWithGoogle(authRepository),
+            signOut = SignOut(authRepository),
+            revokeAccess = RevokeAccess(authRepository)
+        )
+    }
 }
 

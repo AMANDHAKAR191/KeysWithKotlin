@@ -1,10 +1,14 @@
 package com.aman.keyswithkotlin.navigation
 
+import android.content.Context
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
@@ -13,10 +17,12 @@ import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePas
 @Composable
 @ExperimentalAnimationApi
 fun RootNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    lifecycleOwner: LifecycleOwner
 ) {
     val sharedPasswordViewModel: SharePasswordViewModel = hiltViewModel()
     val sharedChatViewModel: SharedChatViewModel = hiltViewModel()
+
     NavHost(
         navController = navController,
         startDestination = Graph.AUTHENTICATION,

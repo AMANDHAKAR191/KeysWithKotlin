@@ -5,9 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aman.keyswithkotlin.auth.domain.repository.AuthRepository
 import com.aman.keyswithkotlin.auth.domain.repository.OneTapSignInResponse
 import com.aman.keyswithkotlin.auth.domain.repository.SignInWithGoogleResponse
+import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
+import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.core.util.Response.Loading
 import com.aman.keyswithkotlin.core.util.Response.Success
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -18,11 +19,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repo: AuthRepository,
+    private val authUseCases: AuthUseCases,
     val oneTapClient: SignInClient
 ) : ViewModel() {
-    val isUserAuthenticated get() = repo.isUserAuthenticatedInFirebase
-
+    val isUserAuthenticated get() = authUseCases.isUserAuthenticated.invoke()
     var oneTapSignInResponse by mutableStateOf<OneTapSignInResponse>(Success(null))
         private set
     var signInWithGoogleResponse by mutableStateOf<SignInWithGoogleResponse>(Success(status = false))
@@ -31,11 +31,22 @@ class AuthViewModel @Inject constructor(
     fun oneTapSignIn() = viewModelScope.launch {
         println("check1")
         oneTapSignInResponse = Loading
-        oneTapSignInResponse = repo.oneTapSignInWithGoogle()
+        authUseCases.oneTapSignInWithGoogle().collect { response ->
+            oneTapSignInResponse = response
+        }
     }
 
     fun signInWithGoogle(googleCredential: AuthCredential) = viewModelScope.launch {
-        oneTapSignInResponse = Loading
-        signInWithGoogleResponse = repo.firebaseSignInWithGoogle(googleCredential)
+        signInWithGoogleResponse = Loading
+        authUseCases.firebaseSignInWithGoogle(googleCredential).collect { response ->
+            when(response){
+                is Response.Success ->{
+                    println("response.data: ${response.data}")
+                }
+
+                else -> {}
+            }
+            signInWithGoogleResponse = response
+        }
     }
 }

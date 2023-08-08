@@ -6,7 +6,16 @@ import com.aman.keyswithkotlin.core.util.Response
 import kotlinx.coroutines.flow.Flow
 
 interface ChatRepository {
-    fun sendMessage(chatRoomId: String, chat: ChatModelClass): Flow<Response<Pair<String?, Boolean?>>>
+    fun sendMessage(
+        chatRoomId: String,
+        chat: ChatModelClass
+    ): Flow<Response<Pair<String?, Boolean?>>>
+
+    fun createChat(
+        otherUserPublicUid: String,
+        userPersonalChatList: UserPersonalChatList
+    ): Flow<Response<Pair<String?, Boolean?>>>
+
     fun getChatUsers(): Flow<Response<Pair<MutableList<UserPersonalChatList>?, Boolean?>>>
-    fun getUserChatMessages(chatRoomId:String): Flow<Response<Pair<MutableList<ChatModelClass>?, Boolean?>>>
+    fun getUserChatMessages(chatRoomId: String): Flow<Response<Pair<MutableList<ChatModelClass>?, Boolean?>>>
 }

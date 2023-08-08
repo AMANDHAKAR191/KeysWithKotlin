@@ -1,6 +1,7 @@
 package com.aman.keyswithkotlin.di
 
 import com.aman.keyswithkotlin.core.AESKeySpacsProvider
+import com.aman.keyswithkotlin.core.MyPreference
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
@@ -27,16 +28,33 @@ class AppModule {
     fun provideAESProvider() = AESKeySpacsProvider()
 
     @Provides
-    suspend fun providePublicID(
+    fun provideSharedPreferenceProvider() = MyPreference()
+
+    @Provides
+    suspend fun providePublicUID(
         database: FirebaseDatabase,
         UID: String,
     ): String {
         val publicUidRef = database.reference.child("users").child(UID).child("publicUID")
         val publicUidSnapshot = withContext(Dispatchers.Main) { publicUidRef.get().await() }
-        val publicID = publicUidSnapshot.getValue(String::class.java)
-        println("publicUID1: $publicID")
-        return publicID!!
+        val publicUID = publicUidSnapshot.getValue(String::class.java)
+        println("publicUID1: $publicUID")
+        return publicUID!!
     }
+
+//    @Provides
+//    suspend fun provideAESKeySpacs(
+//        database: FirebaseDatabase,
+//        UID: String
+//    ): AESKeySpecs {
+//        val aesKeyRef = database.reference.child("users").child(UID).child("aesKey")
+//        val aesIVRef = database.reference.child("users").child(UID).child("aesIV")
+//        val aesKeySnapshot = withContext(Dispatchers.Main) { aesKeyRef.get().await() }
+//        val aesIVSnapshot = withContext(Dispatchers.Main) { aesIVRef.get().await() }
+//        val aesKey = aesKeySnapshot.getValue(String::class.java)
+//        val aesIV = aesIVSnapshot.getValue(String::class.java)
+//        return AESKeySpecs(aesKey = aesKey!!, aesIV = aesIV!!)
+//    }
 
     @Provides
     fun provideAESKeySpacs(): AESKeySpecs =
@@ -53,7 +71,7 @@ class AppModule {
 //    }
 }
 
-    data class AESKeySpecs(
-        var aesKey: String = "",
-        var aesIV: String = "",
-    )
+data class AESKeySpecs(
+    var aesKey: String = "",
+    var aesIV: String = "",
+)
