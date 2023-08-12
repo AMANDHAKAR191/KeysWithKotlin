@@ -10,6 +10,7 @@ import com.aman.keyswithkotlin.auth.domain.repository.SignInWithGoogleResponse
 import com.aman.keyswithkotlin.auth.domain.repository.SignOutResponse
 import com.aman.keyswithkotlin.chats.domain.model.MessageUserList
 import com.aman.keyswithkotlin.core.AES
+import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.Constants.SIGN_IN_REQUEST
 import com.aman.keyswithkotlin.core.Constants.SIGN_UP_REQUEST
 import com.aman.keyswithkotlin.core.Constants.USERS
@@ -46,6 +47,7 @@ class AuthRepositoryImpl @Inject constructor(
     @Named(SIGN_IN_REQUEST) private var signInRequest: BeginSignInRequest,
     @Named(SIGN_UP_REQUEST) private var signUpRequest: BeginSignInRequest,
     private val db: FirebaseDatabase,
+    private val UID: String,
     private val myPreference: MyPreference
 ) : AuthRepository {
     override val isUserAuthenticatedInFirebase = auth.currentUser != null
@@ -134,6 +136,33 @@ class AuthRepositoryImpl @Inject constructor(
         awaitClose { close() }
     }
 
+    override fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
+        callbackFlow {
+            val reference = db.reference.child("users")
+                .child(UID).child("userDevicesList").child(deviceId).child("isAuthorize")
+            val listener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val item = dataSnapshot.getValue(Boolean::class.java)
+                    item?.let {
+                        if (it) {
+                            trySend(Response.Success(Authorization.Authorize.toString()))
+                        } else {
+                            trySend(Response.Success(Authorization.NotAuthorize.toString()))
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    trySend(Response.Failure(error.toException()))
+                }
+            }
+            reference.addValueEventListener(listener)
+            awaitClose {
+                close()
+                reference.removeEventListener(listener)
+            }
+        }
+
     private suspend fun addDeviceDataToFireBase(
         user: FirebaseUser?
     ): SignInWithGoogleResponse = coroutineScope {
@@ -207,6 +236,7 @@ class AuthRepositoryImpl @Inject constructor(
         return DeviceData(
             deviceId = deviceInfo.getDeviceId(),
             deviceType = deviceInfo.getDeviceType(),
+            isAuthorize = false,
             appVersion = deviceInfo.getAppVersion(),
             lastLoginTimeStamp = timeStampUtil.generateTimestamp(),
             ipAddress = "1234"

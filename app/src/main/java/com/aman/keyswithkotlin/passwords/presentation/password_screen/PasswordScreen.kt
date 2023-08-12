@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +35,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -75,6 +78,8 @@ fun PasswordScreen(
     navigateToAddEditPasswordScreen: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit,
     navigateToProfileScreen: () -> Unit,
+    navigateToAccessVerificationScreen:()->Unit,
+    closeApp:()->Unit,
     bottomBar: @Composable (() -> Unit)
 ) {
     val scope = rememberCoroutineScope()
@@ -103,6 +108,7 @@ fun PasswordScreen(
     var searchtext = remember { mutableStateOf("") }
     var isSearchBarActive by remember { mutableStateOf(false) }
     var viewPassword by remember { mutableStateOf(false) }
+    var isAlertDialogVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = true) {
         eventFlowState.collectLatest { event ->
@@ -118,13 +124,15 @@ fun PasswordScreen(
                         onEvent(PasswordEvent.RestorePassword)
                     }
                 }
+                is UIEvents.ShowAlertDialog -> {
+                    isAlertDialogVisible = true
+                }
 
                 else -> {}
             }
         }
 
     }
-
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
@@ -356,6 +364,46 @@ fun PasswordScreen(
                         })
                 }
             }
+            //for Access Alert
+            if (isAlertDialogVisible){
+                println("check2::")
+                AlertDialog(
+                    onDismissRequest = {
+                        // Dismiss the dialog when the user clicks outside the dialog or on the back
+                        // button. If you want to disable that functionality, simply use an empty
+                        // onDismissRequest.
+                    },
+                    title = {
+                        Text(text = "Warning!", color = MaterialTheme.colorScheme.error)
+                    },
+                    text = {
+                        Text(text = "You device is not Authorized. If you are not Authorized user then you can't use this account.", color = MaterialTheme.colorScheme.error)
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            navigateToAccessVerificationScreen()
+                        }) {
+                            Text("Ask Permission")
+                        }
+//                        TextButton(
+//                            onClick = {
+//
+//                            }
+//                        ) {
+//                            Text("Ask Permission")
+//                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                closeApp()
+                            }
+                        ) {
+                            Text("Ok")
+                        }
+                    }
+                )
+            }
         }
     )
 }
@@ -378,6 +426,8 @@ fun preview() {
         onSharedPasswordEvent = {},
         navigateToAddEditPasswordScreen = {},
         navigateToGeneratePasswordScreen = {},
-        navigateToProfileScreen = {}
+        navigateToProfileScreen = {},
+        navigateToAccessVerificationScreen = {},
+        closeApp = {}
     ) {}
 }

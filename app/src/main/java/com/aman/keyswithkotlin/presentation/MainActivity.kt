@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
 
     private fun navigateToProfileScreen() {
         navController.popBackStack()
-        navController.navigate(Graph.HOME)
+        navController.navigate(Graph.ACCESS_VERIFICATION)
     }
 
     private fun launchBiometric() {

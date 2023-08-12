@@ -17,4 +17,6 @@ interface PasswordRepository {
 
     fun getRecentGeneratedPasswords(): Flow<Response<Pair<MutableList<GeneratedPasswordModelClass>?, Boolean?>>>
     fun updateRecentUsedPasswordTimeStamp(password: Password): Flow<Response<Pair<String?, Boolean?>>>
+
+    fun checkAuthorizationOfDevice(deviceId:String):Flow<Response<Pair<String?, Boolean?>>>
 }

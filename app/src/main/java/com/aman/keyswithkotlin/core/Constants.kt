@@ -22,15 +22,6 @@ object Constants {
     const val SIGN_OUT = "Sign-out"
     const val REVOKE_ACCESS = "Revoke Access"
 
-    //Screens
-    const val AUTH_SCREEN = "Authentication"
-    const val PROFILE_SCREEN = "Profile"
-    const val PASSWORD_SCREEN = "PasswordScreen"
-    const val ADD_EDIT_PASSWORD_SCREEN = "AddEditPasswordScreen"
-    const val GENERATE_PASSWORD_SCREEN = "GeneratePasswordScreen"
-    const val RECENT_GENERATE_PASSWORD_SCREEN = "RecentGeneratedPasswordScreen"
-    const val ADD_EDIT_NOTE_SCREEN = "AddEditNoteScreen"
-    const val INDIVIDUAL_CHAT_SCREEN = "IndividualChatScreen"
 
     //identifier
     const val IDENTIFIER_UPPER_CASE = "upperCaseAlphabet"

@@ -1,16 +1,11 @@
 package com.aman.keyswithkotlin.navigation
 
-import com.aman.keyswithkotlin.core.Constants.ADD_EDIT_NOTE_SCREEN
-import com.aman.keyswithkotlin.core.Constants.ADD_EDIT_PASSWORD_SCREEN
-import com.aman.keyswithkotlin.core.Constants.AUTH_SCREEN
-import com.aman.keyswithkotlin.core.Constants.GENERATE_PASSWORD_SCREEN
-import com.aman.keyswithkotlin.core.Constants.INDIVIDUAL_CHAT_SCREEN
-import com.aman.keyswithkotlin.core.Constants.PROFILE_SCREEN
-import com.aman.keyswithkotlin.core.Constants.RECENT_GENERATE_PASSWORD_SCREEN
 
 sealed class Screen(val route: String) {
     object AuthScreen : Screen(AUTH_SCREEN)
     object ProfileScreen : Screen(PROFILE_SCREEN)
+
+    object AccessVerificationScreen:Screen(ACCESS_VERIFICATION_SCREEN)
 
     object AddEditPasswordScreen : Screen(ADD_EDIT_PASSWORD_SCREEN)
     object GeneratePasswordScreen : Screen(GENERATE_PASSWORD_SCREEN)
@@ -20,3 +15,14 @@ sealed class Screen(val route: String) {
 
     object IndividualChatScreen : Screen(INDIVIDUAL_CHAT_SCREEN)
 }
+
+//Screens
+const val AUTH_SCREEN = "AuthenticationScreen"
+const val PROFILE_SCREEN = "ProfileScreen"
+const val ACCESS_VERIFICATION_SCREEN = "AccessVerificationScreen"
+const val PASSWORD_SCREEN = "PasswordScreen"
+const val ADD_EDIT_PASSWORD_SCREEN = "AddEditPasswordScreen"
+const val GENERATE_PASSWORD_SCREEN = "GeneratePasswordScreen"
+const val RECENT_GENERATE_PASSWORD_SCREEN = "RecentGeneratedPasswordScreen"
+const val ADD_EDIT_NOTE_SCREEN = "AddEditNoteScreen"
+const val INDIVIDUAL_CHAT_SCREEN = "IndividualChatScreen"

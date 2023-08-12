@@ -16,6 +16,7 @@ data class User(
 
 data class DeviceData(
     val deviceId:String? = "",
+    val isAuthorize:Boolean = false,
     val deviceType: String? = DeviceType.PHONE.toString(),
     val appVersion:String? = "",
     val lastLoginTimeStamp:String? = "",

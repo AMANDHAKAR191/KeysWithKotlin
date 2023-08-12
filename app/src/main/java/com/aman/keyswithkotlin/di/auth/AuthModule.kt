@@ -6,6 +6,7 @@ import com.aman.keyswithkotlin.R
 import com.aman.keyswithkotlin.auth.data.repository.AuthRepositoryImpl
 import com.aman.keyswithkotlin.auth.domain.repository.AuthRepository
 import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
+import com.aman.keyswithkotlin.auth.domain.use_cases.CheckAuthorizationOfDevice
 import com.aman.keyswithkotlin.auth.domain.use_cases.DisplayName
 import com.aman.keyswithkotlin.auth.domain.use_cases.FirebaseSignInWithGoogle
 import com.aman.keyswithkotlin.auth.domain.use_cases.IsUserAuthenticated
@@ -99,6 +100,7 @@ class AuthModule {
         @Named(Constants.SIGN_UP_REQUEST)
         signUpRequest: BeginSignInRequest,
         db: FirebaseDatabase,
+        UID: String,
         myPreference: MyPreference
     ): AuthRepository = AuthRepositoryImpl(
         auth = auth,
@@ -107,6 +109,7 @@ class AuthModule {
         signInRequest = signInRequest,
         signUpRequest = signUpRequest,
         db = db,
+        UID = UID,
         myPreference = myPreference
     )
 
@@ -121,7 +124,8 @@ class AuthModule {
             oneTapSignInWithGoogle = OneTapSignInWithGoogle(authRepository),
             firebaseSignInWithGoogle = FirebaseSignInWithGoogle(authRepository),
             signOut = SignOut(authRepository),
-            revokeAccess = RevokeAccess(authRepository)
+            revokeAccess = RevokeAccess(authRepository),
+            checkAuthorizationOfDevice = CheckAuthorizationOfDevice(authRepository)
         )
     }
 }

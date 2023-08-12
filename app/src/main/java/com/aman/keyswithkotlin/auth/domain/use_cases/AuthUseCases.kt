@@ -7,5 +7,6 @@ data class AuthUseCases(
     val oneTapSignInWithGoogle: OneTapSignInWithGoogle,
     val firebaseSignInWithGoogle: FirebaseSignInWithGoogle,
     val signOut: SignOut,
-    val revokeAccess: RevokeAccess
+    val revokeAccess: RevokeAccess,
+    val checkAuthorizationOfDevice: CheckAuthorizationOfDevice
 )

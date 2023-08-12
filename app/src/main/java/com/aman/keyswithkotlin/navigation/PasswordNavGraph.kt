@@ -47,6 +47,14 @@ fun NavGraphBuilder.passwordNavGraph(
                             launchSingleTop = true
                         }
                     })
+                },
+                navigateToAccessVerificationScreen = {
+                    navController.popBackStack()
+                    navController.navigate(Graph.ACCESS_VERIFICATION)
+                },
+                closeApp = {
+                    //todo re-check to close
+                    navController.popBackStack()
                 }
             )
         }

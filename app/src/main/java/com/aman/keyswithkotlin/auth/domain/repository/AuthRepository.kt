@@ -26,4 +26,6 @@ interface AuthRepository {
     suspend fun signOut(): Flow<SignOutResponse>
 
     suspend fun revokeAccess(): Flow<RevokeAccessResponse>
+
+    fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>>
 }

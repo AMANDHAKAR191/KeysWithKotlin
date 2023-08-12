@@ -1,3 +1,5 @@
+import com.aman.keyswithkotlin.navigation.Screen
+
 sealed class UIEvents {
     data class ShowSnackBar(
         val message: String,
@@ -10,6 +12,11 @@ sealed class UIEvents {
             }
         }
     }
+
+    object ShowAlertDialog:UIEvents()
+
+    object NavigateToNextScreen:UIEvents()
+
 }
 
 

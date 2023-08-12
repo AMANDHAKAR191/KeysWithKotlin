@@ -14,9 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.aman.keyswithkotlin.core.Constants.PROFILE_SCREEN
 import com.aman.keyswithkotlin.core.Constants.REVOKE_ACCESS
 import com.aman.keyswithkotlin.core.Constants.SIGN_OUT
+import com.aman.keyswithkotlin.navigation.PROFILE_SCREEN
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

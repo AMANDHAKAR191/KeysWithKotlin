@@ -1,5 +1,7 @@
 package com.aman.keyswithkotlin.passwords.data.repository
 
+import com.aman.keyswithkotlin.core.Authorization
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
 import com.aman.keyswithkotlin.passwords.domain.model.GeneratedPasswordModelClass
@@ -15,7 +17,8 @@ import kotlinx.coroutines.flow.callbackFlow
 
 class PasswordRepositoryImpl(
     private val database: FirebaseDatabase,
-    private val UID: String
+    private val UID: String,
+    private val myPreference: MyPreference
 ) : PasswordRepository {
 
     private val _passwordsItems = mutableListOf<Password>()
@@ -101,14 +104,12 @@ class PasswordRepositoryImpl(
             timestamp = timeStampUtil.generateTimestamp()
         )
         try {
-            reference.child(password.websiteName).child(_password.timestamp)
-                .setValue(_password)
+            reference.child(password.websiteName).child(_password.timestamp).setValue(_password)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
                         trySend(Response.Success("Password is successfully saved"))
                     }
-                }
-                .addOnFailureListener {
+                }.addOnFailureListener {
                     trySend(Response.Failure(it))
                 }
             awaitClose {
@@ -130,16 +131,14 @@ class PasswordRepositoryImpl(
                         for (childSnapshot in dataSnapshot.children) {
                             val noteKey = childSnapshot.key
                             println("noteKey: $noteKey")
-                            reference.child(password.websiteName).child(noteKey!!)
-                                .removeValue()
+                            reference.child(password.websiteName).child(noteKey!!).removeValue()
                                 .addOnCompleteListener {
                                     println("password is successfully deleted")
-                                    if (it.isSuccessful){
+                                    if (it.isSuccessful) {
                                         println("password is successfully deleted1")
                                         trySend(Response.Success(data = "password is successfully deleted"))
                                     }
-                                }
-                                .addOnFailureListener {
+                                }.addOnFailureListener {
                                     trySend(Response.Failure(it))
                                 }
                         }
@@ -155,47 +154,42 @@ class PasswordRepositoryImpl(
         }
 
     override fun saveGeneratedPassword(
-        generatePassword: String,
-        recentPasswordsList: MutableList<GeneratedPasswordModelClass>
-    ): Flow<Response<Pair<String?, Boolean?>>> =
-        callbackFlow {
-            trySend(Response.Loading)
-            // Add the new password to the beginning of the list
-            val recentPassword =
-                GeneratedPasswordModelClass(generatePassword, recentPasswordsList.size)
-            recentPasswordsList.add(0, recentPassword)
-            recentPassword.passwordCount = 0
+        generatePassword: String, recentPasswordsList: MutableList<GeneratedPasswordModelClass>
+    ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
+        trySend(Response.Loading)
+        // Add the new password to the beginning of the list
+        val recentPassword = GeneratedPasswordModelClass(generatePassword, recentPasswordsList.size)
+        recentPasswordsList.add(0, recentPassword)
+        recentPassword.passwordCount = 0
 
-            // Update the passwordCount for all the passwords
-            for (i in recentPasswordsList.indices) {
-                recentPasswordsList[i].passwordCount = i
-            }
+        // Update the passwordCount for all the passwords
+        for (i in recentPasswordsList.indices) {
+            recentPasswordsList[i].passwordCount = i
+        }
 
 //            // Remove the oldest password from the end if the list size exceeds 10
 //            if (recentPasswordsList.size > 10) {
 //                recentPasswordsList.removeAt(recentPasswordsList.size - 1)
 //            }
 
-            // TODO: Update the Firebase real-time database with the updated list of passwords
-            database.reference.child("RecentGeneratedPasswords").child(UID)
-                .setValue(recentPasswordsList)
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        trySend(Response.Success(data = "done"))
-                    } else {
-                        trySend(Response.Failure(Throwable("Failed to add")))
-                    }
+        // TODO: Update the Firebase real-time database with the updated list of passwords
+        database.reference.child("RecentGeneratedPasswords").child(UID)
+            .setValue(recentPasswordsList).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    trySend(Response.Success(data = "done"))
+                } else {
+                    trySend(Response.Failure(Throwable("Failed to add")))
                 }
-
-            awaitClose {
-                close()
             }
+
+        awaitClose {
+            close()
         }
+    }
 
     override fun getRecentGeneratedPasswords(): Flow<Response<Pair<MutableList<GeneratedPasswordModelClass>?, Boolean?>>> =
         callbackFlow {
-            val reference =
-                database.getReference("RecentGeneratedPasswords").child(UID)
+            val reference = database.getReference("RecentGeneratedPasswords").child(UID)
             val passwordList = mutableListOf<GeneratedPasswordModelClass>()
 
             val listner = object : ValueEventListener {
@@ -226,21 +220,46 @@ class PasswordRepositoryImpl(
     override fun updateRecentUsedPasswordTimeStamp(password: Password): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
             val timeStampUtil = TimeStampUtil()
-            database.reference.child("Passwords").child(UID).child(password.websiteName).child(password.timestamp)
-                .child("lastUsedTimeStamp")
-                .setValue(timeStampUtil.generateTimestamp())
-                .addOnCompleteListener {
+            database.reference.child("Passwords").child(UID).child(password.websiteName)
+                .child(password.timestamp).child("lastUsedTimeStamp")
+                .setValue(timeStampUtil.generateTimestamp()).addOnCompleteListener {
                     if (it.isSuccessful) {
                         trySend(Response.Success(data = "Done", true))
                     } else {
                         trySend(Response.Failure(Throwable("Failed")))
                     }
-                }
-                .addOnFailureListener {
+                }.addOnFailureListener {
                     trySend(Response.Failure(it))
                 }
             awaitClose {
                 close()
+            }
+        }
+
+    override fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
+        callbackFlow {
+            val reference = database.reference.child("users")
+                .child(UID).child("userDevicesList").child(deviceId).child("isAuthorize")
+            val listener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val item = dataSnapshot.getValue(Boolean::class.java)
+                    item?.let {
+                        if (it) {
+                            trySend(Response.Success(Authorization.Authorize.toString()))
+                        } else {
+                            trySend(Response.Success(Authorization.NotAuthorize.toString()))
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    trySend(Response.Failure(error.toException()))
+                }
+            }
+            reference.addValueEventListener(listener)
+            awaitClose {
+                close()
+                reference.removeEventListener(listener)
             }
         }
 

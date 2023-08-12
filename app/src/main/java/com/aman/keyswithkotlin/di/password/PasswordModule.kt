@@ -7,6 +7,7 @@ import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.aman.keyswithkotlin.passwords.data.repository.PasswordRepositoryImpl
 import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
 import com.aman.keyswithkotlin.passwords.domain.use_cases.AddPassword
+import com.aman.keyswithkotlin.passwords.domain.use_cases.CheckAuthorizationOfDevice
 import com.aman.keyswithkotlin.passwords.domain.use_cases.DeletePassword
 import com.aman.keyswithkotlin.passwords.domain.use_cases.GeneratePassword
 import com.aman.keyswithkotlin.passwords.domain.use_cases.GetPasswords
@@ -46,14 +47,16 @@ class PasswordModule {
             generatePassword = GeneratePassword(repository),
             saveRecentGeneratedPassword =  SaveRecentGeneratedPassword(repository),
             getRecentGeneratedPasswords =  GetRecentGeneratedPasswords(repository),
+            checkAuthorizationOfDevice = CheckAuthorizationOfDevice(repository)
         )
     }
 
     @Provides
     fun providePasswordRepository(
         database: FirebaseDatabase,
-        UID: String
+        UID: String,
+        myPreference: MyPreference
     ): PasswordRepository {
-        return PasswordRepositoryImpl(database, UID = UID)
+        return PasswordRepositoryImpl(database, UID = UID, myPreference)
     }
 }
