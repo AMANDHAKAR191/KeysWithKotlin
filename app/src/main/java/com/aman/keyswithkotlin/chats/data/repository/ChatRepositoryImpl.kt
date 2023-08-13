@@ -1,11 +1,14 @@
-package com.aman.keyswithkotlin.chats.data
+package com.aman.keyswithkotlin.chats.data.repository
 
+import androidx.compose.animation.splineBasedDecay
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
+import com.aman.keyswithkotlin.chats.domain.model.MessageUserList
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.chats.domain.repository.ChatRepository
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
 import com.aman.keyswithkotlin.di.AESKeySpecs
+import com.aman.keyswithkotlin.di.PublicUID
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -17,7 +20,7 @@ import kotlinx.coroutines.tasks.await
 
 class ChatRepositoryImpl(
     private val database: FirebaseDatabase,
-    private val UID: String,
+    @PublicUID
     private val publicUID: String,
     private val aesKeySpecs: AESKeySpecs
 ) : ChatRepository {
@@ -62,34 +65,89 @@ class ChatRepositoryImpl(
             }
         }
 
-    override fun createChat(
+    override fun createChatUser(
         otherUserPublicUid: String,
         userPersonalChatList: UserPersonalChatList
-    ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow{
+    ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
+        trySend(Response.Loading)
         database.reference.child("messageUserList").child(publicUID)
             .child("UserPersonalChatList").child(otherUserPublicUid)
             .setValue(userPersonalChatList).await()
-
-        awaitClose{close()}
+        trySend(Response.Success(data = "Chat User Created"))
+        awaitClose { close() }
     }
 
-    override fun getChatUsers(): Flow<Response<Pair<MutableList<UserPersonalChatList>?, Boolean?>>> =
+    override fun getChatProfileDataByPublicUID(otherUserPublicUid: String): Flow<Response<Pair<MessageUserList?, Boolean?>>> =
         callbackFlow {
-            val reference = database.reference.child("messageUserList").child(publicUID)
-                .child("userPersonalChatList")
-            reference.keepSynced(true)
+            val reference = database.reference.child("messageUserList").orderByChild("publicUid")
+                .equalTo(otherUserPublicUid)
             trySend(Response.Loading)
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    _chatUsersList.clear()
-                    for (ds in dataSnapshot.children) {
-                        val items = ds.getValue(UserPersonalChatList::class.java)
-                        if (items != null) {
-                            println("items: $items")
-                            _chatUsersList.add(items)
+                    if (dataSnapshot.exists()) {
+                        println("dataSnapshot: $dataSnapshot")
+                        for (ds in dataSnapshot.children) {
+                            println("ds: $ds")
+                            val item = ds.getValue(MessageUserList::class.java)
+                            if (item != null) {
+                                item.UserPersonalChatList?.let {
+                                    println("Map: $it")
+                                    it.keys.forEach{key->
+                                        println("key: $key")
+                                        println("value: ${it[key]}")
+                                        println("otherUserPublicUid: ${it[key]?.otherUserPublicUid}")
+                                        if (it[key]?.otherUserPublicUid.equals(publicUID)){
+                                            println("Check: Matched")
+                                        }
+                                    }
+                                    println("publicUID: $publicUID")
+                                    println("commonChatRoomId: ${it["amandhaker191"]}")
+                                }
+                                trySend(Response.Success(data = item))
+                            }
                         }
+                    } else {
+                        trySend(Response.Failure(Throwable("User Not Found")))
                     }
-                    trySend(Response.Success(data = _chatUsersList))
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    trySend(Response.Failure(error.toException()))
+                }
+            }
+
+            reference.addValueEventListener(listener)
+            awaitClose {
+                reference.removeEventListener(listener)
+                close()
+            }
+
+        }
+
+    override fun getChatUsers(): Flow<Response<Pair<MutableList<UserPersonalChatList>?, Boolean?>>> =
+        callbackFlow {
+            println("check11: publicUID: $publicUID")
+            trySend(Response.Loading)
+            val reference = database.reference.child("messageUserList").child(publicUID)
+                .child("UserPersonalChatList")
+            reference.keepSynced(true)
+            val listener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    println("dataSnapshot: $dataSnapshot")
+                    if (dataSnapshot.exists()){
+                        _chatUsersList.clear()
+                        for (ds in dataSnapshot.children) {
+                            val items = ds.getValue(UserPersonalChatList::class.java)
+                            if (items != null) {
+                                println("items: $items")
+                                _chatUsersList.add(items)
+                            }
+                        }
+                        trySend(Response.Success(data = _chatUsersList))
+                    }else{
+                        trySend(Response.Failure(Throwable("No user")))
+                    }
 
                 }
 

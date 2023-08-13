@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.passwords.presentation.add_edit_password
 
+import UIEvents
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -18,7 +19,7 @@ import javax.inject.Inject
 class AddEditPasswordViewModel @Inject constructor(
     private val passwordUseCases: PasswordUseCases
 ) : ViewModel() {
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     private val _state = mutableStateOf(AddEditPasswordState())
@@ -63,7 +64,7 @@ class AddEditPasswordViewModel @Inject constructor(
 
                                 is Response.Success<*, *> -> {
                                     _eventFlow.emit(
-                                        UiEvent.ShowSnackBar(
+                                        UIEvents.ShowSnackBar(
                                             message = response.data.toString()
                                         )
                                     )
@@ -74,13 +75,13 @@ class AddEditPasswordViewModel @Inject constructor(
                                 }
                             }
                             _eventFlow.emit(
-                                UiEvent.savePassword
+                                UIEvents.SavePassword
                             )
                         }
 
                     } catch (e: InvalidPasswordException) {
                         _eventFlow.emit(
-                            UiEvent.ShowSnackBar(
+                            UIEvents.ShowSnackBar(
                                 message = e.message ?: "Couldn't save Expense"
                             )
                         )
@@ -92,8 +93,4 @@ class AddEditPasswordViewModel @Inject constructor(
         }
     }
 
-    sealed class UiEvent {
-        data class ShowSnackBar(val message: String) : UiEvent()
-        object savePassword : UiEvent()
-    }
 }

@@ -260,7 +260,10 @@ class AuthRepositoryImpl @Inject constructor(
 
                     // After first setValue is successful, proceed to next setValue
                     val userListModel = MessageUserList(
-                        publicUid = newUser.publicUID, publicUname = newUser.displayName, false
+                        publicUid = newUser.publicUID,
+                        publicUname = newUser.displayName,
+                        false,
+                        profileUrl = newUser.photoUrl
                     )
                     val referenceSender = db.reference
                     referenceSender.child("messageUserList").child(newUser.publicUID!!)

@@ -1,4 +1,4 @@
-package com.aman.keyswithkotlin.chats.presentation
+package com.aman.keyswithkotlin.chats.presentation.individual_chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,19 +45,19 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
+import com.aman.keyswithkotlin.chats.presentation.SpacerWidth
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
 import com.aman.keyswithkotlin.ui.theme.Pink80
 import com.aman.keyswithkotlin.ui.theme.RedOrange
 import kotlinx.coroutines.flow.StateFlow
-import java.time.format.DateTimeParseException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IndividualChatScreen(
     data: UserPersonalChatList? = null,
 //    state: ChatMessagesState,
-    _state: StateFlow<ChatMessagesState>,
-    onChatEvent: (ChatEvent) -> Unit,
+    _state: StateFlow<ChatMessageState>,
+    onChatEvent: (ChatMessageEvent) -> Unit,
     navigateToPasswordScreen: () -> Unit
 ) {
     val state = _state.collectAsState()
@@ -139,13 +139,13 @@ fun IndividualChatScreen(
 
                 CustomTextField(
                     text = messageTextValue, onValueChange = {
-                        onChatEvent(ChatEvent.OnMessageEntered(it))
+                        onChatEvent(ChatMessageEvent.OnMessageEntered(it))
                     },
                     modifier = Modifier
                         .padding(horizontal = 10.dp, vertical = 10.dp)
                         .align(Alignment.BottomCenter),
                     onTrailingIconButtonClicked = {
-                        onChatEvent(ChatEvent.SendMessage)
+                        onChatEvent(ChatMessageEvent.SendMessage)
                     }
                 )
             }
@@ -276,17 +276,19 @@ fun UserNameRow(
     ) {
         person?.let { personData ->
             Row {
-                AsyncImage(
-                    model = personData.otherUserProfileUrl ?: "",
-                    contentDescription = "",
-                    modifier = Modifier
-                        .clip(
-                            CircleShape
-                        )
-                        .background(Color.Yellow)
-                        .padding(2.dp)
-                        .clip(CircleShape)
-                )
+                personData.otherUserProfileUrl?.let {
+                    AsyncImage(
+                        model = personData.otherUserProfileUrl,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .clip(
+                                CircleShape
+                            )
+                            .background(Color.Yellow)
+                            .padding(2.dp)
+                            .clip(CircleShape)
+                    )
+                }
                 SpacerWidth()
                 Column {
                     Text(

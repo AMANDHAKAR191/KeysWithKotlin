@@ -3,6 +3,7 @@ package com.aman.keyswithkotlin.notes.data.repository
 import com.aman.keyswithkotlin.core.AES
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.di.AESKeySpecs
+import com.aman.keyswithkotlin.di.UID
 import com.aman.keyswithkotlin.notes.domain.model.Note
 import com.aman.keyswithkotlin.notes.domain.repository.NoteRepository
 import com.google.firebase.database.DataSnapshot
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter
 
 class NoteRepositoryImpl(
     private val database: FirebaseDatabase,
+    @UID
     private val UID: String,
     private val aesKeySpecs: AESKeySpecs
 ) : NoteRepository {

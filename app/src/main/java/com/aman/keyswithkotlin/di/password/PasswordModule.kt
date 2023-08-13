@@ -3,6 +3,8 @@ package com.aman.keyswithkotlin.di.password
 import androidx.compose.animation.ExperimentalAnimationApi
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.di.AESKeySpecs
+import com.aman.keyswithkotlin.di.PublicUID
+import com.aman.keyswithkotlin.di.UID
 import com.aman.keyswithkotlin.passwords.data.repository.PasswordRepositoryImpl
 import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
 import com.aman.keyswithkotlin.passwords.domain.use_cases.AddPassword
@@ -28,6 +30,7 @@ class PasswordModule {
     fun providePasswordUseCases(
         repository: PasswordRepository,
         aesKeySpecs: AESKeySpecs,
+        @PublicUID
         publicUID: String,
         myPreference: MyPreference
     ): PasswordUseCases {
@@ -57,6 +60,7 @@ class PasswordModule {
     @Provides
     fun providePasswordRepository(
         database: FirebaseDatabase,
+        @UID
         UID: String,
         myPreference: MyPreference
     ): PasswordRepository {

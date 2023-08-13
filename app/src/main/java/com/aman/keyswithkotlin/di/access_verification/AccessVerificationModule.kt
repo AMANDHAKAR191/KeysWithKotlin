@@ -4,6 +4,7 @@ import com.aman.keyswithkotlin.access_verification.data.repository.AccessVerific
 import com.aman.keyswithkotlin.access_verification.domain.repository.AccessVerificationRepository
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.AccessVerificationUseCases
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.CheckAuthorizationOfDevice
+import com.aman.keyswithkotlin.di.UID
 import com.google.firebase.database.FirebaseDatabase
 import dagger.Module
 import dagger.Provides
@@ -16,6 +17,7 @@ class AccessVerificationModule {
     @Provides
     fun provideAccessVerificationRepository(
         db: FirebaseDatabase,
+        @UID
         UID: String,
     ): AccessVerificationRepository = AccessVerificationRepositoryImpl(
         db = db,

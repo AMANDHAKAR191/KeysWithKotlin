@@ -7,9 +7,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.aman.keyswithkotlin.chats.presentation.ChatUserViewModel
 import com.aman.keyswithkotlin.chats.presentation.ChatsScreen
-import com.aman.keyswithkotlin.chats.presentation.IndividualUserChatsViewModel
+import com.aman.keyswithkotlin.chats.presentation.individual_chat.IndividualUserChatsViewModel
 import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
-import com.aman.keyswithkotlin.chats.presentation.IndividualChatScreen
+import com.aman.keyswithkotlin.chats.presentation.individual_chat.IndividualChatScreen
 import com.aman.keyswithkotlin.core.components.BottomBar
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePasswordViewModel
 
@@ -27,7 +27,9 @@ fun NavGraphBuilder.chatNavGraph(
             ChatsScreen(
                 title = BottomBarScreen.Chats.title,
                 chatUsersList = viewModel.state.value.chatUsersList,
-                onEvent = sharedChatViewModel::onEvent,
+                eventFlowState = viewModel.eventFlow,
+                onEvent = viewModel::onEvent,
+                onSharedChatEvent = sharedChatViewModel::onEvent,
                 bottomBar = {
                     BottomBar(navController, navigateTo = {
                         navController.popBackStack()

@@ -1,7 +1,6 @@
-package com.aman.keyswithkotlin.chats.presentation
+package com.aman.keyswithkotlin.chats.presentation.individual_chat
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
+import UIEvents
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
@@ -24,10 +23,10 @@ class IndividualUserChatsViewModel @Inject constructor(
     private val chatUseCases: ChatUseCases
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<ChatMessagesState>(ChatMessagesState())
-    val state: StateFlow<ChatMessagesState> = _state.asStateFlow()
+    private val _state = MutableStateFlow<ChatMessageState>(ChatMessageState())
+    val state: StateFlow<ChatMessageState> = _state.asStateFlow()
 
-    private val _eventFlow = MutableSharedFlow<AddEditPasswordViewModel.UiEvent>()
+    private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
 
 
@@ -35,9 +34,9 @@ class IndividualUserChatsViewModel @Inject constructor(
         getChatUserList()
     }
 
-    fun onEvent(event: ChatEvent) {
+    fun onEvent(event: ChatMessageEvent) {
         when (event) {
-            is ChatEvent.SendMessage -> {
+            is ChatMessageEvent.SendMessage -> {
                 println("Message: ${state.value.chatMessage}")
                 viewModelScope.launch {
                     chatUseCases.sendMessage(
@@ -58,7 +57,7 @@ class IndividualUserChatsViewModel @Inject constructor(
                                     chatMessage = ""
                                 )
                                 _eventFlow.emit(
-                                    AddEditPasswordViewModel.UiEvent.ShowSnackBar(
+                                    UIEvents.ShowSnackBar(
                                         message = response.data.toString()
                                     )
                                 )
@@ -69,13 +68,13 @@ class IndividualUserChatsViewModel @Inject constructor(
                             }
                         }
                         _eventFlow.emit(
-                            AddEditPasswordViewModel.UiEvent.savePassword
+                            UIEvents.SavePassword
                         )
                     }
                 }
             }
 
-            is ChatEvent.OnMessageEntered -> {
+            is ChatMessageEvent.OnMessageEntered -> {
                 println("${event.value}")
                 _state.value = state.value.copy(
                     chatMessage = event.value

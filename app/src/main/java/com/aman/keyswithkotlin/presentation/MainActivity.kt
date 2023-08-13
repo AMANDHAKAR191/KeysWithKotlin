@@ -67,7 +67,8 @@ class MainActivity : ComponentActivity() {
 
     private fun checkAuthState() {
         if (viewModel.isUserAuthenticated) {
-            launchBiometric()
+//            launchBiometric()
+            navigateToProfileScreen()
         }
     }
 

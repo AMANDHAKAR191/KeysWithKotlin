@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.passwords.presentation.add_edit_password
 
+import UIEvents
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +33,7 @@ import kotlinx.coroutines.flow.SharedFlow
 @Composable
 fun AddEditPasswordScreen(
     state: AddEditPasswordState,
-    eventFlow: SharedFlow<AddEditPasswordViewModel.UiEvent>,
+    eventFlow: SharedFlow<UIEvents>,
     onEvent: (PasswordEvent) -> Unit,
     onSharedPasswordEvent: (SharedPasswordEvent) -> Unit,
     generatedPassword: String? = "",
@@ -65,11 +66,11 @@ fun AddEditPasswordScreen(
     LaunchedEffect(key1 = eventFlow) {
         eventFlow.collect { event ->
             when (event) {
-                is AddEditPasswordViewModel.UiEvent.ShowSnackBar -> {
+                is UIEvents.ShowSnackBar -> {
                     snackbarHostState.showSnackbar(event.message)
                 }
 
-                is AddEditPasswordViewModel.UiEvent.savePassword -> {
+                is UIEvents.SavePassword -> {
                     navigateToPasswordScreen()
                 }
 
@@ -174,7 +175,7 @@ fun AddEditPasswordScreen(
 fun Preview() {
     val state = AddEditPasswordState() // Provide the desired state object
     val eventFlow =
-        remember { MutableSharedFlow<AddEditPasswordViewModel.UiEvent>() } // Create an instance of MutableSharedFlow
+        remember { MutableSharedFlow<UIEvents>() } // Create an instance of MutableSharedFlow
     val onEvent: (PasswordEvent) -> Unit = {} // Provide an empty lambda function for onEvent
     AddEditPasswordScreen(
         state = state,

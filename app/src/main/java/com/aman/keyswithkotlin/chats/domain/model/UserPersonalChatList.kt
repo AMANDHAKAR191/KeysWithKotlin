@@ -1,11 +1,12 @@
 package com.aman.keyswithkotlin.chats.domain.model
 
-class UserPersonalChatList {
-    var otherUserPublicUid: String? = ""
-    var otherUserPublicUname: String? = ""
-    var otherUserProfileUrl:String? = ""
-    var commonEncryptionKey: String? = ""
-    var commonEncryptionIv: String? = ""
-    var isKnowUser = false
+ data class UserPersonalChatList (
+    var otherUserPublicUid: String? = "",
+    var otherUserPublicUname: String? = "",
+    var otherUserProfileUrl:String? = "",
+    val commonChatRoomId:String? = "",
+    var commonEncryptionKey: String? = "",
+    var commonEncryptionIv: String? = "",
+    var isKnowUser:Boolean = false,
     var lastMessage: String? = ""
-}
+)

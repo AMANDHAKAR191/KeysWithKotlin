@@ -1,9 +1,9 @@
 package com.aman.keyswithkotlin.access_verification.data.repository
 
 import com.aman.keyswithkotlin.access_verification.domain.repository.AccessVerificationRepository
-import com.aman.keyswithkotlin.core.Authentication
 import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.di.UID
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.callbackFlow
 
 class AccessVerificationRepositoryImpl(
     private val db: FirebaseDatabase,
-    private val UID: String,
-): AccessVerificationRepository {
+    @UID private val UID: String,
+) : AccessVerificationRepository {
 
     override fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
