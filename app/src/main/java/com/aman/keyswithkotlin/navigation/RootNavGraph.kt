@@ -30,6 +30,7 @@ fun RootNavGraph(
         exitTransition = { ExitTransition.None }
     ) {
         authNavGraph(navController)
+        profileNavGraph(navController)
         accessVerificationNavGraph(navController)
         passwordNavGraph(
             navController = navController,
@@ -43,6 +44,7 @@ fun RootNavGraph(
 
 object Graph {
     const val AUTHENTICATION = "auth_graph"
+    const val PROFILE = "profile_graph"
     const val ACCESS_VERIFICATION = "access_verification"
     const val HOME = "home_graph"
     const val CHAT = "chat_graph"

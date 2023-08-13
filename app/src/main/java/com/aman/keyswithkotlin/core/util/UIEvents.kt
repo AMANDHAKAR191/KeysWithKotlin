@@ -14,6 +14,7 @@ sealed class UIEvents {
     }
 
     object ShowAlertDialog:UIEvents()
+    object HideAlertDialog:UIEvents()
 
     object NavigateToNextScreen:UIEvents()
 

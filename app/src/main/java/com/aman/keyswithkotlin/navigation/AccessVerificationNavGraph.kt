@@ -5,8 +5,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.aman.keyswithkotlin.auth.presentation.accessVerification.AccessVerificationScreen
-import com.aman.keyswithkotlin.auth.presentation.accessVerification.AccessVerificationViewModel
+import com.aman.keyswithkotlin.access_verification.presentation.accessVerification.AccessVerificationScreen
+import com.aman.keyswithkotlin.access_verification.presentation.accessVerification.AccessVerificationViewModel
 
 fun NavGraphBuilder.accessVerificationNavGraph(
     navController: NavController

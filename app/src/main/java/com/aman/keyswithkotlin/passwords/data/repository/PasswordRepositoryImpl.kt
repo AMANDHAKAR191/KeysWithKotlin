@@ -236,31 +236,31 @@ class PasswordRepositoryImpl(
             }
         }
 
-    override fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
-        callbackFlow {
-            val reference = database.reference.child("users")
-                .child(UID).child("userDevicesList").child(deviceId).child("isAuthorize")
-            val listener = object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val item = dataSnapshot.getValue(Boolean::class.java)
-                    item?.let {
-                        if (it) {
-                            trySend(Response.Success(Authorization.Authorize.toString()))
-                        } else {
-                            trySend(Response.Success(Authorization.NotAuthorize.toString()))
-                        }
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    trySend(Response.Failure(error.toException()))
-                }
-            }
-            reference.addValueEventListener(listener)
-            awaitClose {
-                close()
-                reference.removeEventListener(listener)
-            }
-        }
+//    override fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
+//        callbackFlow {
+//            val reference = database.reference.child("users")
+//                .child(UID).child("userDevicesList").child(deviceId).child("isAuthorize")
+//            val listener = object : ValueEventListener {
+//                override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                    val item = dataSnapshot.getValue(String::class.java)
+//                    item?.let {
+//                        if (it == Authorization.Authorize.toString()) {
+//                            trySend(Response.Success(Authorization.Authorize.toString()))
+//                        } else {
+//                            trySend(Response.Success(Authorization.NotAuthorize.toString()))
+//                        }
+//                    }
+//                }
+//
+//                override fun onCancelled(error: DatabaseError) {
+//                    trySend(Response.Failure(error.toException()))
+//                }
+//            }
+//            reference.addValueEventListener(listener)
+//            awaitClose {
+//                close()
+//                reference.removeEventListener(listener)
+//            }
+//        }
 
 }

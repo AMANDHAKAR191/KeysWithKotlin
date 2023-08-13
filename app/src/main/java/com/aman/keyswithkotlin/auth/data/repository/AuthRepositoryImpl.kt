@@ -10,11 +10,13 @@ import com.aman.keyswithkotlin.auth.domain.repository.SignInWithGoogleResponse
 import com.aman.keyswithkotlin.auth.domain.repository.SignOutResponse
 import com.aman.keyswithkotlin.chats.domain.model.MessageUserList
 import com.aman.keyswithkotlin.core.AES
+import com.aman.keyswithkotlin.core.Authentication
 import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.Constants.SIGN_IN_REQUEST
 import com.aman.keyswithkotlin.core.Constants.SIGN_UP_REQUEST
 import com.aman.keyswithkotlin.core.Constants.USERS
 import com.aman.keyswithkotlin.core.DeviceInfo
+import com.aman.keyswithkotlin.core.DeviceType
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
@@ -47,7 +49,6 @@ class AuthRepositoryImpl @Inject constructor(
     @Named(SIGN_IN_REQUEST) private var signInRequest: BeginSignInRequest,
     @Named(SIGN_UP_REQUEST) private var signUpRequest: BeginSignInRequest,
     private val db: FirebaseDatabase,
-    private val UID: String,
     private val myPreference: MyPreference
 ) : AuthRepository {
     override val isUserAuthenticatedInFirebase = auth.currentUser != null
@@ -81,22 +82,33 @@ class AuthRepositoryImpl @Inject constructor(
         try {
             val authResult = auth.signInWithCredential(googleAuthCredential).await()
             val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
+            val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
 
             println("isNewUser: $isNewUser")
 
             coroutineScope {
                 val addUserDeferred = async { addUserToFireBase(auth.currentUser) }
-                val addDeviceDataDeferred = async { addDeviceDataToFireBase(auth.currentUser) }
+//                val addDeviceDataDeferred = async { addDeviceDataToFireBase(auth.currentUser) }
                 val getUserDeferred = async { getUserFromFireBase(auth.currentUser) }
 
                 val status = if (isNewUser) {
                     println("new user")
                     addUserDeferred.await()
-                    addDeviceDataDeferred.await()
+                    async { addDeviceDataToFireBase(auth.currentUser, DeviceType.Primary) }.await()
+//                    addDeviceDataDeferred.await()
                 } else {
                     println("old user")
                     getUserDeferred.await()
-                    addDeviceDataDeferred.await()
+//                    var deviceType:DeviceType = DeviceType.Secondary
+//                    checkDeviceType(deviceInfo.getDeviceId()).collect{
+//                        deviceType = it
+//                    }
+                    async {
+                        addDeviceDataToFireBase(
+                            auth.currentUser, DeviceType.Secondary
+                        )
+                    }.await()
+//                    addDeviceDataDeferred.await()
                 }
                 status.let {
                     trySend(it)
@@ -109,6 +121,7 @@ class AuthRepositoryImpl @Inject constructor(
 
         awaitClose { close() }
     }
+
 
     override suspend fun signOut(): Flow<SignOutResponse> = callbackFlow {
         try {
@@ -136,47 +149,86 @@ class AuthRepositoryImpl @Inject constructor(
         awaitClose { close() }
     }
 
-    override fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
+    override suspend fun getLoggedInDevices(): Flow<Response<Pair<List<DeviceData>?, Boolean?>>> =
         callbackFlow {
-            val reference = db.reference.child("users")
-                .child(UID).child("userDevicesList").child(deviceId).child("isAuthorize")
-            val listener = object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val item = dataSnapshot.getValue(Boolean::class.java)
-                    item?.let {
-                        if (it) {
-                            trySend(Response.Success(Authorization.Authorize.toString()))
-                        } else {
-                            trySend(Response.Success(Authorization.NotAuthorize.toString()))
+            auth.currentUser?.let {
+                var _deviceList = mutableListOf<DeviceData>()
+                val reference = db.reference.child("users").child(it.uid).child("userDevicesList")
+
+                val listener = object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        println("dataSnapshot: $dataSnapshot")
+                        for (ds in dataSnapshot.children) {
+                            println("ds: $ds")
+                            val item = ds.getValue(DeviceData::class.java)
+                            item?.let {
+                                _deviceList.add(it)
+                            }
                         }
+                        trySend(Response.Success(_deviceList))
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        trySend(Response.Failure(error.toException()))
                     }
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    trySend(Response.Failure(error.toException()))
+                reference.addValueEventListener(listener)
+                awaitClose {
+                    close()
+                    reference.removeEventListener(listener)
                 }
-            }
-            reference.addValueEventListener(listener)
-            awaitClose {
-                close()
-                reference.removeEventListener(listener)
             }
         }
 
     private suspend fun addDeviceDataToFireBase(
-        user: FirebaseUser?
+        user: FirebaseUser?, deviceType: DeviceType
     ): SignInWithGoogleResponse = coroutineScope {
         user?.let {
             val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
             return@coroutineScope try {
                 db.reference.child(USERS).child(it.uid).child("userDevicesList")
-                    .child(deviceInfo.getDeviceId()).setValue(getDeviceData(deviceInfo))
+                    .child(deviceInfo.getDeviceId()).setValue(getDeviceData(deviceInfo, deviceType))
                     .await() // Wait for the first Firebase operation to complete
                 Response.Success(status = true) // Return success response if both setValue operations are successful
             } catch (e: Exception) {
                 Response.Failure(e) // Return failure response if either setValue operation fails
             }
         } ?: Response.Failure(Exception("Invalid FirebaseUser."))
+    }
+
+    private fun checkDeviceType(deviceId: String): Flow<DeviceType> = callbackFlow {
+        println("check4")
+        auth.currentUser?.let {
+            val reference =
+                db.reference.child("users").child(it.uid).child("userDevicesList").child(deviceId)
+                    .child("deviceType")
+
+            val listener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    println("dataSnapshot: $dataSnapshot")
+                    for (ds in dataSnapshot.children) {
+                        println("ds: $ds")
+                    }
+                    DeviceType.Primary
+//                    val item = dataSnapshot.getValue(String::class.java)
+//                    println("item: $item")
+//                    item?.let {
+//                        println("item: $it")
+//                        if (it == DeviceType.Primary.toString()) {
+//                            DeviceType.Secondary
+//                        } else {
+//                            DeviceType.Primary
+//                        }
+//                    }
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
+            }
+            reference.addValueEventListener(listener)
+        }
+        awaitClose { close() }
     }
 
     private suspend fun addUserToFireBase(
@@ -231,12 +283,15 @@ class AuthRepositoryImpl @Inject constructor(
         } ?: Response.Failure(Exception("Invalid FirebaseUser."))
     }
 
-    private fun getDeviceData(deviceInfo: DeviceInfo): DeviceData {
+    private fun getDeviceData(deviceInfo: DeviceInfo, deviceType: DeviceType): DeviceData {
         val timeStampUtil = TimeStampUtil()
         return DeviceData(
             deviceId = deviceInfo.getDeviceId(),
-            deviceType = deviceInfo.getDeviceType(),
-            isAuthorize = false,
+            deviceName = deviceInfo.getDeviceName(),
+            deviceBuildNumber = deviceInfo.getDeviceBuildNumber(),
+            deviceType = deviceType.toString(),
+            authorization = Authorization.NotAuthorized.toString(),
+            authentication = Authentication.Authenticated.toString(),
             appVersion = deviceInfo.getAppVersion(),
             lastLoginTimeStamp = timeStampUtil.generateTimestamp(),
             ipAddress = "1234"
@@ -277,61 +332,6 @@ class AuthRepositoryImpl @Inject constructor(
             }
         } ?: Response.Failure(Exception("Invalid FirebaseUser."))
     }
-
-
-//    private suspend fun addUserToFireBase(
-//        user: FirebaseUser?
-//    ): SignInWithGoogleResponse = coroutineScope {
-//        val current = LocalDateTime.now()
-//        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-//        val formatted = current.format(formatter)
-//        val aesKey = "${generatePassword(22, specialCharacters = false)}=="
-//        val aesIV = generatePassword(22, specialCharacters = false)
-//        user?.let {
-//            val newUser = User(
-//                displayName = it.displayName,
-//                email = it.email,
-//                photoUrl = it.photoUrl?.toString(),
-//                aesKey = aesKey,
-//                aesIV = aesIV,
-//                privateUID = it.uid,
-//                publicUID = it.email
-//            )
-//
-//            AES.getInstance(aesKey, aesIV)?.let { aes ->
-//                val encryptedUser = encryptUser(newUser, aes)
-//                println("Adding user0 to Firebase...")
-//                try {
-//                    db.reference.child(USERS).child(it.uid)
-//                        .setValue(encryptedUser)
-//                        .addOnCompleteListener {
-//
-//                            //check
-//                            //create a personal user chat list
-//                            val userListModel = MessageUserList(
-//                                publicUid = newUser.publicUID,
-//                                publicUname = newUser.displayName,
-//                                false
-//                            )
-//                            val referenceSender = FirebaseDatabase.getInstance().reference
-//                            referenceSender.child("messageUserList").child(newUser.publicUID!!)
-//                                .setValue(userListModel)
-//                                .addOnCompleteListener {
-//                                    if (it.isSuccessful){
-//
-//                                    }
-//                                }
-//                            //check
-//
-//                        }.await() // Wait for the Firebase operation to complete
-//
-//                    Response.Success(status = true) // Return success response
-//                } catch (e: Exception) {
-//                    Response.Failure(e) // Return failure response
-//                }
-//            } ?: Response.Failure(Exception("AES initialization failed."))
-//        } ?: Response.Failure(Exception("Invalid FirebaseUser."))
-//    }
 
 
     private fun addUserInSharedPreferenceDB(aesKey: String?, aesIV: String?, publicUID: String) {

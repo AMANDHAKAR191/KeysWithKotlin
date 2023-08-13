@@ -127,6 +127,9 @@ fun PasswordScreen(
                 is UIEvents.ShowAlertDialog -> {
                     isAlertDialogVisible = true
                 }
+                is UIEvents.HideAlertDialog->{
+                    isAlertDialogVisible = false
+                }
 
                 else -> {}
             }

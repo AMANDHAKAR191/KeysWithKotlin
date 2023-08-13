@@ -39,7 +39,7 @@ fun NavGraphBuilder.passwordNavGraph(
                     navController.navigate(Screen.GeneratePasswordScreen.route)
                 },
                 navigateToProfileScreen = {
-                    navController.navigate(Graph.SETTING)
+                    navController.navigate(Graph.PROFILE)
                 },
                 bottomBar = {
                     BottomBar(navController, navigateTo = {

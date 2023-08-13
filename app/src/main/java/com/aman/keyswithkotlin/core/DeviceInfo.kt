@@ -3,7 +3,6 @@ package com.aman.keyswithkotlin.core
 import android.content.Context
 import android.os.Build
 import android.provider.Settings
-import com.aman.keyswithkotlin.auth.domain.model.DeviceType
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
 
 class DeviceInfo(private val context: Context) {
@@ -15,8 +14,14 @@ class DeviceInfo(private val context: Context) {
         )
     }
 
-    fun getDeviceType(): String {
-        return if (Build.MODEL.contains(DeviceType.TABLET.toString())) DeviceType.TABLET.toString() else DeviceType.PHONE.toString()
+    fun getDeviceName(): String {
+        //to get device name
+        return "${Build.MANUFACTURER} ${Build.MODEL}"
+    }
+
+    fun getDeviceBuildNumber(): String {
+        //to get build number
+        return Build.ID
     }
 
     fun getOSAndVersion(): String {

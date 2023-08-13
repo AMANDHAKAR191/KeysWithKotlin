@@ -8,6 +8,5 @@ data class PasswordUseCases(
     val updateLastUsedPasswordTimeStamp: UpdateLastUsedPasswordTimeStamp,
     val generatePassword: GeneratePassword,
     val saveRecentGeneratedPassword: SaveRecentGeneratedPassword,
-    val getRecentGeneratedPasswords: GetRecentGeneratedPasswords,
-    val checkAuthorizationOfDevice: CheckAuthorizationOfDevice
+    val getRecentGeneratedPasswords: GetRecentGeneratedPasswords
 )

@@ -1,6 +1,9 @@
 package com.aman.keyswithkotlin.auth.domain.model
 
 import com.aman.keyswithkotlin.core.AES
+import com.aman.keyswithkotlin.core.Authentication
+import com.aman.keyswithkotlin.core.Authorization
+import com.aman.keyswithkotlin.core.DeviceType
 
 data class User(
     var displayName: String? = "",
@@ -16,15 +19,15 @@ data class User(
 
 data class DeviceData(
     val deviceId:String? = "",
-    val isAuthorize:Boolean = false,
-    val deviceType: String? = DeviceType.PHONE.toString(),
+    val deviceName:String? = "",
+    val deviceBuildNumber:String? = "",
+    val authorization:String = Authorization.NotAuthorized.toString(),
+    val authentication:String? = Authentication.NotAuthenticated.toString(),
+    val deviceType: String? = DeviceType.Secondary.toString(),
     val appVersion:String? = "",
     val lastLoginTimeStamp:String? = "",
     val ipAddress:String? = ""
 )
 
-enum class DeviceType{
-    PHONE, TABLET
-}
 
 

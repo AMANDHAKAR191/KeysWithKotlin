@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.auth.domain.repository
 
+import com.aman.keyswithkotlin.auth.domain.model.DeviceData
 import com.aman.keyswithkotlin.auth.domain.model.User
 import com.aman.keyswithkotlin.core.util.Response
 import com.google.android.gms.auth.api.identity.BeginSignInResult
@@ -27,5 +28,5 @@ interface AuthRepository {
 
     suspend fun revokeAccess(): Flow<RevokeAccessResponse>
 
-    fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>>
+    suspend fun getLoggedInDevices():Flow<Response<Pair<List<DeviceData>?, Boolean?>>>
 }

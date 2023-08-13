@@ -1,4 +1,4 @@
-package com.aman.keyswithkotlin.auth.presentation.accessVerification
+package com.aman.keyswithkotlin.access_verification.presentation.accessVerification
 
 import UIEvents
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +36,9 @@ fun AccessVerificationScreen(
                 }
 
                 is UIEvents.NavigateToNextScreen->{
+                    navigateToProfileScreen()
+                }
+                is UIEvents.HideAlertDialog->{
                     navigateToProfileScreen()
                 }
 

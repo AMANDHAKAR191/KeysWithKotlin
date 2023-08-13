@@ -47,7 +47,6 @@ class MainActivity : ComponentActivity() {
             val deviceInfo = DeviceInfo(context)
 
             println("deviceInfo.getDeviceId(): ${deviceInfo.getDeviceId()}")
-            println("deviceInfo.getDeviceType(): ${deviceInfo.getDeviceType()}")
             println("deviceInfo.getAppVersion(): ${deviceInfo.getAppVersion()}")
             println("deviceInfo.getLastLoginTimeStamp(): ${deviceInfo.getLastLoginTimeStamp()}")
 
@@ -58,7 +57,6 @@ class MainActivity : ComponentActivity() {
                 lifecycleOwner = this
             )
             checkAuthState()
-
         }
     }
 

@@ -7,6 +7,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthScreen
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthViewModel
+import com.aman.keyswithkotlin.auth.presentation.profile.ProfileScreen
+import com.aman.keyswithkotlin.auth.presentation.profile.ProfileViewModel
+import com.aman.keyswithkotlin.core.components.BottomBar
 import com.google.firebase.auth.GoogleAuthProvider
 
 fun NavGraphBuilder.authNavGraph(
