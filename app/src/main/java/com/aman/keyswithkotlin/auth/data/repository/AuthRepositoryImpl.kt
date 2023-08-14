@@ -30,6 +30,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.getValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
@@ -84,34 +85,43 @@ class AuthRepositoryImpl @Inject constructor(
             val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
             val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
 
-            println("isNewUser: $isNewUser")
+//            println("isNewUser: $isNewUser")
 
             coroutineScope {
-                val addUserDeferred = async { addUserToFireBase(auth.currentUser) }
-//                val addDeviceDataDeferred = async { addDeviceDataToFireBase(auth.currentUser) }
-                val getUserDeferred = async { getUserFromFireBase(auth.currentUser) }
+                checkFirebaseUser().collect { isUserExist ->
+                    println("auth: isUserExist: $isUserExist")
 
-                val status = if (isNewUser) {
-                    println("new user")
-                    addUserDeferred.await()
-                    async { addDeviceDataToFireBase(auth.currentUser, DeviceType.Primary) }.await()
+
+//                val addDeviceDataDeferred = async { addDeviceDataToFireBase(auth.currentUser) }
+                    val status = if (!isUserExist) {
+                        println("auth: new user")
+                        val addUserDeferred = async { addUserToFireBase(auth.currentUser) }
+                        addUserDeferred.await()
+//                        async { addDeviceDataToFireBase(auth.currentUser, DeviceType.Primary) }.await()
 //                    addDeviceDataDeferred.await()
-                } else {
-                    println("old user")
-                    getUserDeferred.await()
+                        async {
+                            addDeviceDataToFireBase(
+                                auth.currentUser, DeviceType.Secondary
+                            )
+                        }.await()
+                    } else {
+                        println("auth: old user")
+                        val getUserDeferred = async { getUserFromFireBase(auth.currentUser) }
+                        getUserDeferred.await()
 //                    var deviceType:DeviceType = DeviceType.Secondary
 //                    checkDeviceType(deviceInfo.getDeviceId()).collect{
 //                        deviceType = it
 //                    }
-                    async {
-                        addDeviceDataToFireBase(
-                            auth.currentUser, DeviceType.Secondary
-                        )
-                    }.await()
+                        async {
+                            addDeviceDataToFireBase(
+                                auth.currentUser, DeviceType.Secondary
+                            )
+                        }.await()
 //                    addDeviceDataDeferred.await()
-                }
-                status.let {
-                    trySend(it)
+                    }
+                    status.let {
+                        trySend(it)
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -122,113 +132,23 @@ class AuthRepositoryImpl @Inject constructor(
         awaitClose { close() }
     }
 
-
-    override suspend fun signOut(): Flow<SignOutResponse> = callbackFlow {
-        try {
-            oneTapClient.signOut().await()
-            auth.signOut()
-            trySend(Response.Success(true))
-        } catch (e: Exception) {
-            trySend(Response.Failure(e))
-        }
-        awaitClose { close() }
-    }
-
-    override suspend fun revokeAccess(): Flow<RevokeAccessResponse> = callbackFlow {
-        try {
-            auth.currentUser?.apply {
-//                db.reference.child(USERS).child(uid).removeValue().await()
-                googleSignInClient.revokeAccess().await()
-                oneTapClient.signOut().await()
-                delete().await()
-            }
-            trySend(Response.Success(true))
-        } catch (e: Exception) {
-            trySend(Response.Failure(e))
-        }
-        awaitClose { close() }
-    }
-
-    override suspend fun getLoggedInDevices(): Flow<Response<Pair<List<DeviceData>?, Boolean?>>> =
-        callbackFlow {
-            auth.currentUser?.let {
-                var _deviceList = mutableListOf<DeviceData>()
-                val reference = db.reference.child("users").child(it.uid).child("userDevicesList")
-
-                val listener = object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        println("dataSnapshot: $dataSnapshot")
-                        for (ds in dataSnapshot.children) {
-                            println("ds: $ds")
-                            val item = ds.getValue(DeviceData::class.java)
-                            item?.let {
-                                _deviceList.add(it)
-                            }
-                        }
-                        trySend(Response.Success(_deviceList))
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        trySend(Response.Failure(error.toException()))
-                    }
-                }
-                reference.addValueEventListener(listener)
-                awaitClose {
-                    close()
-                    reference.removeEventListener(listener)
-                }
-            }
-        }
-
     private suspend fun addDeviceDataToFireBase(
         user: FirebaseUser?, deviceType: DeviceType
     ): SignInWithGoogleResponse = coroutineScope {
         user?.let {
             val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+            val deviceId = deviceInfo.getDeviceId()
+            val deviceData = mapOf(deviceId to getDeviceData(deviceInfo, deviceType))
+
             return@coroutineScope try {
-                db.reference.child(USERS).child(it.uid).child("userDevicesList")
-                    .child(deviceInfo.getDeviceId()).setValue(getDeviceData(deviceInfo, deviceType))
-                    .await() // Wait for the first Firebase operation to complete
-                Response.Success(status = true) // Return success response if both setValue operations are successful
+                db.reference.child(USERS).child(it.uid).child("userDevicesList").child(deviceId)
+                    .setValue(deviceData)
+                    .await() // Update the specific device data under userDevicesList
+                Response.Success(status = true)
             } catch (e: Exception) {
-                Response.Failure(e) // Return failure response if either setValue operation fails
+                Response.Failure(e)
             }
         } ?: Response.Failure(Exception("Invalid FirebaseUser."))
-    }
-
-    private fun checkDeviceType(deviceId: String): Flow<DeviceType> = callbackFlow {
-        println("check4")
-        auth.currentUser?.let {
-            val reference =
-                db.reference.child("users").child(it.uid).child("userDevicesList").child(deviceId)
-                    .child("deviceType")
-
-            val listener = object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    println("dataSnapshot: $dataSnapshot")
-                    for (ds in dataSnapshot.children) {
-                        println("ds: $ds")
-                    }
-                    DeviceType.Primary
-//                    val item = dataSnapshot.getValue(String::class.java)
-//                    println("item: $item")
-//                    item?.let {
-//                        println("item: $it")
-//                        if (it == DeviceType.Primary.toString()) {
-//                            DeviceType.Secondary
-//                        } else {
-//                            DeviceType.Primary
-//                        }
-//                    }
-
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                }
-            }
-            reference.addValueEventListener(listener)
-        }
-        awaitClose { close() }
     }
 
     private suspend fun addUserToFireBase(
@@ -238,6 +158,13 @@ class AuthRepositoryImpl @Inject constructor(
         val aesIV = generatePassword(22, specialCharacters = false)
         user?.let {
             val timeStampUtil = TimeStampUtil()
+            val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+            val userDevicesList = mapOf(
+                deviceInfo.getDeviceId() to getDeviceData(
+                    deviceInfo = deviceInfo,
+                    deviceType = DeviceType.Secondary
+                )
+            )
             val newUser = User(
                 displayName = it.displayName,
                 email = it.email,
@@ -247,7 +174,7 @@ class AuthRepositoryImpl @Inject constructor(
                 privateUID = it.uid,
                 publicUID = createPublicUID(it.email),
                 createdAt = timeStampUtil.generateTimestamp(),
-                userDevicesList = null
+                userDevicesList = userDevicesList
             )
 
             AES.getInstance(aesKey, aesIV)?.let { aes ->
@@ -300,6 +227,154 @@ class AuthRepositoryImpl @Inject constructor(
             ipAddress = "1234"
         )
     }
+
+    private fun checkFirebaseUser(): Flow<Boolean> = callbackFlow {
+        auth.currentUser?.let { user ->
+            val query = db.reference.child("users").orderByChild("privateUID").equalTo(user.uid)
+
+            val listener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                    val item = dataSnapshot.getValue(String::class.java)
+                    println("auth: dataSnapshot: $dataSnapshot")
+                    if (dataSnapshot.exists()) {
+                        println("auth: user exist")
+                        trySend(true) // Emitting true if the item is found
+                    } else {
+                        println("auth: user does not exist")
+                        trySend(false) // Emitting false if the item is not found
+                    }
+                    close()
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // You can handle the error here as you see fit
+                }
+            }
+            query.addValueEventListener(listener)
+
+            // Removing the listener when the flow is no longer collected
+            awaitClose {
+                query.removeEventListener(listener)
+            }
+        }
+    }
+
+
+    override suspend fun signOut(): Flow<SignOutResponse> = callbackFlow {
+        try {
+            oneTapClient.signOut().await()
+            auth.signOut()
+            trySend(Response.Success(true))
+        } catch (e: Exception) {
+            trySend(Response.Failure(e))
+        }
+        awaitClose { close() }
+    }
+
+    override suspend fun revokeAccess(): Flow<RevokeAccessResponse> = callbackFlow {
+        try {
+            auth.currentUser?.apply {
+//                db.reference.child(USERS).child(uid).removeValue().await()
+                googleSignInClient.revokeAccess().await()
+                oneTapClient.signOut().await()
+                delete().await()
+            }
+            trySend(Response.Success(true))
+        } catch (e: Exception) {
+            trySend(Response.Failure(e))
+        }
+        awaitClose { close() }
+    }
+
+    override suspend fun getLoggedInDevices(): Flow<Response<Pair<List<DeviceData>?, Boolean?>>> =
+        callbackFlow {
+            auth.currentUser?.let {
+                var _deviceList = mutableListOf<DeviceData>()
+                val reference = db.reference.child("users").child(it.uid).child("userDevicesList")
+
+                val listener = object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        println("dataSnapshot: $dataSnapshot")
+                        for (ds in dataSnapshot.children) {
+                            println("ds: ${ds}")
+                            for (ds1 in ds.children){
+                                println("ds: ${ds1}")
+                                val item = ds1.getValue(DeviceData::class.java)
+                                item?.let {
+                                    _deviceList.add(it)
+                                }
+                            }
+                        }
+                        trySend(Response.Success(_deviceList))
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        trySend(Response.Failure(error.toException()))
+                    }
+                }
+                reference.addValueEventListener(listener)
+                awaitClose {
+                    close()
+                    reference.removeEventListener(listener)
+                }
+            }
+        }
+
+//    private suspend fun addDeviceDataToFireBase(
+//        user: FirebaseUser?, deviceType: DeviceType
+//    ): SignInWithGoogleResponse = coroutineScope {
+//        user?.let {
+//            val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+//            println("${USERS}/${it.uid}/userDevicesList/${deviceInfo.getDeviceId()}")
+//            return@coroutineScope try {
+//                db.reference.child(USERS).child(it.uid).child("userDevicesList")
+//                    .child(deviceInfo.getDeviceId()).setValue(getDeviceData(deviceInfo, deviceType))
+//                    .await() // Wait for the first Firebase operation to complete
+//                Response.Success(status = true) // Return success response if both setValue operations are successful
+//            } catch (e: Exception) {
+//                Response.Failure(e) // Return failure response if either setValue operation fails
+//            }
+//        } ?: Response.Failure(Exception("Invalid FirebaseUser."))
+//    }
+
+
+
+    private fun checkDeviceType(deviceId: String): Flow<DeviceType> = callbackFlow {
+        println("check4")
+        auth.currentUser?.let {
+            val reference =
+                db.reference.child("users").child(it.uid).child("userDevicesList").child(deviceId)
+                    .child("deviceType")
+
+            val listener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    println("dataSnapshot: $dataSnapshot")
+                    for (ds in dataSnapshot.children) {
+                        println("ds: $ds")
+                    }
+                    DeviceType.Primary
+//                    val item = dataSnapshot.getValue(String::class.java)
+//                    println("item: $item")
+//                    item?.let {
+//                        println("item: $it")
+//                        if (it == DeviceType.Primary.toString()) {
+//                            DeviceType.Secondary
+//                        } else {
+//                            DeviceType.Primary
+//                        }
+//                    }
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
+            }
+            reference.addValueEventListener(listener)
+        }
+        awaitClose { close() }
+    }
+
+
 
     private suspend fun getUserFromFireBase(
         user: FirebaseUser?

@@ -14,7 +14,7 @@ data class User(
     var privateUID: String? = "",
     var publicUID: String? = "",
     var createdAt: String? = "",
-    var userDevicesList: DeviceData? = null,
+    var userDevicesList: Map<String, DeviceData>? = null,
 )
 
 data class DeviceData(

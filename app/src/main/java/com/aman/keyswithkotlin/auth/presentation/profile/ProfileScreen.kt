@@ -18,7 +18,10 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.aman.keyswithkotlin.Keys
 import com.aman.keyswithkotlin.auth.domain.repository.RevokeAccessResponse
 import com.aman.keyswithkotlin.auth.domain.repository.SignOutResponse
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthScreen
@@ -39,6 +43,7 @@ import com.aman.keyswithkotlin.auth.presentation.profile.components.RevokeAccess
 import com.aman.keyswithkotlin.auth.presentation.profile.components.SignOut
 import com.aman.keyswithkotlin.core.Constants.REVOKE_ACCESS_MESSAGE
 import com.aman.keyswithkotlin.core.Constants.SIGN_OUT
+import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.DeviceType
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordState
@@ -108,6 +113,16 @@ fun ProfileScreen(
                     fontSize = 24.sp
                 )
                 Column {
+                    val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+                    var isCurrentUserPrimary by remember { mutableStateOf(false) }
+                    //to check is current device is primary
+                    for (deviceData in state.loggedInDeviceList){
+                        if (deviceData.deviceId == deviceInfo.getDeviceId()){
+                            if (deviceData.deviceType == DeviceType.Primary.toString())
+                                isCurrentUserPrimary = true
+                                break
+                        }
+                    }
                     LazyColumn{
                         items(state.loggedInDeviceList){deviceData->
                             Column {
@@ -116,9 +131,12 @@ fun ProfileScreen(
                                 Text(text = "Device Type: ${deviceData.deviceType}")
                                 Text(text = "Device Authorization: ${deviceData.authorization}")
                                 Text(text = "Last login time: ${deviceData.lastLoginTimeStamp}")
-                                if (deviceData.deviceType == DeviceType.Primary.toString()){
-                                    Button(onClick = { /*TODO*/ }) {
-                                        Text(text = "Remove Access")
+                                //if current device is primary device then show remove access for secondary devices
+                                if (isCurrentUserPrimary){
+                                    if (deviceData.deviceType == DeviceType.Secondary.toString()){
+                                        Button(onClick = { /*TODO*/ }) {
+                                            Text(text = "Remove Access")
+                                        }
                                     }
                                 }
                             }

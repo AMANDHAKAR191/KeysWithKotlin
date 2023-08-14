@@ -21,7 +21,7 @@ class AccessVerificationRepositoryImpl(
         callbackFlow {
             println("check4")
             val reference = db.reference.child("users")
-                .child(UID).child("userDevicesList").child(deviceId).child("authorization")
+                .child(UID).child("userDevicesList").child(deviceId).child(deviceId).child("authorization")
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     println("dataSnapshot11: $dataSnapshot")

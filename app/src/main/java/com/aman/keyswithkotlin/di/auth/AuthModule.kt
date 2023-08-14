@@ -58,10 +58,10 @@ class AuthModule {
             BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                 .setSupported(true)
                 .setServerClientId(app.getString(R.string.web_client_id))
-                .setFilterByAuthorizedAccounts(true)
+                .setFilterByAuthorizedAccounts(false)
                 .build()
         )
-        .setAutoSelectEnabled(true)
+//        .setAutoSelectEnabled(true)
         .build()
 
     @Provides
