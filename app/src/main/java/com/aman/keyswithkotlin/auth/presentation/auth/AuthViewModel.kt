@@ -8,12 +8,15 @@ import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.auth.domain.repository.OneTapSignInResponse
 import com.aman.keyswithkotlin.auth.domain.repository.SignInWithGoogleResponse
 import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
+import com.aman.keyswithkotlin.auth.presentation.AuthEvent
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.core.util.Response.Loading
 import com.aman.keyswithkotlin.core.util.Response.Success
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.AuthCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,8 +31,8 @@ class AuthViewModel @Inject constructor(
     var signInWithGoogleResponse by mutableStateOf<SignInWithGoogleResponse>(Success(status = false))
         private set
 
+
     fun oneTapSignIn() = viewModelScope.launch {
-        println("check1")
         oneTapSignInResponse = Loading
         authUseCases.oneTapSignInWithGoogle().collect { response ->
             oneTapSignInResponse = response
@@ -41,7 +44,6 @@ class AuthViewModel @Inject constructor(
         authUseCases.firebaseSignInWithGoogle(googleCredential).collect { response ->
             when(response){
                 is Response.Success ->{
-                    println("response.data: ${response.data}")
                 }
 
                 else -> {}

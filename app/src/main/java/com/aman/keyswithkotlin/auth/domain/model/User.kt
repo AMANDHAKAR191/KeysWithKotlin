@@ -26,7 +26,13 @@ data class DeviceData(
     val deviceType: String? = DeviceType.Secondary.toString(),
     val appVersion:String? = "",
     val lastLoginTimeStamp:String? = "",
-    val ipAddress:String? = ""
+    val ipAddress:String? = "",
+    val requestAuthorizationAccess: RequestAuthorizationAccess = RequestAuthorizationAccess()
+)
+
+data class RequestAuthorizationAccess(
+    val requesterID:String? = "",
+    val requestingAccess:Boolean = false
 )
 
 

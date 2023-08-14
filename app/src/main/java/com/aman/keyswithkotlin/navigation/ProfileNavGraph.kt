@@ -27,6 +27,8 @@ fun NavGraphBuilder.profileNavGraph(
                 state = viewModel.state.value,
                 displayName = viewModel.displayName.invoke(),
                 photoUrl = viewModel.photoUrl.invoke(),
+                eventFlowState = viewModel.eventFlow,
+                onEvent = viewModel::onEvent,
                 signOutResponse = viewModel.signOutResponse,
                 revokeAccessResponse = viewModel.revokeAccessResponse,
                 onSignOut = {

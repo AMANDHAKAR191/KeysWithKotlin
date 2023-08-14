@@ -15,12 +15,14 @@ sealed class UIEvents {
     }
     object SavePassword : UIEvents()
 
-    object ShowAlertDialog:UIEvents()
-
     object ShowLoadingBar:UIEvents()
 
-    data class ShowError(val errorMessage:String):UIEvents()
+    object ShowAlertDialog:UIEvents()
     object HideAlertDialog:UIEvents()
+    object ShowAuthorizationAlertDialog:UIEvents()
+    object HideAuthorizationAlertDialog:UIEvents()
+
+    data class ShowError(val errorMessage:String):UIEvents()
 
     object NavigateToNextScreen:UIEvents()
     object ChatUsrCreatedSuccessFully : UIEvents()

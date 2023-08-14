@@ -22,11 +22,14 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun AccessVerificationScreen(
     eventFlowState: SharedFlow<UIEvents>,
-    navigateToProfileScreen:()->Unit,
+    navigateToProfileScreen: () -> Unit,
+    onEvent:(AccessVerificationEvent)->Unit
 ) {
 
 
     var isAlertDialogVisible by remember { mutableStateOf(false) }
+    var isAuthorizationAlertDialogVisible by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(key1 = true) {
         eventFlowState.collectLatest { event ->
@@ -35,11 +38,20 @@ fun AccessVerificationScreen(
                     isAlertDialogVisible = true
                 }
 
-                is UIEvents.NavigateToNextScreen->{
+                is UIEvents.NavigateToNextScreen -> {
                     navigateToProfileScreen()
                 }
-                is UIEvents.HideAlertDialog->{
+
+                is UIEvents.HideAlertDialog -> {
                     navigateToProfileScreen()
+                }
+
+                is UIEvents.ShowAuthorizationAlertDialog -> {
+                    isAuthorizationAlertDialogVisible = true
+                }
+
+                is UIEvents.HideAuthorizationAlertDialog -> {
+                    isAuthorizationAlertDialogVisible = false
                 }
 
                 else -> {}
@@ -58,7 +70,7 @@ fun AccessVerificationScreen(
             )
         },
         content = { innerPadding ->
-            if (isAlertDialogVisible){
+            if (isAlertDialogVisible) {
                 println("check2::")
                 AlertDialog(
                     onDismissRequest = {
@@ -70,10 +82,16 @@ fun AccessVerificationScreen(
                         Text(text = "Warning!", color = MaterialTheme.colorScheme.error)
                     },
                     text = {
-                        Text(text = "You device is not Authorized", color = MaterialTheme.colorScheme.error)
+                        Text(
+                            text = "You device is not Authorized",
+                            color = MaterialTheme.colorScheme.error
+                        )
                     },
                     confirmButton = {
-                        Button(onClick = { navigateToProfileScreen() }) {
+                        Button(onClick = {
+//                            navigateToProfileScreen()
+                            onEvent(AccessVerificationEvent.AskAccessPermission)
+                        }) {
                             Text("Ask Permission")
                         }
 //                        TextButton(
@@ -87,10 +105,55 @@ fun AccessVerificationScreen(
                     dismissButton = {
                         TextButton(
                             onClick = {
+                                onEvent(AccessVerificationEvent.CancelAuthorizationAccessProcess)
                                 isAlertDialogVisible = false
                             }
                         ) {
-                            Text("Ok")
+                            Text("Cancel request")
+                        }
+                    }
+                )
+            }
+
+            if (isAuthorizationAlertDialogVisible) {
+                println("check2::")
+                AlertDialog(
+                    onDismissRequest = {
+                        // Dismiss the dialog when the user clicks outside the dialog or on the back
+                        // button. If you want to disable that functionality, simply use an empty
+                        // onDismissRequest.
+                    },
+                    title = {
+                        Text(text = "Grant Permission!", color = MaterialTheme.colorScheme.error)
+                    },
+                    text = {
+                        Text(
+                            text = "Device is requesting for Login permission",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            onEvent(AccessVerificationEvent.GrantAccessPermission)
+                        }) {
+                            Text("Grant Permission")
+                        }
+//                        TextButton(
+//                            onClick = {
+//
+//                            }
+//                        ) {
+//                            Text("Ask Permission")
+//                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                navigateToProfileScreen()
+                                isAuthorizationAlertDialogVisible= false
+                            }
+                        ) {
+                            Text("Decline")
                         }
                     }
                 )

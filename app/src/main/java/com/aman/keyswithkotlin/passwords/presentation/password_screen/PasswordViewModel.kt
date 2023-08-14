@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.Keys
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.AccessVerificationUseCases
+import com.aman.keyswithkotlin.auth.domain.model.RequestAuthorizationAccess
 import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.util.Response

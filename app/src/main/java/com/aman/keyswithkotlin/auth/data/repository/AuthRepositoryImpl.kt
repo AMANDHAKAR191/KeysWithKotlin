@@ -85,39 +85,25 @@ class AuthRepositoryImpl @Inject constructor(
             val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
             val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
 
-//            println("isNewUser: $isNewUser")
 
             coroutineScope {
                 checkFirebaseUser().collect { isUserExist ->
-                    println("auth: isUserExist: $isUserExist")
-
-
-//                val addDeviceDataDeferred = async { addDeviceDataToFireBase(auth.currentUser) }
                     val status = if (!isUserExist) {
-                        println("auth: new user")
                         val addUserDeferred = async { addUserToFireBase(auth.currentUser) }
                         addUserDeferred.await()
-//                        async { addDeviceDataToFireBase(auth.currentUser, DeviceType.Primary) }.await()
-//                    addDeviceDataDeferred.await()
                         async {
                             addDeviceDataToFireBase(
                                 auth.currentUser, DeviceType.Secondary
                             )
                         }.await()
                     } else {
-                        println("auth: old user")
                         val getUserDeferred = async { getUserFromFireBase(auth.currentUser) }
                         getUserDeferred.await()
-//                    var deviceType:DeviceType = DeviceType.Secondary
-//                    checkDeviceType(deviceInfo.getDeviceId()).collect{
-//                        deviceType = it
-//                    }
                         async {
                             addDeviceDataToFireBase(
                                 auth.currentUser, DeviceType.Secondary
                             )
                         }.await()
-//                    addDeviceDataDeferred.await()
                     }
                     status.let {
                         trySend(it)
@@ -179,7 +165,6 @@ class AuthRepositoryImpl @Inject constructor(
 
             AES.getInstance(aesKey, aesIV)?.let { aes ->
                 val encryptedUser = encryptUser(newUser, aes)
-                println("Adding user to Firebase...")
 
                 return@coroutineScope try {
                     db.reference.child(USERS).child(it.uid).setValue(encryptedUser)
@@ -235,12 +220,9 @@ class AuthRepositoryImpl @Inject constructor(
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
 //                    val item = dataSnapshot.getValue(String::class.java)
-                    println("auth: dataSnapshot: $dataSnapshot")
                     if (dataSnapshot.exists()) {
-                        println("auth: user exist")
                         trySend(true) // Emitting true if the item is found
                     } else {
-                        println("auth: user does not exist")
                         trySend(false) // Emitting false if the item is not found
                     }
                     close()
@@ -294,11 +276,8 @@ class AuthRepositoryImpl @Inject constructor(
 
                 val listener = object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        println("dataSnapshot: $dataSnapshot")
                         for (ds in dataSnapshot.children) {
-                            println("ds: ${ds}")
                             for (ds1 in ds.children){
-                                println("ds: ${ds1}")
                                 val item = ds1.getValue(DeviceData::class.java)
                                 item?.let {
                                     _deviceList.add(it)
@@ -320,25 +299,6 @@ class AuthRepositoryImpl @Inject constructor(
             }
         }
 
-//    private suspend fun addDeviceDataToFireBase(
-//        user: FirebaseUser?, deviceType: DeviceType
-//    ): SignInWithGoogleResponse = coroutineScope {
-//        user?.let {
-//            val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
-//            println("${USERS}/${it.uid}/userDevicesList/${deviceInfo.getDeviceId()}")
-//            return@coroutineScope try {
-//                db.reference.child(USERS).child(it.uid).child("userDevicesList")
-//                    .child(deviceInfo.getDeviceId()).setValue(getDeviceData(deviceInfo, deviceType))
-//                    .await() // Wait for the first Firebase operation to complete
-//                Response.Success(status = true) // Return success response if both setValue operations are successful
-//            } catch (e: Exception) {
-//                Response.Failure(e) // Return failure response if either setValue operation fails
-//            }
-//        } ?: Response.Failure(Exception("Invalid FirebaseUser."))
-//    }
-
-
-
     private fun checkDeviceType(deviceId: String): Flow<DeviceType> = callbackFlow {
         println("check4")
         auth.currentUser?.let {
@@ -348,9 +308,7 @@ class AuthRepositoryImpl @Inject constructor(
 
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    println("dataSnapshot: $dataSnapshot")
                     for (ds in dataSnapshot.children) {
-                        println("ds: $ds")
                     }
                     DeviceType.Primary
 //                    val item = dataSnapshot.getValue(String::class.java)
@@ -399,7 +357,6 @@ class AuthRepositoryImpl @Inject constructor(
                 while (_user == null) {
                     kotlinx.coroutines.delay(100) // Add a small delay before checking again
                 }
-                println("User1: $_user")
                 _user?.let {
                     Response.Success(
                         _user, true
@@ -429,7 +386,6 @@ class AuthRepositoryImpl @Inject constructor(
                     val listener = object : ValueEventListener {
                         override fun onDataChange(dataSnapshot: DataSnapshot) {
                             _user = dataSnapshot.getValue(User::class.java)
-                            println("User: $_user")
                         }
 
                         override fun onCancelled(error: DatabaseError) {
@@ -438,7 +394,6 @@ class AuthRepositoryImpl @Inject constructor(
                         }
                     }
                     reference.addListenerForSingleValueEvent(listener)
-                    println("User1: $_user")
                     if (_user != null) {
                         Response.Success(
                             _user, true

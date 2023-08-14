@@ -1,11 +1,12 @@
 package com.aman.keyswithkotlin.access_verification.presentation.accessVerification
 
 import UIEvents
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.Keys
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.AccessVerificationUseCases
-import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
+import com.aman.keyswithkotlin.auth.domain.model.RequestAuthorizationAccess
 import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.util.Response
@@ -20,29 +21,132 @@ import javax.inject.Inject
 @HiltViewModel
 class AccessVerificationViewModel @Inject constructor(
     private val accessVerificationUseCases: AccessVerificationUseCases
-):ViewModel() {
+) : ViewModel() {
     private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
+
+    val _accessRequestingDeviceId = mutableStateOf("")
+
     init {
-        println("check1")
+        println("check point 1")
         checkAuthorizationOfDevice()
+    }
+
+    fun onEvent(event: AccessVerificationEvent) {
+        val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+        when (event) {
+            AccessVerificationEvent.AskAccessPermission -> {
+                viewModelScope.launch {
+                    accessVerificationUseCases.requestAuthorizationAccess(
+                        primaryDeviceId = "aa32850c3b944554",
+                        requestingDeviceId = "90ee812f4d6911ce"
+                    ).collect {
+
+                    }
+                }
+            }
+
+            is AccessVerificationEvent.GrantAccessPermission -> {
+                viewModelScope.launch {
+                    println("_accessRequestingDeviceId.value: ${_accessRequestingDeviceId.value}")
+                    accessVerificationUseCases.giveAuthorizationAccessOfSecondaryDevice(
+                        _accessRequestingDeviceId.value
+                    ).collect {response->
+                        when(response){
+                            is Response.Failure -> {
+
+
+                            }
+                            Response.Loading -> {
+
+
+                            }
+                            is Response.Success -> {
+                                _eventFlow.emit(UIEvents.NavigateToNextScreen)
+                                completeAccessGrantingProcess(deviceInfo.getDeviceId())
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            AccessVerificationEvent.CancelAuthorizationAccessProcess -> {
+                completeAccessGrantingProcess("aa32850c3b944554")
+            }
+        }
     }
 
     private fun checkAuthorizationOfDevice() {
         viewModelScope.launch(Dispatchers.IO) {
             val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
-            println("check2")
             accessVerificationUseCases.checkAuthorizationOfDevice(deviceInfo.getDeviceId())
                 .collect { response ->
                     withContext(Dispatchers.Main) {
                         when (response) {
                             is Response.Success<*, *> -> {
-                                println("isAuthorize: ${response.data as String}")
-                                if ((response.data).equals(Authorization.NotAuthorized.toString())){
+                                println("isAuthorize??: ${response.data as String}")
+                                if ((response.data).equals(Authorization.NotAuthorized.toString())) {
+                                    println("check point 2")
                                     _eventFlow.emit(UIEvents.ShowAlertDialog)
-                                }else{
+                                } else {
+                                    println("check point 1")
+                                    getAccessRequesterClient()
+                                }
+                            }
+
+                            is Response.Failure -> {
+
+                            }
+
+                            is Response.Loading -> {
+
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun getAccessRequesterClient() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+            accessVerificationUseCases.getAccessRequesterClient(deviceInfo.getDeviceId())
+                .collect { response ->
+                    withContext(Dispatchers.Main) {
+                        when (response) {
+                            is Response.Success<*, *> -> {
+                                println("response.data: ${response.data as RequestAuthorizationAccess}")
+                                if (response.data.requestingAccess) {
+                                    _accessRequestingDeviceId.value = response.data.requesterID!!
+                                    _eventFlow.emit(UIEvents.ShowAuthorizationAlertDialog)
+                                } else {
+                                    _eventFlow.emit(UIEvents.HideAuthorizationAlertDialog)
                                     _eventFlow.emit(UIEvents.NavigateToNextScreen)
                                 }
+                            }
+
+                            is Response.Failure -> {
+
+                            }
+
+                            is Response.Loading -> {
+
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun completeAccessGrantingProcess(deviceId:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            accessVerificationUseCases.completeAuthorizationAccessProcess(deviceId)
+                .collect { response ->
+                    withContext(Dispatchers.Main) {
+                        when (response) {
+                            is Response.Success<*, *> -> {
+                                _eventFlow.emit(UIEvents.NavigateToNextScreen)
                             }
 
                             is Response.Failure -> {

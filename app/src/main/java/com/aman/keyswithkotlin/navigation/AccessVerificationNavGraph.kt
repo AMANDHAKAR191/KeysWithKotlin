@@ -19,6 +19,7 @@ fun NavGraphBuilder.accessVerificationNavGraph(
             val viewModel: AccessVerificationViewModel = hiltViewModel()
             AccessVerificationScreen(
                 eventFlowState = viewModel.eventFlow,
+                onEvent = viewModel::onEvent,
                 navigateToProfileScreen = {
                     navController.popBackStack()
                     navController.navigate(Graph.HOME)

@@ -78,8 +78,8 @@ fun PasswordScreen(
     navigateToAddEditPasswordScreen: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit,
     navigateToProfileScreen: () -> Unit,
-    navigateToAccessVerificationScreen:()->Unit,
-    closeApp:()->Unit,
+    navigateToAccessVerificationScreen: () -> Unit,
+    closeApp: () -> Unit,
     bottomBar: @Composable (() -> Unit)
 ) {
     val scope = rememberCoroutineScope()
@@ -124,10 +124,12 @@ fun PasswordScreen(
                         onEvent(PasswordEvent.RestorePassword)
                     }
                 }
+
                 is UIEvents.ShowAlertDialog -> {
                     isAlertDialogVisible = true
                 }
-                is UIEvents.HideAlertDialog->{
+
+                is UIEvents.HideAlertDialog -> {
                     isAlertDialogVisible = false
                 }
 
@@ -156,15 +158,15 @@ fun PasswordScreen(
                 item = items,
                 onMinFabItemClick = { minFabItem ->
                     when (minFabItem.identifier) {
-                        com.amandhakar.expendable_floating_action_button.Identifier.AddEditPassword.name -> {
+                        Identifier.AddEditPassword.name -> {
                             navigateToAddEditPasswordScreen()
                         }
 
-                        com.amandhakar.expendable_floating_action_button.Identifier.GeneratePassword.name -> {
+                        Identifier.GeneratePassword.name -> {
                             navigateToGeneratePasswordScreen()
                         }
 
-                        com.amandhakar.expendable_floating_action_button.Identifier.Profile.name -> {
+                        Identifier.Profile.name -> {
                             navigateToProfileScreen()
                         }
 
@@ -368,7 +370,7 @@ fun PasswordScreen(
                 }
             }
             //for Access Alert
-            if (isAlertDialogVisible){
+            if (isAlertDialogVisible) {
                 println("check2::")
                 AlertDialog(
                     onDismissRequest = {
@@ -380,7 +382,10 @@ fun PasswordScreen(
                         Text(text = "Warning!", color = MaterialTheme.colorScheme.error)
                     },
                     text = {
-                        Text(text = "You device is not Authorized. If you are not Authorized user then you can't use this account.", color = MaterialTheme.colorScheme.error)
+                        Text(
+                            text = "You device is not Authorized. If you are not Authorized user then you can't use this account.",
+                            color = MaterialTheme.colorScheme.error
+                        )
                     },
                     confirmButton = {
                         Button(onClick = {

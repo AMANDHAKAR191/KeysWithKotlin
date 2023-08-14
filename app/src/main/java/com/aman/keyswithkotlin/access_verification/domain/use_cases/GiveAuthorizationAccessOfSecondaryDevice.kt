@@ -4,10 +4,10 @@ import com.aman.keyswithkotlin.access_verification.domain.repository.AccessVerif
 import com.aman.keyswithkotlin.core.util.Response
 import kotlinx.coroutines.flow.Flow
 
-class CheckAuthorizationOfDevice(
+class GiveAuthorizationAccessOfSecondaryDevice (
     private val accessVerificationRepository: AccessVerificationRepository
 ) {
     operator fun invoke(deviceId:String): Flow<Response<Pair<String?, Boolean?>>> {
-        return accessVerificationRepository.checkAuthorizationOfDevice(deviceId)
+        return accessVerificationRepository.giveAuthorizationAccessOfSecondaryDevice(deviceId)
     }
 }

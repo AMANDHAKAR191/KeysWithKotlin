@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.auth.presentation.profile
 
+import UIEvents
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,14 +10,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,19 +39,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.aman.keyswithkotlin.Keys
+import com.aman.keyswithkotlin.access_verification.presentation.accessVerification.AccessVerificationEvent
 import com.aman.keyswithkotlin.auth.domain.repository.RevokeAccessResponse
 import com.aman.keyswithkotlin.auth.domain.repository.SignOutResponse
+import com.aman.keyswithkotlin.auth.presentation.AuthEvent
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthScreen
 import com.aman.keyswithkotlin.auth.presentation.profile.components.ProfileContent
 import com.aman.keyswithkotlin.auth.presentation.profile.components.ProfileTopBar
 import com.aman.keyswithkotlin.auth.presentation.profile.components.RevokeAccess
 import com.aman.keyswithkotlin.auth.presentation.profile.components.SignOut
+import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.Constants.REVOKE_ACCESS_MESSAGE
 import com.aman.keyswithkotlin.core.Constants.SIGN_OUT
 import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.DeviceType
 import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordState
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +66,8 @@ fun ProfileScreen(
     state: ProfileState,
     displayName:String,
     photoUrl:String,
+    onEvent: (AuthEvent) -> Unit,
+    eventFlowState: SharedFlow<UIEvents>,
     revokeAccessResponse:RevokeAccessResponse,
     signOutResponse:SignOutResponse,
     onSignOut:()->Unit,
@@ -67,6 +80,29 @@ fun ProfileScreen(
         SnackbarHostState()
     }
     val coroutineScope = rememberCoroutineScope()
+    var isAuthorizationAlertDialogVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = true) {
+        eventFlowState.collectLatest { event ->
+            when (event) {
+
+                is UIEvents.NavigateToNextScreen -> {
+                    isAuthorizationAlertDialogVisible= false
+                }
+
+                is UIEvents.ShowAuthorizationAlertDialog -> {
+                    isAuthorizationAlertDialogVisible = true
+                }
+
+                is UIEvents.HideAuthorizationAlertDialog -> {
+                    isAuthorizationAlertDialogVisible = false
+                }
+
+                else -> {}
+            }
+        }
+
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
@@ -118,9 +154,10 @@ fun ProfileScreen(
                     //to check is current device is primary
                     for (deviceData in state.loggedInDeviceList){
                         if (deviceData.deviceId == deviceInfo.getDeviceId()){
-                            if (deviceData.deviceType == DeviceType.Primary.toString())
+                            if(deviceData.deviceType == DeviceType.Primary.toString()) {
                                 isCurrentUserPrimary = true
                                 break
+                            }
                         }
                     }
                     LazyColumn{
@@ -134,8 +171,20 @@ fun ProfileScreen(
                                 //if current device is primary device then show remove access for secondary devices
                                 if (isCurrentUserPrimary){
                                     if (deviceData.deviceType == DeviceType.Secondary.toString()){
-                                        Button(onClick = { /*TODO*/ }) {
-                                            Text(text = "Remove Access")
+                                        Button(onClick = {
+                                            if (deviceData.authorization == Authorization.Authorized.toString()){
+                                                println("deviceName: ${deviceData.deviceName} authorization: ${deviceData.authorization}")
+                                                onEvent(AuthEvent.RemoveAuthorizationAccess(deviceData.deviceId!!))
+                                            }else{
+                                                println("deviceName: ${deviceData.deviceName} authorization: ${deviceData.authorization}")
+                                                onEvent(AuthEvent.GiveAuthorizationAccess(deviceData.deviceId!!))
+                                            }
+                                        }) {
+                                            if (deviceData.authorization == Authorization.Authorized.toString()){
+                                                Text(text = "Remove Access")
+                                            }else{
+                                                Text(text = "Give Access")
+                                            }
                                         }
                                     }
                                 }
@@ -143,6 +192,49 @@ fun ProfileScreen(
                         }
                     }
                 }
+            }
+
+            if (isAuthorizationAlertDialogVisible) {
+                println("check2::")
+                AlertDialog(
+                    onDismissRequest = {
+                        // Dismiss the dialog when the user clicks outside the dialog or on the back
+                        // button. If you want to disable that functionality, simply use an empty
+                        // onDismissRequest.
+                    },
+                    title = {
+                        Text(text = "Grant Permission!", color = MaterialTheme.colorScheme.error)
+                    },
+                    text = {
+                        Text(
+                            text = "Device is requesting for Login permission",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            onEvent(AuthEvent.GrantAccessPermission)
+                        }) {
+                            Text("Grant Permission")
+                        }
+//                        TextButton(
+//                            onClick = {
+//
+//                            }
+//                        ) {
+//                            Text("Ask Permission")
+//                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                onEvent(AuthEvent.DeclineAuthorizationAccessProcess)
+                            }
+                        ) {
+                            Text("Decline")
+                        }
+                    }
+                )
             }
         }
     )
@@ -179,19 +271,20 @@ fun ProfileScreen(
     )
 }
 
-@Preview
-@Composable
-fun preview(){
-    ProfileScreen(
-        state = ProfileState(),
-        displayName = "Aman dhaker",
-        photoUrl = "",
-        signOutResponse = Response.Success(false),
-        revokeAccessResponse = Response.Success(false),
-        onSignOut = { /*TODO*/ },
-        onRevokeAccess = { /*TODO*/ },
-        navigateToAuthScreen = { /*TODO*/ },
-        navigateToPasswordScreen = { /*TODO*/ }) {
-        
-    }
-}
+//@Preview
+//@Composable
+//fun preview(){
+//    ProfileScreen(
+//        state = ProfileState(),
+//        displayName = "Aman dhaker",
+//        photoUrl = "",
+//        onEvent = {},
+//        signOutResponse = Response.Success(false),
+//        revokeAccessResponse = Response.Success(false),
+//        onSignOut = { /*TODO*/ },
+//        onRevokeAccess = { /*TODO*/ },
+//        navigateToAuthScreen = { /*TODO*/ },
+//        navigateToPasswordScreen = { /*TODO*/ }) {
+//
+//    }
+//}
