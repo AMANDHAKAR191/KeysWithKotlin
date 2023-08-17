@@ -5,8 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.use_cases.ChatUseCases
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
+import com.aman.keyswithkotlin.di.PublicUID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,30 +21,43 @@ import javax.inject.Inject
 
 @HiltViewModel
 class IndividualUserChatsViewModel @Inject constructor(
-    private val chatUseCases: ChatUseCases
+    private val chatUseCases: ChatUseCases,
+    private val myPreference: MyPreference,
+    @PublicUID
+    private val publicUID: String,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<ChatMessageState>(ChatMessageState())
-    val state: StateFlow<ChatMessageState> = _state.asStateFlow()
+    private var _state = MutableStateFlow<ChatMessageState>(ChatMessageState())
+    var state: StateFlow<ChatMessageState> = _state.asStateFlow()
 
     private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
 
 
     init {
-        getChatUserList()
+        _state.value = state.value.copy(
+            senderPublicUID = publicUID
+        )
+//        println("sharedChatViewModel.state.value.commonChatRoomId: ${sharedChatViewModel.state.value.commonChatRoomId}")
+//        state.value.commonChatRoomId = sharedChatViewModel.state.value.commonChatRoomId
+        println("commonChatRoomId: ${myPreference.commonChatRoomId}")
+        myPreference.commonChatRoomId?.let {
+            getChatUserList(it)
+        }
     }
 
     fun onEvent(event: ChatMessageEvent) {
         when (event) {
             is ChatMessageEvent.SendMessage -> {
                 println("Message: ${state.value.chatMessage}")
+                println("commonChatRoomId: ${event.commonChatRoomId}")
+
                 viewModelScope.launch {
                     chatUseCases.sendMessage(
-                        "kirandhaker123tushar08152002",
+                        event.commonChatRoomId,
                         ChatModelClass(
                             message = state.value.chatMessage,
-                            publicUid = "amandhaker191",
+                            publicUid = publicUID,
                             type = "text"
                         )
                     ).collect { response ->
@@ -75,19 +89,17 @@ class IndividualUserChatsViewModel @Inject constructor(
             }
 
             is ChatMessageEvent.OnMessageEntered -> {
-                println("${event.value}")
                 _state.value = state.value.copy(
                     chatMessage = event.value
                 )
             }
-
-            else -> {}
         }
     }
 
-    private fun getChatUserList() {
+    private fun getChatUserList(commonChatRoomId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            chatUseCases.getUserChatMessages("kirandhaker123tushar08152002").collect { response ->
+            println("commonChatRoomId??: $commonChatRoomId")
+            chatUseCases.getUserChatMessages(commonChatRoomId).collect { response ->
                 println(this.coroutineContext)
                 withContext(Dispatchers.Main) {
                     println(this.coroutineContext)

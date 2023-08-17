@@ -21,6 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthViewModel
+import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
 import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.navigation.Graph
@@ -28,13 +29,13 @@ import com.aman.keyswithkotlin.navigation.RootNavGraph
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 @ExperimentalAnimationApi
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
     private val viewModel by viewModels<AuthViewModel>()
-
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +55,6 @@ class MainActivity : ComponentActivity() {
             navController = rememberNavController()
             RootNavGraph(
                 navController = navController,
-                lifecycleOwner = this
             )
             checkAuthState()
         }

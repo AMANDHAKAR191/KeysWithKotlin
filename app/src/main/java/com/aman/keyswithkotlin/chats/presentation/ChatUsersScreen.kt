@@ -152,7 +152,8 @@ fun ChatsScreen(
                             if (!chatUsersList.isNullOrEmpty()) {
                                 items(items = chatUsersList) { person ->
                                     UserEachRow(person = person, onClick = {
-                                        onSharedChatEvent(SharedChatEvent.OpenSharedChat(person))
+                                        println("person.commonChatRoomId: ${person.commonChatRoomId}")
+                                        onSharedChatEvent(SharedChatEvent.OpenSharedChat(person, person.commonChatRoomId!!))
                                         navigateToChatScreen()
                                     })
                                 }

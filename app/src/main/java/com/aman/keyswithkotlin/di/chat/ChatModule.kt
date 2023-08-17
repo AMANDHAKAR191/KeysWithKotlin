@@ -8,6 +8,8 @@ import com.aman.keyswithkotlin.chats.domain.use_cases.GetChatProfileDataByPublic
 import com.aman.keyswithkotlin.chats.domain.use_cases.GetChatUsers
 import com.aman.keyswithkotlin.chats.domain.use_cases.GetUserChatMessages
 import com.aman.keyswithkotlin.chats.domain.use_cases.SendMessage
+import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.aman.keyswithkotlin.di.PublicUID
 import com.aman.keyswithkotlin.di.UID
@@ -16,6 +18,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.scopes.ViewModelScoped
+import javax.inject.Qualifier
+import javax.inject.Singleton
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -35,6 +40,13 @@ class ChatModule {
             getChatProfileDataByPublicUID = GetChatProfileDataByPublicUID(repository)
         )
     }
+//    @Provides
+//    @SharedChat
+//    fun provideSharedViewModel(
+//        myPreference: MyPreference
+//    ): SharedChatViewModel {
+//        return SharedChatViewModel(myPreference)
+//    }
 
     @Provides
     fun provideChatRepository(
@@ -46,3 +58,6 @@ class ChatModule {
         return ChatRepositoryImpl(database, publicUID, aesKeySpecs)
     }
 }
+//@Qualifier
+//@Retention(AnnotationRetention.BINARY)
+//annotation class SharedChat

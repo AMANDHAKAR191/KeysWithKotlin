@@ -30,7 +30,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.getValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
@@ -88,20 +87,22 @@ class AuthRepositoryImpl @Inject constructor(
 
             coroutineScope {
                 checkFirebaseUser().collect { isUserExist ->
-                    val status = if (!isUserExist) {
+                    val status = if (!isUserExist) {    //new user
+                        println("new user")
                         val addUserDeferred = async { addUserToFireBase(auth.currentUser) }
                         addUserDeferred.await()
                         async {
                             addDeviceDataToFireBase(
-                                auth.currentUser, DeviceType.Secondary
+                                auth.currentUser, DeviceType.Primary, Authorization.NotAuthorized
                             )
                         }.await()
-                    } else {
+                    } else { // old user
+                        println("old user")
                         val getUserDeferred = async { getUserFromFireBase(auth.currentUser) }
                         getUserDeferred.await()
                         async {
                             addDeviceDataToFireBase(
-                                auth.currentUser, DeviceType.Secondary
+                                auth.currentUser, DeviceType.Secondary, Authorization.NotAuthorized
                             )
                         }.await()
                     }
@@ -119,12 +120,18 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     private suspend fun addDeviceDataToFireBase(
-        user: FirebaseUser?, deviceType: DeviceType
+        user: FirebaseUser?, deviceType: DeviceType, authorization: Authorization
     ): SignInWithGoogleResponse = coroutineScope {
         user?.let {
             val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
             val deviceId = deviceInfo.getDeviceId()
-            val deviceData = mapOf(deviceId to getDeviceData(deviceInfo, deviceType))
+            val deviceData = mapOf(
+                deviceId to getDeviceData(
+                    deviceInfo,
+                    deviceType,
+                    authorization
+                )
+            )
 
             return@coroutineScope try {
                 db.reference.child(USERS).child(it.uid).child("userDevicesList").child(deviceId)
@@ -148,9 +155,11 @@ class AuthRepositoryImpl @Inject constructor(
             val userDevicesList = mapOf(
                 deviceInfo.getDeviceId() to getDeviceData(
                     deviceInfo = deviceInfo,
-                    deviceType = DeviceType.Secondary
+                    deviceType = DeviceType.Primary,
+                    authorization = Authorization.NotAuthorized
                 )
             )
+
             val newUser = User(
                 displayName = it.displayName,
                 email = it.email,
@@ -198,14 +207,18 @@ class AuthRepositoryImpl @Inject constructor(
         } ?: Response.Failure(Exception("Invalid FirebaseUser."))
     }
 
-    private fun getDeviceData(deviceInfo: DeviceInfo, deviceType: DeviceType): DeviceData {
+    private fun getDeviceData(
+        deviceInfo: DeviceInfo,
+        deviceType: DeviceType,
+        authorization: Authorization
+    ): DeviceData {
         val timeStampUtil = TimeStampUtil()
         return DeviceData(
             deviceId = deviceInfo.getDeviceId(),
             deviceName = deviceInfo.getDeviceName(),
             deviceBuildNumber = deviceInfo.getDeviceBuildNumber(),
             deviceType = deviceType.toString(),
-            authorization = Authorization.NotAuthorized.toString(),
+            authorization = authorization.toString(),
             authentication = Authentication.Authenticated.toString(),
             appVersion = deviceInfo.getAppVersion(),
             lastLoginTimeStamp = timeStampUtil.generateTimestamp(),
@@ -277,7 +290,7 @@ class AuthRepositoryImpl @Inject constructor(
                 val listener = object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         for (ds in dataSnapshot.children) {
-                            for (ds1 in ds.children){
+                            for (ds1 in ds.children) {
                                 val item = ds1.getValue(DeviceData::class.java)
                                 item?.let {
                                     _deviceList.add(it)
@@ -331,7 +344,6 @@ class AuthRepositoryImpl @Inject constructor(
         }
         awaitClose { close() }
     }
-
 
 
     private suspend fun getUserFromFireBase(

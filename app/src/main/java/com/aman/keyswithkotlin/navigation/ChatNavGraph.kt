@@ -11,13 +11,17 @@ import com.aman.keyswithkotlin.chats.presentation.individual_chat.IndividualUser
 import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
 import com.aman.keyswithkotlin.chats.presentation.individual_chat.IndividualChatScreen
 import com.aman.keyswithkotlin.core.components.BottomBar
+import com.aman.keyswithkotlin.di.PublicUID
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePasswordViewModel
+import javax.inject.Inject
 
 fun NavGraphBuilder.chatNavGraph(
     navController: NavController,
     sharedPasswordViewModel: SharePasswordViewModel,
-    sharedChatViewModel: SharedChatViewModel
+    sharedChatViewModel: SharedChatViewModel,
 ) {
+
+
     navigation(
         startDestination = BottomBarScreen.Chats.route,
         route = Graph.CHAT
@@ -39,15 +43,18 @@ fun NavGraphBuilder.chatNavGraph(
                     })
                 },
                 navigateToChatScreen = {
+
                     navController.navigate(Screen.IndividualChatScreen.route)
                 }
             )
         }
         composable(Screen.IndividualChatScreen.route) {
             val viewModel: IndividualUserChatsViewModel = hiltViewModel()
+
             IndividualChatScreen(
                 data = sharedChatViewModel.state.value.person,
                 _state = viewModel.state,
+                eventFlowState = viewModel.eventFlow,
                 onChatEvent = viewModel::onEvent,
                 navigateToPasswordScreen = {
                     navController.popBackStack()

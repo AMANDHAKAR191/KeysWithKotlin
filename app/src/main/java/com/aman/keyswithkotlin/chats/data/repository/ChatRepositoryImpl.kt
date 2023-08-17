@@ -1,6 +1,5 @@
 package com.aman.keyswithkotlin.chats.data.repository
 
-import androidx.compose.animation.splineBasedDecay
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.model.MessageUserList
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
@@ -92,11 +91,11 @@ class ChatRepositoryImpl(
                             if (item != null) {
                                 item.UserPersonalChatList?.let {
                                     println("Map: $it")
-                                    it.keys.forEach{key->
+                                    it.keys.forEach { key ->
                                         println("key: $key")
                                         println("value: ${it[key]}")
                                         println("otherUserPublicUid: ${it[key]?.otherUserPublicUid}")
-                                        if (it[key]?.otherUserPublicUid.equals(publicUID)){
+                                        if (it[key]?.otherUserPublicUid.equals(publicUID)) {
                                             println("Check: Matched")
                                         }
                                     }
@@ -127,25 +126,22 @@ class ChatRepositoryImpl(
 
     override fun getChatUsers(): Flow<Response<Pair<MutableList<UserPersonalChatList>?, Boolean?>>> =
         callbackFlow {
-            println("check11: publicUID: $publicUID")
             trySend(Response.Loading)
             val reference = database.reference.child("messageUserList").child(publicUID)
                 .child("UserPersonalChatList")
             reference.keepSynced(true)
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    println("dataSnapshot: $dataSnapshot")
-                    if (dataSnapshot.exists()){
+                    if (dataSnapshot.exists()) {
                         _chatUsersList.clear()
                         for (ds in dataSnapshot.children) {
                             val items = ds.getValue(UserPersonalChatList::class.java)
                             if (items != null) {
-                                println("items: $items")
                                 _chatUsersList.add(items)
                             }
                         }
                         trySend(Response.Success(data = _chatUsersList))
-                    }else{
+                    } else {
                         trySend(Response.Failure(Throwable("No user")))
                     }
 
@@ -170,18 +166,17 @@ class ChatRepositoryImpl(
             trySend(Response.Loading)
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    _chatMessagesList.clear()
-                    println("dataSnapshot: $dataSnapshot")
-                    for (ds in dataSnapshot.children) {
-                        val items = ds.getValue(ChatModelClass::class.java)
-                        if (items != null) {
-                            println("items: $items")
-                            _chatMessagesList.add(items)
-                        }
-                    }
-                    println("passwords: $_chatMessagesList")
-                    trySend(Response.Success(data = _chatMessagesList))
+                    if (dataSnapshot.exists()) {
+                        _chatMessagesList.clear()
+                        for (ds in dataSnapshot.children) {
+                            val items = ds.getValue(ChatModelClass::class.java)
+                            if (items != null) {
+                                _chatMessagesList.add(items)
+                            }
 
+                        }
+                        trySend(Response.Success(data = _chatMessagesList))
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {

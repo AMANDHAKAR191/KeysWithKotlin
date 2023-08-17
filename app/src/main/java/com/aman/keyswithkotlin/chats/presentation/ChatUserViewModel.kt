@@ -70,10 +70,12 @@ class ChatUserViewModel @Inject constructor(
                                                     }
                                                 }
                                             }
+                                            println("check point1")
 //                                            val map = messageUserList.UserPersonalChatList
-                                            val userPersonalChatList: UserPersonalChatList? = messageUserList.UserPersonalChatList?.let { map ->
-                                                map.entries.mapNotNull { entry ->
+                                            val userPersonalChatList: UserPersonalChatList? = messageUserList.UserPersonalChatList.let { map ->
+                                                map?.entries?.map { entry ->
                                                     if (entry.value.otherUserPublicUid.equals(publicUID)) {
+                                                        println("check point2")
                                                         UserPersonalChatList(
                                                             otherUserPublicUid = messageUserList.publicUid,
                                                             otherUserPublicUname = messageUserList.publicUname,
@@ -83,9 +85,15 @@ class ChatUserViewModel @Inject constructor(
                                                             commonEncryptionIv = entry.value.commonEncryptionIv
                                                         )
                                                     } else {
-                                                        null
+                                                        println("check point3")
+                                                        UserPersonalChatList(
+                                                            otherUserPublicUid = messageUserList.publicUid,
+                                                            otherUserPublicUname = messageUserList.publicUname,
+                                                            otherUserProfileUrl = messageUserList.profileUrl,
+                                                            commonChatRoomId = generateChatRoomId(messageUserList.publicUid)
+                                                        )
                                                     }
-                                                }.firstOrNull() ?: UserPersonalChatList(
+                                                }?.firstOrNull() ?: UserPersonalChatList(
                                                     otherUserPublicUid = messageUserList.publicUid,
                                                     otherUserPublicUname = messageUserList.publicUname,
                                                     otherUserProfileUrl = messageUserList.profileUrl,

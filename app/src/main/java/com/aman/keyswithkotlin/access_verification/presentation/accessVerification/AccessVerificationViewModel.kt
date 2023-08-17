@@ -39,7 +39,7 @@ class AccessVerificationViewModel @Inject constructor(
                 viewModelScope.launch {
                     accessVerificationUseCases.requestAuthorizationAccess(
                         primaryDeviceId = "aa32850c3b944554",
-                        requestingDeviceId = "90ee812f4d6911ce"
+                        requestingDeviceId = deviceInfo.getDeviceId()
                     ).collect {
 
                     }

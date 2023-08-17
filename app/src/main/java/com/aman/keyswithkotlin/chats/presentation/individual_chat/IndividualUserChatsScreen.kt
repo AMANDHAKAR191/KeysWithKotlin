@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.chats.presentation.individual_chat
 
+import UIEvents
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -47,8 +48,10 @@ import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.chats.presentation.SpacerWidth
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
+import com.aman.keyswithkotlin.di.PublicUID
 import com.aman.keyswithkotlin.ui.theme.Pink80
 import com.aman.keyswithkotlin.ui.theme.RedOrange
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,14 +60,17 @@ fun IndividualChatScreen(
     data: UserPersonalChatList? = null,
 //    state: ChatMessagesState,
     _state: StateFlow<ChatMessageState>,
+    eventFlowState: SharedFlow<UIEvents>,
     onChatEvent: (ChatMessageEvent) -> Unit,
     navigateToPasswordScreen: () -> Unit
 ) {
     val state = _state.collectAsState()
-    val chatMessages:List<ChatModelClass>? = state.value.chatMessagesList
-//    val chatMessages: List<ChatModelClass>? by state.value.chatMessagesList
+    val chatMessages: List<ChatModelClass>? = state.value.chatMessagesList
     val messageTextValue = state.value.chatMessage
     val lazyColumnState = rememberLazyListState()
+
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -127,11 +133,19 @@ fun IndividualChatScreen(
                             ),
                             state = lazyColumnState
                         ) {
-                            if (!chatMessages.isNullOrEmpty()) {
+                            println("check:1 chatMessages: $chatMessages")
+                            if (chatMessages != null) {
+                                println("check:2 chatMessages: $chatMessages")
                                 val timeStampUtil = TimeStampUtil()
                                 items(chatMessages) {
-                                    ChatRow(chat = it, timeStampUtil)
+                                    ChatRow(
+                                        chat = it,
+                                        timeStampUtil = timeStampUtil,
+                                        senderPublicUID = state.value.senderPublicUID!!
+                                    )
                                 }
+                            } else {
+                                println("check:3")
                             }
                         }
                     }
@@ -145,7 +159,7 @@ fun IndividualChatScreen(
                         .padding(horizontal = 10.dp, vertical = 10.dp)
                         .align(Alignment.BottomCenter),
                     onTrailingIconButtonClicked = {
-                        onChatEvent(ChatMessageEvent.SendMessage)
+                        onChatEvent(ChatMessageEvent.SendMessage(data?.commonChatRoomId!!))
                     }
                 )
             }
@@ -153,7 +167,6 @@ fun IndividualChatScreen(
     )
     // Scroll to the bottom of the LazyColumn when a new item is added
     LaunchedEffect(state.value) {
-        println("chatMessage: $chatMessages")
         if (chatMessages.isNullOrEmpty()) {
             //todo do nothing
         } else {
@@ -165,23 +178,26 @@ fun IndividualChatScreen(
 
 @Composable
 fun ChatRow(
+    senderPublicUID: String,
     chat: ChatModelClass,
     timeStampUtil: TimeStampUtil
 ) {
+    println("chat.publicUid: ${chat.publicUid}")
+    println("receiverPublicUID: $senderPublicUID")
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = if (chat.publicUid == "kirandhaker123") Alignment.Start else Alignment.End
+        horizontalAlignment = if (chat.publicUid != senderPublicUID) Alignment.Start else Alignment.End
     ) {
         Box(
             modifier = Modifier
                 .background(
-                    if (chat.publicUid == "kirandhaker123") RedOrange else Pink80,
+                    if (chat.publicUid != senderPublicUID) RedOrange else Pink80,
                     RoundedCornerShape(100.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = chat.message!!, style = TextStyle(
+                text = chat.message ?: "", style = TextStyle(
                     color = Color.Black,
                     fontSize = 15.sp
                 ),

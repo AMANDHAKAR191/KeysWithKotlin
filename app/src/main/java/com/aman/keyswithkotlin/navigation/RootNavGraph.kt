@@ -18,7 +18,6 @@ import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePas
 @ExperimentalAnimationApi
 fun RootNavGraph(
     navController: NavHostController,
-    lifecycleOwner: LifecycleOwner
 ) {
     val sharedPasswordViewModel: SharePasswordViewModel = hiltViewModel()
     val sharedChatViewModel: SharedChatViewModel = hiltViewModel()

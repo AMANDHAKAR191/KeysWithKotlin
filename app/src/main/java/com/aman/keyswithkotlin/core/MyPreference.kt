@@ -17,6 +17,7 @@ class MyPreference() {
     val RECEIVER_PUBLIC_UID = "receiverPublicId"
     val USER_RESTRICTED = "userRestricted"
     val USER_AUTHENTICATED = "userAuthenticated"
+    val COMMON_CHAT_ROOM_ID = "commonChatRoomId"
 
     init {
 //        sharedPreferences =
@@ -46,6 +47,13 @@ class MyPreference() {
         set(receiverRoomId) {
             sharedPreferences.edit().putString(ROOM_ID, receiverRoomId).apply()
         }
+
+    var commonChatRoomId: String?
+        get() = sharedPreferences.getString(COMMON_CHAT_ROOM_ID, "")
+        set(receiverRoomId) {
+            sharedPreferences.edit().putString(COMMON_CHAT_ROOM_ID, receiverRoomId).apply()
+        }
+
     var receiverPublicId: String?
         get() = sharedPreferences.getString(RECEIVER_PUBLIC_UID, "")
         set(receiverRoomId) {
