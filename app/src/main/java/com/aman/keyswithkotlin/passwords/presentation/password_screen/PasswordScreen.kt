@@ -57,6 +57,7 @@ import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordItem
+import com.aman.keyswithkotlin.passwords.presentation.componants.SearchedPasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
 import com.amandhakar.expendable_floating_action_button.ExpendableFloatingButton
@@ -222,7 +223,7 @@ fun PasswordScreen(
                         ) {
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
                                 items(searchedPasswords) { password ->
-                                    PasswordItem(
+                                    SearchedPasswordItem(
                                         password = password,
                                         onItemClick = {
                                             isSearchBarActive = false

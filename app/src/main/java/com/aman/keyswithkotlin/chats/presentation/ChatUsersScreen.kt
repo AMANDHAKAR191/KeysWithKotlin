@@ -58,7 +58,6 @@ import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsScreen(
     title: String,
@@ -152,7 +151,6 @@ fun ChatsScreen(
                             if (!chatUsersList.isNullOrEmpty()) {
                                 items(items = chatUsersList) { person ->
                                     UserEachRow(person = person, onClick = {
-                                        println("person.commonChatRoomId: ${person.commonChatRoomId}")
                                         onSharedChatEvent(SharedChatEvent.OpenSharedChat(person, person.commonChatRoomId!!))
                                         navigateToChatScreen()
                                     })
@@ -160,12 +158,6 @@ fun ChatsScreen(
                             } else {
                                 //todo wrote code to show loading bar
                             }
-//                            items(personList, key = { it.id }) { person ->
-//                                UserEachRow(person = person, onClick = {
-//                                    onEvent(SharedChatEvent.OpenSharedChat(person))
-//                                    navigateToChatScreen()
-//                                })
-//                            }
                         }
                     }
                 }
@@ -220,13 +212,6 @@ fun ChatsScreen(
     )
 }
 
-//@Preview
-//@Composable
-//fun Preview() {
-//    ChatsScreen(title = "Aman", onEvent = {}, bottomBar = { /*TODO*/ }) {
-//
-//    }
-//}
 
 @Composable
 fun HeaderOrViewStory() {
@@ -276,7 +261,6 @@ fun UserEachRow(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row {
-                    println("{person.otherUserProfileUrl}: ${person.otherUserProfileUrl}")
                     person.otherUserProfileUrl?.let {
                         AsyncImage(
                             model = it,
@@ -330,11 +314,11 @@ fun Header() {
                 fontWeight = FontWeight.W300
             )
         ) {
-            append("Welcome back")
+            append("Welcome back ")
         }
         withStyle(
             style = SpanStyle(
-                color = Color.White,
+                color = Color.Yellow,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
             )

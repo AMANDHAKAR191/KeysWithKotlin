@@ -1,6 +1,9 @@
 package com.aman.keyswithkotlin.setting.presentation
 
+import androidx.compose.foundation.Indication
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,18 +12,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.aman.keyswithkotlin.chats.presentation.noRippleEffect
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 
 @Composable
@@ -29,6 +40,7 @@ fun SettingScreen(
     navigateToProfileScreen: () -> Unit
 ) {
 
+    var isDevicesVisible by remember { mutableStateOf(false) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -68,7 +80,32 @@ fun SettingScreen(
                             Text(text = "After1 Minute", fontSize = 12.sp)
                         }
                         Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = "Devices", fontSize = 20.sp)
+                        Column {
+                            Text(
+                                text = "Devices",
+                                fontSize = 20.sp,
+                                modifier = Modifier.noRippleEffect {
+                                    isDevicesVisible = !isDevicesVisible
+                                }
+                            )
+                            if (isDevicesVisible) {
+                                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                                    item {
+                                        Column(modifier = Modifier.padding(10.dp)) {
+                                            Text(text = "Devices name1", fontSize = 20.sp)
+                                            Text(text = "Devices id1", fontSize = 20.sp)
+                                        }
+                                    }
+                                    item {
+                                        Column(modifier = Modifier.padding(10.dp)) {
+                                            Text(text = "Devices name2", fontSize = 20.sp)
+                                            Text(text = "Devices id2", fontSize = 20.sp)
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(text = "User Guide", fontSize = 20.sp)
                         Spacer(modifier = Modifier.height(10.dp))
@@ -84,4 +121,12 @@ fun SettingScreen(
             )
         }
     )
+}
+
+@Preview
+@Composable
+fun Preview() {
+    SettingScreen(bottomBar = { /*TODO*/ }) {
+
+    }
 }
