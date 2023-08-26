@@ -1,48 +1,37 @@
 package com.aman.keyswithkotlin.autofill_service
 
 import android.app.PendingIntent
-import android.app.assist.AssistStructure
 import android.app.assist.AssistStructure.ViewNode
-import android.app.slice.Slice
 import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
 import android.os.CancellationSignal
 import android.service.autofill.AutofillService
-import android.service.autofill.Dataset
 import android.service.autofill.FillCallback
 import android.service.autofill.FillRequest
 import android.service.autofill.FillResponse
-import android.service.autofill.InlinePresentation
 import android.service.autofill.SaveCallback
+import android.service.autofill.SaveInfo
 import android.service.autofill.SaveRequest
-import android.util.ArrayMap
 import android.util.Log
-import android.util.Size
 import android.view.View
 import android.view.autofill.AutofillId
-import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
-import android.widget.inline.InlinePresentationSpec
 import com.aman.keyswithkotlin.R
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.presentation.BiometricAuthActivity
 import com.aman.keyswithkotlin.presentation.BiometricAuthActivity.Companion.EXTRA_AUTOFILL_IDS
-import com.aman.keyswithkotlin.presentation.BiometricAuthActivity.Companion.EXTRA_DATASET
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import java.util.Locale
 
 
 class KeysAutofillService : AutofillService() {
 
-//    @Inject
+    //    @Inject
 //    lateinit var passwordUseCases: PasswordUseCases
     override fun onConnected() {
         super.onConnected()
     }
 
-    var hasDataSet:Boolean = false
+    var hasDataSet: Boolean = false
 
     private val TAG: String = "KeysAutofillService"
     val scope = CoroutineScope(Dispatchers.IO)
@@ -83,6 +72,7 @@ class KeysAutofillService : AutofillService() {
         val fillContexts = request.fillContexts
         val structure = fillContexts.last().structure
         val packageName = structure.activityComponent.packageName
+        println("$TAG onFillRequest")
         Log.d(TAG, " packageName: $packageName")
 //        getPasswords()
 
@@ -121,12 +111,23 @@ class KeysAutofillService : AutofillService() {
         val intentSender1 = pendingIntent1.intentSender
 
         val responseBuilder = FillResponse.Builder()
-        if (userNameId == null){
+        if (userNameId == null) {
             responseBuilder.setAuthentication(arrayOf(passwordId), intentSender1, presentation)
-        } else if (passwordId == null){
+        } else if (passwordId == null) {
             responseBuilder.setAuthentication(arrayOf(userNameId), intentSender1, presentation)
-        }else{
-            responseBuilder.setAuthentication(arrayOf(userNameId, passwordId), intentSender1, presentation)
+        } else {
+            responseBuilder.setAuthentication(
+                arrayOf(userNameId, passwordId),
+                intentSender1,
+                presentation
+            )
+            responseBuilder
+                .setSaveInfo(
+                    SaveInfo.Builder(
+                        SaveInfo.SAVE_DATA_TYPE_USERNAME or SaveInfo.SAVE_DATA_TYPE_PASSWORD,
+                        arrayOf(userNameId, passwordId)
+                    ).build()
+                )
         }
         callback.onSuccess(responseBuilder.build())
     }
@@ -139,146 +140,42 @@ class KeysAutofillService : AutofillService() {
         }
     }
 
-//    private fun getPasswords() {
-//
-//        scope.launch(Dispatchers.IO) {
-//            passwordUseCases.getPasswords().collect { response ->
-//                withContext(Dispatchers.Main) {
-//                    when (response) {
-//                        is Response.Success<*, *> -> {
-//                            passwordList1 = response.data as MutableList<Password>
-//                            println("passwordList: $passwordList")
-//                        }
-//
-//                        is Response.Failure -> {
-//
-//                        }
-//
-//                        is Response.Loading -> {
-//
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+    override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
+        val structure = request.fillContexts.last().structure
+        val packageName = structure.activityComponent.packageName
+        println("$TAG onSaveRequest")
+        println("$TAG packageName: $packageName")
 
-    private fun fetchAutofillData(
-        packageName: String,
-        fields: MutableMap.MutableEntry<String?, AutofillId?>
-    ): Dataset {
-//        getPasswords() // Fetch the passwords
-        val datasetBuilder = Dataset.Builder()
-        println("yourAutofillId: $fields")
-        passwordList.forEach { password ->
-            val presentation = newDatasetPresentation(
-                packageName,
-                password.userName
-            ) // how to create layout on compose
-            datasetBuilder.setValue(
-                fields.value!!, // Provide the proper AutofillId
-                AutofillValue.forText(password.userName),
-                presentation
-            ).setValue(
-                fields.value!!, // Provide the proper AutofillId
-                AutofillValue.forText(password.password),
-                presentation
-            )
-        }
-        return datasetBuilder.build()
-    }
+        var userName: String? = null
+        var password: String? = null
 
-    fun newDatasetPresentation(
-        packageName: String,
-        text: CharSequence
-    ): RemoteViews {
-        val presentation =
-            RemoteViews("com.aman.keyswithkotlin", R.layout.autofill_list_item)
-        presentation.setTextViewText(android.R.id.text1, text)
-        presentation.setImageViewResource(android.R.id.icon, android.R.drawable.ic_delete)
-        return presentation
-    }
-
-    private fun addAutofillableFields(
-        fields: MutableMap<String?, AutofillId?>,
-        node: ViewNode
-    ) {
-        val hints = node.autofillHints
-        if (hints != null) {
-            // We're simple, we only care about the first hint
-            val hint = hints[0].lowercase(Locale.getDefault())
-            val id = node.autofillId
-            if (!fields.containsKey(hint)) {
-                Log.v(TAG, "Setting hint '$hint' on $id")
-                fields[hint] = id
-            } else {
-                Log.v(
-                    TAG, "Ignoring hint '" + hint + "' on " + id
-                            + " because it was already set"
-                )
+        // Traverse the structure and find the AutofillValues
+        for (i in 0 until structure.windowNodeCount) {
+            val windowNode = structure.getWindowNodeAt(i)
+            val viewNode = windowNode.rootViewNode
+            traverseViewStructure(viewNode){node->
+                if (node.autofillHints?.contains(View.AUTOFILL_HINT_USERNAME) == true) {
+                    val value = node.autofillValue
+                    if (value?.isText!! && value?.textValue != null) {
+                        userName = value.textValue.toString()
+                    }
+                    println("userName: $userName")
+                }
+                if (node.autofillHints?.contains(View.AUTOFILL_HINT_PASSWORD) == true) {
+                    val value = node.autofillValue
+                    if (value?.isText!! && value?.textValue != null) {
+                        password = value.textValue.toString()
+                    }
+                    println("password: $password")
+                }
             }
         }
-        val childrenSize = node.childCount
-        for (i in 0 until childrenSize) {
-            addAutofillableFields(fields, node.getChildAt(i))
-        }
-    }
 
-    fun getLatestAssistStructure(request: FillRequest): AssistStructure {
-        Log.d(TAG, "getFillContexts : " + request.fillContexts)
-        val fillContexts = request.fillContexts
-        Log.d(TAG, "getFillContexts : " + fillContexts[fillContexts.size - 1].requestId)
-        Log.d(TAG, "getFillContexts : " + fillContexts[fillContexts.size - 1].describeContents())
-        return fillContexts[fillContexts.size - 1].structure
-    }
+        // TODO: Here you would save the username and password.
+        // Maybe call an API or store it in a secure place like Android Keystore.
 
-
-    private fun getAutofillableFields(structure: AssistStructure): MutableMap<String?, AutofillId?> {
-        val fields: MutableMap<String?, AutofillId?> = ArrayMap()
-        val nodes = structure.windowNodeCount
-        for (i in 0 until nodes) {
-            val node = structure.getWindowNodeAt(i).rootViewNode
-            addAutofillableFields(fields, node)
-        }
-        return fields
-    }
-
-    override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
-        val structure = request.fillContexts[request.fillContexts.size - 1].structure
-        val packageName = structure.activityComponent.packageName
-        println("$TAG packageName: $packageName")
-//        if (!PackageVerifier.isValidPackage(applicationContext, packageName)) {
-//            callback.onFailure("Invalid Package name")
-//            return
-//        }
-
-        val clientState = request.clientState
-
-        // Assuming you have a function to parse and save the data
-        val success = saveAutofillData(clientState)
-
-        if (success) {
-            callback.onSuccess()
-        } else {
-            callback.onFailure("Failed to save data")
-        }
-    }
-
-
-    private fun saveAutofillData(clientState: Bundle?): Boolean {
-        // Parse the data from clientState and save it as per your app's logic
-        // Return true if the data was saved successfully, false otherwise
-        return true // Return the appropriate value based on your implementation
+        // Notify the system that the save operation was a success
+        callback.onSuccess()
     }
 
 }
-
-// and my password data class
-//data class Password constructor(
-//    var userName: String = "",
-//    var password: String = "",
-//    val websiteName: String = "",
-//    val websiteLink: String = "",
-//    val timestamp: String = "",
-//    val lastUsedTimeStamp: String = ""
-//)
