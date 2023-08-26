@@ -1,6 +1,5 @@
 package com.aman.keyswithkotlin.passwords.data.repository
 
-import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
@@ -26,6 +25,7 @@ class PasswordRepositoryImpl(
 
     override fun getPasswords(): Flow<Response<Pair<MutableList<Password>?, Boolean?>>> =
         callbackFlow {
+            println("UID: $UID")
             val reference = database.reference.child("Passwords").child(UID)
             reference.keepSynced(true)
             trySend(Response.Loading)

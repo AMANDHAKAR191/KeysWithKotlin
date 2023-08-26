@@ -1,7 +1,11 @@
 package com.aman.keyswithkotlin.autofill_service
 
+import android.app.PendingIntent
 import android.app.assist.AssistStructure
 import android.app.assist.AssistStructure.ViewNode
+import android.app.slice.Slice
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.service.autofill.AutofillService
@@ -9,29 +13,41 @@ import android.service.autofill.Dataset
 import android.service.autofill.FillCallback
 import android.service.autofill.FillRequest
 import android.service.autofill.FillResponse
+import android.service.autofill.InlinePresentation
 import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
 import android.util.ArrayMap
 import android.util.Log
+import android.util.Size
+import android.view.View
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
+import android.widget.inline.InlinePresentationSpec
+import com.aman.keyswithkotlin.R
 import com.aman.keyswithkotlin.passwords.domain.model.Password
-import com.aman.keyswithkotlin.passwords.domain.use_cases.PasswordUseCases
+import com.aman.keyswithkotlin.presentation.BiometricAuthActivity
+import com.aman.keyswithkotlin.presentation.BiometricAuthActivity.Companion.EXTRA_AUTOFILL_IDS
+import com.aman.keyswithkotlin.presentation.BiometricAuthActivity.Companion.EXTRA_DATASET
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.util.Locale
-import javax.inject.Inject
 
 
 class KeysAutofillService : AutofillService() {
 
-    @Inject
-    lateinit var passwordUseCases: PasswordUseCases
+//    @Inject
+//    lateinit var passwordUseCases: PasswordUseCases
+    override fun onConnected() {
+        super.onConnected()
+    }
+
+    var hasDataSet:Boolean = false
 
     private val TAG: String = "KeysAutofillService"
     val scope = CoroutineScope(Dispatchers.IO)
-    private val passwordList = mutableListOf(
+    private var passwordList1 = mutableListOf<Password>()
+    private var passwordList = mutableListOf(
         Password(
             "user1",
             "pass1",
@@ -58,50 +74,94 @@ class KeysAutofillService : AutofillService() {
         )
     )
 
-    //    var passwordList = mutableListOf<Password>()
     override fun onFillRequest(
         request: FillRequest,
         cancellationSignal: CancellationSignal,
         callback: FillCallback
     ) {
-        val structure = request.fillContexts[request.fillContexts.size - 1].structure
+
+        val fillContexts = request.fillContexts
+        val structure = fillContexts.last().structure
         val packageName = structure.activityComponent.packageName
         Log.d(TAG, " packageName: $packageName")
-//        if (!PackageVerifier.isValidPackage(applicationContext, packageName)) {
-//            callback.onFailure("Invalid Package name")
-//            return
-//        }
-        val data = request.clientState
-        Log.d(TAG, "onFillRequest(): data = $data")
-        cancellationSignal.setOnCancelListener {
-            Log.d(TAG, "Request cancelled")
-        }
-        // Find autofillable fields
-        // Find autofillable fields
-//        val structure: AssistStructure = getLatestAssistStructure(request)
-        Log.d(TAG, "structure ${structure.activityComponent} +${structure.describeContents()}")
-        val fields: MutableMap<String?, AutofillId?> = getAutofillableFields(structure)
-        Log.d(TAG, "autofillable fields:$fields")
-        var autofillData: Dataset? = null
-        var response:FillResponse? = null
-        fields.entries.forEach {
-            println("it.key: ${it.key} == it.value: ${it.value}")
-            // Assuming you have a function to fetch autofill data based on the package name or other criteria
-            println("packageName: $packageName")
-            autofillData = fetchAutofillData(packageName, it)
-            response = FillResponse.Builder()
-                .addDataset(autofillData)
-                .build()
+//        getPasswords()
 
-        }
-        if (response != null) {
-            callback.onSuccess(response)
-        } else {
-            callback.onFailure("No autofill data available")
+        var userNameId: AutofillId? = null
+        var passwordId: AutofillId? = null
+
+        println("AUTOFILL_HINT_USERNAME: ${View.AUTOFILL_HINT_USERNAME}")
+        println("AUTOFILL_HINT_PASSWORD: ${View.AUTOFILL_HINT_PASSWORD}")
+        //traverse the structure
+        for (i in 0 until structure.windowNodeCount) {
+            val windowNode = structure.getWindowNodeAt(i)
+            val viewNode = windowNode.rootViewNode
+            traverseViewStructure(viewNode) { node ->
+                if (node.autofillHints?.contains(View.AUTOFILL_HINT_USERNAME) == true) {
+                    userNameId = node.autofillId
+                    println("userNameId: $userNameId")
+                }
+                if (node.autofillHints?.contains(View.AUTOFILL_HINT_PASSWORD) == true) {
+                    passwordId = node.autofillId
+                    println("passwordId: $passwordId")
+                }
+            }
         }
 
+        //create presentation for the dataset
+        val presentation =
+            RemoteViews(applicationContext.packageName, R.layout.your_auth_layout)
 
+        val intent1 = Intent(applicationContext, BiometricAuthActivity::class.java)
+        intent1.putExtra(EXTRA_AUTOFILL_IDS, arrayListOf(userNameId, passwordId))
+        // Create a PendingIntent from the intent
+        val pendingIntent1 = PendingIntent.getActivity(
+            applicationContext, 0, intent1,
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val intentSender1 = pendingIntent1.intentSender
+
+        val responseBuilder = FillResponse.Builder()
+        if (userNameId == null){
+            responseBuilder.setAuthentication(arrayOf(passwordId), intentSender1, presentation)
+        } else if (passwordId == null){
+            responseBuilder.setAuthentication(arrayOf(userNameId), intentSender1, presentation)
+        }else{
+            responseBuilder.setAuthentication(arrayOf(userNameId, passwordId), intentSender1, presentation)
+        }
+        callback.onSuccess(responseBuilder.build())
     }
+
+
+    private fun traverseViewStructure(node: ViewNode, action: (ViewNode) -> Unit) {
+        action(node)
+        for (i in 0 until node.childCount) {
+            traverseViewStructure(node.getChildAt(i), action)
+        }
+    }
+
+//    private fun getPasswords() {
+//
+//        scope.launch(Dispatchers.IO) {
+//            passwordUseCases.getPasswords().collect { response ->
+//                withContext(Dispatchers.Main) {
+//                    when (response) {
+//                        is Response.Success<*, *> -> {
+//                            passwordList1 = response.data as MutableList<Password>
+//                            println("passwordList: $passwordList")
+//                        }
+//
+//                        is Response.Failure -> {
+//
+//                        }
+//
+//                        is Response.Loading -> {
+//
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private fun fetchAutofillData(
         packageName: String,
@@ -128,41 +188,17 @@ class KeysAutofillService : AutofillService() {
         return datasetBuilder.build()
     }
 
-    /**
-     * Helper method to create a dataset presentation with the given text.
-     */
     fun newDatasetPresentation(
         packageName: String,
         text: CharSequence
     ): RemoteViews {
         val presentation =
-            RemoteViews("com.aman.keyswithkotlin", android.R.layout.activity_list_item)
+            RemoteViews("com.aman.keyswithkotlin", R.layout.autofill_list_item)
         presentation.setTextViewText(android.R.id.text1, text)
         presentation.setImageViewResource(android.R.id.icon, android.R.drawable.ic_delete)
         return presentation
     }
 
-    private fun getAutofillableFields(structure: AssistStructure): MutableMap<String?, AutofillId?> {
-        val fields: MutableMap<String?, AutofillId?> = ArrayMap()
-        val nodes = structure.windowNodeCount
-        for (i in 0 until nodes) {
-            val node = structure.getWindowNodeAt(i).rootViewNode
-            addAutofillableFields(fields, node)
-        }
-        return fields
-    }
-
-    fun getLatestAssistStructure(request: FillRequest): AssistStructure {
-        Log.d(TAG, "getFillContexts : " + request.fillContexts)
-        val fillContexts = request.fillContexts
-        Log.d(TAG, "getFillContexts : " + fillContexts[fillContexts.size - 1].requestId)
-        Log.d(TAG, "getFillContexts : " + fillContexts[fillContexts.size - 1].describeContents())
-        return fillContexts[fillContexts.size - 1].structure
-    }
-
-    /**
-     * Adds any autofillable view from the [ViewNode] and its descendants to the map.
-     */
     private fun addAutofillableFields(
         fields: MutableMap<String?, AutofillId?>,
         node: ViewNode
@@ -188,6 +224,24 @@ class KeysAutofillService : AutofillService() {
         }
     }
 
+    fun getLatestAssistStructure(request: FillRequest): AssistStructure {
+        Log.d(TAG, "getFillContexts : " + request.fillContexts)
+        val fillContexts = request.fillContexts
+        Log.d(TAG, "getFillContexts : " + fillContexts[fillContexts.size - 1].requestId)
+        Log.d(TAG, "getFillContexts : " + fillContexts[fillContexts.size - 1].describeContents())
+        return fillContexts[fillContexts.size - 1].structure
+    }
+
+
+    private fun getAutofillableFields(structure: AssistStructure): MutableMap<String?, AutofillId?> {
+        val fields: MutableMap<String?, AutofillId?> = ArrayMap()
+        val nodes = structure.windowNodeCount
+        for (i in 0 until nodes) {
+            val node = structure.getWindowNodeAt(i).rootViewNode
+            addAutofillableFields(fields, node)
+        }
+        return fields
+    }
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
         val structure = request.fillContexts[request.fillContexts.size - 1].structure
@@ -210,37 +264,12 @@ class KeysAutofillService : AutofillService() {
         }
     }
 
+
     private fun saveAutofillData(clientState: Bundle?): Boolean {
         // Parse the data from clientState and save it as per your app's logic
         // Return true if the data was saved successfully, false otherwise
         return true // Return the appropriate value based on your implementation
     }
-
-
-    //complete this code
-//    private fun getPasswords() {
-//        scope.launch(Dispatchers.IO) {
-//            passwordUseCases.getPasswords().collect { response ->
-//                withContext(Dispatchers.Main) {
-//                    when (response) {
-//                        is Response.Success<*, *> -> {
-//                            passwordList = response.data as MutableList<Password>
-//                            println("passwordList: $passwordList")
-//                        }
-//
-//                        is Response.Failure -> {
-//
-//                        }
-//
-//                        is Response.Loading -> {
-//
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-
 
 }
 

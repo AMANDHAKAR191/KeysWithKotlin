@@ -34,16 +34,6 @@ class PasswordModule {
         publicUID: String,
         myPreference: MyPreference
     ): PasswordUseCases {
-        println("providePasswordUseCases:publicUID:: $publicUID")
-
-        println(
-            "myPreference.AES_KEY: ${
-                myPreference.sharedPreferences.getString(
-                    myPreference.AES_KEY,
-                    "Hello"
-                )
-            }"
-        )
 
         return PasswordUseCases(
             getPasswords = GetPasswords(repository, aesKeySpecs),
