@@ -21,5 +21,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginEnd="?android:attr/listPreferredItemPaddingEnd"
-        android:src="@drawable/man_4" />
+        android:src="@drawable/ic_google_logo" />
 </LinearLayout>
