@@ -14,6 +14,7 @@ class AddPassword(
 ) {
     @Throws(InvalidPasswordException::class)
     operator fun invoke(password: Password): Flow<Response<Pair<String?, Boolean?>>> {
+        println("AddPassword: check3")
         if (password.userName.isBlank()) {
             throw InvalidPasswordException("The username can't be empty.")
         }
@@ -23,6 +24,7 @@ class AddPassword(
         if (password.websiteName.isBlank()) {
             throw InvalidPasswordException("The website name can't be empty.")
         }
+        println("AddPassword: check4")
         val aes = AES.getInstance(aesKeySpecs.aesKey, aesKeySpecs.aesIV)
             ?: throw IllegalStateException("Failed to initialize AES instance.")
 

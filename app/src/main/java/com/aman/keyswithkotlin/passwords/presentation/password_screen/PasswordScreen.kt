@@ -229,8 +229,6 @@ fun PasswordScreen(
                                             isSearchBarActive = false
                                             itemToView.value = password
                                             viewPassword = true
-                                        },
-                                        onDeleteClick = {
                                         }
                                     )
                                 }

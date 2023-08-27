@@ -92,6 +92,9 @@ class PasswordRepositoryImpl(
     override fun insertPassword(
         password: Password
     ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
+        println("insertPassword: check5")
+
+
         val timeStampUtil = TimeStampUtil()
 
         val reference = database.reference.child("Passwords").child(UID)

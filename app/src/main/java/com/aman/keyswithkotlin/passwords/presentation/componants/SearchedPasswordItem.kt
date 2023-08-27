@@ -30,11 +30,10 @@ fun SearchedPasswordItem(
     password: Password?,
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit,
-    onDeleteClick: () -> Unit
 ) {
     Row(modifier = modifier
         .fillMaxWidth()
-        .padding(horizontal = 10.dp, vertical = 10.dp)) {
+        .padding(horizontal = 10.dp, vertical = 10.dp).clickable { onItemClick() }) {
         Surface(
             shape = RoundedCornerShape(10f),
             tonalElevation = 5.dp,
@@ -42,9 +41,6 @@ fun SearchedPasswordItem(
             modifier = Modifier
                 .weight(3f)
                 .aspectRatio(2.0f)
-                .clickable {
-                    onItemClick()
-                }
                 .align(CenterVertically),
             color = MaterialTheme.colorScheme.primary,
             content = {
@@ -71,9 +67,6 @@ fun SearchedPasswordItem(
                 .wrapContentSize()
                 .weight(6f)
                 .padding(16.dp)
-                .clickable {
-                    onItemClick()
-                }
         ) {
             if (password != null) {
                 Text(
@@ -102,6 +95,5 @@ fun SearchedPasswordItem(
 fun Preview1() {
     SearchedPasswordItem(
         password = Password("AMAN", "DFSFS", "AMAN", "", "CDJSCJSOI"),
-        onItemClick = { /*TODO*/ },
-        onDeleteClick = {})
+        onItemClick = { /*TODO*/ })
 }

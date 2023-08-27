@@ -17,8 +17,9 @@ import android.view.autofill.AutofillId
 import android.widget.RemoteViews
 import com.aman.keyswithkotlin.R
 import com.aman.keyswithkotlin.passwords.domain.model.Password
-import com.aman.keyswithkotlin.presentation.BiometricAuthActivity
-import com.aman.keyswithkotlin.presentation.BiometricAuthActivity.Companion.EXTRA_AUTOFILL_IDS
+import com.aman.keyswithkotlin.autofill_service.BiometricAuthActivity.Companion.EXTRA_AUTOFILL_IDS
+import com.aman.keyswithkotlin.autofill_service.BiometricAuthActivity.Companion.EXTRA_CLIENT_PACKAGE_NAME
+import com.aman.keyswithkotlin.autofill_service.SaveAutofillPasswordActivity.Companion.EXTRA_PASSWORD_DATA
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -102,6 +103,8 @@ class KeysAutofillService : AutofillService() {
             RemoteViews(applicationContext.packageName, R.layout.your_auth_layout)
 
         val intent1 = Intent(applicationContext, BiometricAuthActivity::class.java)
+        intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent1.putExtra(EXTRA_CLIENT_PACKAGE_NAME, packageName.replace('.', '_'))
         intent1.putExtra(EXTRA_AUTOFILL_IDS, arrayListOf(userNameId, passwordId))
         // Create a PendingIntent from the intent
         val pendingIntent1 = PendingIntent.getActivity(
@@ -169,6 +172,13 @@ class KeysAutofillService : AutofillService() {
                     println("password: $password")
                 }
             }
+        }
+
+        if (password?.isNotEmpty() == true && userName?.isNotEmpty() == true){
+            val intent1 = Intent(applicationContext, SaveAutofillPasswordActivity::class.java)
+            intent1.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            intent1.putExtra(EXTRA_PASSWORD_DATA, arrayListOf(userName, password, packageName, ""))
+                applicationContext.startActivity(intent1)
         }
 
         // TODO: Here you would save the username and password.

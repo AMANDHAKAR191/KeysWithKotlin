@@ -6,5 +6,6 @@ import com.aman.keyswithkotlin.passwords.domain.model.RealtimeModelResponse
 data class AutofillPasswordState (
     val passwords:List<Password> = emptyList(),
     val error:String?  = "",
-    val isLoading:Boolean = false
+    val isLoading:Boolean = false,
+    val autofillPasswordItem:Password? = null
 )

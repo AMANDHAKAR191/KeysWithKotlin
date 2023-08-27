@@ -47,7 +47,6 @@ class AddEditPasswordViewModel @Inject constructor(
 
             is PasswordEvent.SavePassword -> {
                 viewModelScope.launch {
-                    println()
                     try {
                         passwordUseCases.addPassword(
                             Password(

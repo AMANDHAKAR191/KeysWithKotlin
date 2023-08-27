@@ -26,7 +26,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".presentation.BiometricAuthActivity" />
+        <activity android:name=".autofill_service.BiometricAuthActivity" />
+        <activity android:name=".autofill_service.SaveAutofillPasswordActivity" />
 
         <service
             android:name=".autofill_service.KeysAutofillService"

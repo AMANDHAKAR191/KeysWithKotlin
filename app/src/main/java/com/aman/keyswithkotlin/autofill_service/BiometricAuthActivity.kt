@@ -1,4 +1,4 @@
-package com.aman.keyswithkotlin.presentation
+package com.aman.keyswithkotlin.autofill_service
 
 import android.Manifest
 import android.app.KeyguardManager
@@ -23,17 +23,18 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aman.keyswithkotlin.autofill_service.AutofillPasswordViewModel
 import com.aman.keyswithkotlin.passwords.domain.model.Password
+import com.aman.keyswithkotlin.passwords.presentation.componants.SearchedPasswordItem
 import com.aman.keyswithkotlin.ui.theme.KeysWithKotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.ArrayList
 
 
 @AndroidEntryPoint
@@ -44,13 +45,14 @@ class BiometricAuthActivity : ComponentActivity() {
         const val EXTRA_DATASET = "dataset"
         const val EXTRA_USERNAME = "username"
         const val EXTRA_PASSWORD = "password"
+        const val EXTRA_CLIENT_PACKAGE_NAME = "clientPackageName"
         const val EXTRA_AUTOFILL_IDS = "autofillIds"
     }
 
     var usernameID: AutofillId? = null
     var passwordID: AutofillId? = null
-    private var passwordList1 = listOf<Password>()
-    private var autofillIds:ArrayList<AutofillId>? = arrayListOf()
+    private var autofillIds: ArrayList<AutofillId>? = arrayListOf()
+    private var passwordList = listOf<Password>()
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,27 +60,48 @@ class BiometricAuthActivity : ComponentActivity() {
         setContent {
             KeysWithKotlinTheme {
                 val viewModel: AutofillPasswordViewModel = hiltViewModel()
-                passwordList1 = viewModel.state.value.passwords
+                passwordList = viewModel.state.value.passwords
 
-                println("passwordList11: $passwordList1")
-                if (passwordList1.isEmpty()){
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                println("passwordList11: $passwordList")
+                if (passwordList.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
-                }else{
+                } else {
+//                    val someWebsiteName = "20BCR70782"
+                    val someWebsiteName = intent.getStringExtra(EXTRA_CLIENT_PACKAGE_NAME)
+                    println("someWebsiteName: $someWebsiteName")
+                    //write code filter passwordList based on given value websiteName and store in filteredPasswordList
+                    var filteredPasswordList:List<Password> = passwordList.filter { it.websiteName == someWebsiteName }
+                    if (filteredPasswordList.isEmpty()){
+                        ShowPasswordList(passwordList)
+                    }else{
+                        ShowPasswordList(filteredPasswordList)
+                    }
                     launchBiometric()
                 }
             }
         }
     }
 
+    @Composable
+    fun ShowPasswordList(passwordList1: List<Password>) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            LazyColumn {
+                items(passwordList1) {
+                    SearchedPasswordItem(
+                        password = it,
+                        onItemClick = { onYes(listOf(it)) }
+                    )
+                }
+            }
+        }
+    }
 
-    private fun onYes() {
-        //            autofillIds = intent.getParcelableArrayListExtra(EXTRA_AUTOFILL_IDS, AutofillId::class.java)
 
-
+    private fun onYes(tempPasswordList:List<Password>) {
         val fillResponse = FillResponse.Builder()
-        passwordList1.forEach { password ->
+        tempPasswordList.forEach { password ->
             val datasetBuilder = Dataset.Builder()
 
             //create presentation for the dataset
@@ -96,13 +119,21 @@ class BiometricAuthActivity : ComponentActivity() {
 
                 //set the value to the fields
                 println("usernameID: ${it.get(0)} ")
-                if (it.get(0) != null){
-                    datasetBuilder.setValue(it.get(0), AutofillValue.forText(password.userName), presentation)
+                if (it.get(0) != null) {
+                    datasetBuilder.setValue(
+                        it.get(0),
+                        AutofillValue.forText(password.userName),
+                        presentation
+                    )
                 }
 
                 println("passwordID: ${it.get(1)} ")
-                if (it.get(1) != null){
-                    datasetBuilder.setValue(it.get(1), AutofillValue.forText(password.password), presentation)
+                if (it.get(1) != null) {
+                    datasetBuilder.setValue(
+                        it.get(1),
+                        AutofillValue.forText(password.password),
+                        presentation
+                    )
                 }
             }
 
@@ -129,8 +160,8 @@ class BiometricAuthActivity : ComponentActivity() {
     private fun launchBiometric() {
         if (checkBiometricSupport()) {
             val biometricPrompt = BiometricPrompt.Builder(applicationContext)
-                .setTitle("Keys want to verify your Biometric")
-                .setDescription("Your Biometric is used to make secure authentication process.")
+                .setTitle("Keys want to verify you")
+                .setDescription("Your Biometric is used to make authentication process more secure.")
                 .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
                 .build()
 
@@ -148,12 +179,11 @@ class BiometricAuthActivity : ComponentActivity() {
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    onYes()
+//                    onYes()
                 }
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    onNo()
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
@@ -195,21 +225,5 @@ class BiometricAuthActivity : ComponentActivity() {
     }
 }
 
-fun AutofillId.toStringValue(): String {
-    return this.toString()
-}
 
-
-// Store the mapping between your custom string IDs and AutofillIds
-private val autofillIdMap = mutableMapOf<String, AutofillId>()
-
-// Function to convert a custom string ID to an AutofillId
-fun String.toAutofillId(): AutofillId? {
-    return autofillIdMap[this]
-}
-
-// Function to register an AutofillId with a custom string ID
-fun registerAutofillId(customId: String, autofillId: AutofillId) {
-    autofillIdMap[customId] = autofillId
-}
 
