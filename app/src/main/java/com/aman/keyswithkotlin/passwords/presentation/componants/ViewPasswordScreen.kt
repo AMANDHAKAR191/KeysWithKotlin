@@ -14,8 +14,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,7 +43,8 @@ fun ViewPasswordScreen(
     password: Password,
     modifier: Modifier = Modifier,
     onCloseButtonClick:()->Unit,
-    onEditButtonClick:()->Unit
+    onEditButtonClick:()->Unit,
+    onShareButtonClick:(Password)->Unit
 ) {
     var passwordVisibility by remember { mutableStateOf(false) }
     var icon = if (passwordVisibility) Icons.Default.Visibility else Icons.Default.VisibilityOff
@@ -92,9 +95,9 @@ fun ViewPasswordScreen(
                     }
                 }
                 IconButton(onClick = {
-                    onEditButtonClick()
+                    onShareButtonClick(password)
                 }) {
-                    Icon(Icons.Default.Create, contentDescription = "Edit password")
+                    Icon(Icons.Default.Share, contentDescription = "Edit password")
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -129,6 +132,11 @@ fun ViewPasswordScreen(
                 },
                 visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
             )
+            Button(onClick = {
+                onEditButtonClick()
+            }) {
+                Text(text = "Edit Password")
+            }
         }
     }
 }

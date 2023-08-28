@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
 import com.aman.keyswithkotlin.core.components.BottomBar
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
@@ -18,7 +19,8 @@ import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordVi
 
 fun NavGraphBuilder.passwordNavGraph(
     navController: NavController,
-    sharedPasswordViewModel: SharePasswordViewModel
+    sharedPasswordViewModel: SharePasswordViewModel,
+    sharedChatViewModel: SharedChatViewModel
 ) {
     navigation(
         startDestination = BottomBarScreen.Password.route,
@@ -32,6 +34,7 @@ fun NavGraphBuilder.passwordNavGraph(
                 searchedPasswordState = viewModel.searchedPasswords.collectAsState(),
                 onEvent = viewModel::onEvent,
                 onSharedPasswordEvent = sharedPasswordViewModel::onEvent,
+                onSharedChatEvent = sharedChatViewModel::onEvent,
                 navigateToAddEditPasswordScreen = {
                     navController.navigate(Screen.AddEditPasswordScreen.route)
                 },
@@ -40,6 +43,9 @@ fun NavGraphBuilder.passwordNavGraph(
                 },
                 navigateToProfileScreen = {
                     navController.navigate(Graph.PROFILE)
+                },
+                navigateToChatUserListScreen = {
+                    navController.navigate(BottomBarScreen.Chats.route)
                 },
                 bottomBar = {
                     BottomBar(navController, navigateTo = {

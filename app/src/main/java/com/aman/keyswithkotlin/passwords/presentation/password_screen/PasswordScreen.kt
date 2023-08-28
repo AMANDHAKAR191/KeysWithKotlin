@@ -53,17 +53,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
+import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
+import com.aman.keyswithkotlin.passwords.presentation.componants.ExpendableFloatingButton
+import com.aman.keyswithkotlin.passwords.presentation.componants.Identifier
+import com.aman.keyswithkotlin.passwords.presentation.componants.MinFabItem
+import com.aman.keyswithkotlin.passwords.presentation.componants.MultiFloatingState
 import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.SearchedPasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
-import com.amandhakar.expendable_floating_action_button.ExpendableFloatingButton
-import com.amandhakar.expendable_floating_action_button.Identifier
-import com.amandhakar.expendable_floating_action_button.MinFabItem
-import com.amandhakar.expendable_floating_action_button.MultiFloatingState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -76,9 +77,11 @@ fun PasswordScreen(
     searchedPasswordState: State<List<Password>>,
     onEvent: (PasswordEvent) -> Unit,
     onSharedPasswordEvent: (SharedPasswordEvent) -> Unit,
+    onSharedChatEvent: (SharedChatEvent) -> Unit,
     navigateToAddEditPasswordScreen: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit,
     navigateToProfileScreen: () -> Unit,
+    navigateToChatUserListScreen: () -> Unit,
     navigateToAccessVerificationScreen: () -> Unit,
     closeApp: () -> Unit,
     bottomBar: @Composable (() -> Unit)
@@ -89,19 +92,19 @@ fun PasswordScreen(
     var multiFloatingState by remember { mutableStateOf(MultiFloatingState.Collapsed) }
     val items = listOf(
         MinFabItem(
+            icon = Icons.Default.Create,
+            label = "Add Password",
+            identifier = Identifier.AddEditPassword.name
+        ),
+        MinFabItem(
+            icon = Icons.Default.Password,
+            label = "Generate Password",
+            identifier = Identifier.GeneratePassword.name
+        ),
+        MinFabItem(
             icon = Icons.Default.Person,
             label = "Profile",
             identifier = Identifier.Profile.name
-        ),
-        com.amandhakar.expendable_floating_action_button.MinFabItem(
-            icon = Icons.Default.Password,
-            label = "Generate Password",
-            identifier = com.amandhakar.expendable_floating_action_button.Identifier.GeneratePassword.name
-        ),
-        com.amandhakar.expendable_floating_action_button.MinFabItem(
-            icon = Icons.Default.Create,
-            label = "Add Password",
-            identifier = com.amandhakar.expendable_floating_action_button.Identifier.AddEditPassword.name
         )
     )
 
@@ -140,258 +143,272 @@ fun PasswordScreen(
 
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopBar(title = "Keys",
-                onClickActionButton = {
-                    navigateToProfileScreen()
-                }
-            )
-        },
-        floatingActionButton = {
-            ExpendableFloatingButton(
-                multiFloatingState = multiFloatingState,
-                onMultiFabStateChange = {
-                    multiFloatingState = it
-                },
-                item = items,
-                onMinFabItemClick = { minFabItem ->
-                    when (minFabItem.identifier) {
-                        Identifier.AddEditPassword.name -> {
-                            navigateToAddEditPasswordScreen()
-                        }
-
-                        Identifier.GeneratePassword.name -> {
-                            navigateToGeneratePasswordScreen()
-                        }
-
-                        Identifier.Profile.name -> {
-                            navigateToProfileScreen()
-                        }
-
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                TopBar(title = "Keys",
+                    onClickActionButton = {
+                        navigateToProfileScreen()
                     }
-                }
-            )
-        },
-        bottomBar = {
-            bottomBar()
-        },
-        content = { innerPadding ->
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                color = Color.Black,
-                content = {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        SearchBar(
-                            modifier = Modifier.padding(horizontal = 10.dp),
-                            query = searchtext.value,
-                            onQueryChange = {
-                                onEvent(PasswordEvent.OnSearchTextChange(it))
-                                searchtext.value = it
-                            },
-                            onSearch = {
+                )
+            },
+            floatingActionButton = {
+                ExpendableFloatingButton(
+                    multiFloatingState = multiFloatingState,
+                    onMultiFabStateChange = {
+                        multiFloatingState = it
+                    },
+                    item = items,
+                    onMinFabItemClick = { minFabItem ->
+                        when (minFabItem.identifier) {
+                            Identifier.AddEditPassword.name -> {
+                                navigateToAddEditPasswordScreen()
+                            }
 
-                            },
-                            active = isSearchBarActive,
-                            onActiveChange = { isSearchBarActive = it },
-                            colors = SearchBarDefaults.colors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            ),
-                            placeholder = { Text(text = "Search") },
-                            leadingIcon = {
-                                IconButton(onClick = {}) {
-                                    Icon(Icons.Default.Search, contentDescription = "Search")
-                                }
-                            },
-                            trailingIcon = {
-                                if (isSearchBarActive) {
-                                    IconButton(onClick = {
-                                        if (searchtext.value != "") {
-                                            searchtext.value = ""
-                                        } else {
-                                            isSearchBarActive = false
-                                        }
-                                    }) {
-                                        Icon(Icons.Default.Close, contentDescription = "Close")
-                                    }
-                                }
+                            Identifier.GeneratePassword.name -> {
+                                navigateToGeneratePasswordScreen()
                             }
-                        ) {
-                            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                items(searchedPasswords) { password ->
-                                    SearchedPasswordItem(
-                                        password = password,
-                                        onItemClick = {
-                                            isSearchBarActive = false
-                                            itemToView.value = password
-                                            viewPassword = true
-                                        }
-                                    )
-                                }
+
+                            Identifier.Profile.name -> {
+                                navigateToProfileScreen()
                             }
+
                         }
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 10.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
-                                )
-                                .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-                        ) {
-                            BottomSheetSwipeUp(
-                                modifier = Modifier
-                                    .align(TopCenter)
-                                    .padding(top = 15.dp)
-                            )
-                            LazyColumn(modifier = Modifier.padding(top = 30.dp)) {
-                                item {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .width(50.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(text = "Recently used passwords")
-                                    }
-                                }
-                                items(state.recentlyUsedPasswords.take(3)) { password ->
-                                    PasswordItem(
-                                        password = password,
-                                        onItemClick = {
-                                            itemToView.value = password
-                                            viewPassword = true
-                                        },
-                                        onDeleteClick = {
-                                            onEvent(PasswordEvent.DeletePassword(password = password))
-//                                            scope.launch {
-//                                                val result = snackBarHostState.showSnackbar(
-//                                                    message = "Password deleted",
-//                                                    actionLabel = "Restore",
-//                                                    withDismissAction = true,
-//                                                    duration = SnackbarDuration.Short
-//                                                )
-//                                                if (result == SnackbarResult.ActionPerformed) {
-//                                                    onEvent(PasswordEvent.RestorePassword(password = password))
-//                                                }
-//                                            }
-                                        }
-                                    )
-                                }
-                                item {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .width(50.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(text = "All passwords")
-                                    }
-                                }
-
-                                items(state.passwords) { password ->
-                                    PasswordItem(
-                                        password = password,
-                                        onItemClick = {
-                                            itemToView.value = password
-                                            viewPassword = true
-                                        },
-                                        onDeleteClick = {
-//                                            onEvent(PasswordEvent.DeletePassword(password = password))
-                                            onEvent(
-                                                PasswordEvent.UpdateLastUsedPasswordTimeStamp(
-                                                    password = password
-                                                )
-                                            )
-//                                            scope.launch {
-//                                                val result = snackBarHostState.showSnackbar(
-//                                                    message = "Password deleted",
-//                                                    actionLabel = "Restore",
-//                                                    withDismissAction = true,
-//                                                    duration = SnackbarDuration.Short
-//                                                )
-//                                                if (result == SnackbarResult.ActionPerformed) {
-//                                                    onEvent(PasswordEvent.RestorePassword(password = password))
-//                                                }
-//                                            }
-                                        }
-                                    )
-                                }
-                                item {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .width(100.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(text = "This is end of passwords")
-                                    }
-                                }
-                            }
-                        }
-
                     }
-                }
-            )
-
-
-            if (state.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
-                    CircularProgressIndicator()
-                }
-            }
-            //for view password in separate dialog
-            if (viewPassword) {
-                Box(
+                )
+            },
+            bottomBar = {
+                bottomBar()
+            },
+            content = { innerPadding ->
+                Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable {
-                            viewPassword = false
+                        .padding(innerPadding),
+                    color = Color.Black,
+                    content = {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            SearchBar(
+                                modifier = Modifier.padding(horizontal = 10.dp),
+                                query = searchtext.value,
+                                onQueryChange = {
+                                    onEvent(PasswordEvent.OnSearchTextChange(it))
+                                    searchtext.value = it
+                                },
+                                onSearch = {
+
+                                },
+                                active = isSearchBarActive,
+                                onActiveChange = { isSearchBarActive = it },
+                                colors = SearchBarDefaults.colors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                ),
+                                placeholder = { Text(text = "Search") },
+                                leadingIcon = {
+                                    IconButton(onClick = {}) {
+                                        Icon(Icons.Default.Search, contentDescription = "Search")
+                                    }
+                                },
+                                trailingIcon = {
+                                    if (isSearchBarActive) {
+                                        IconButton(onClick = {
+                                            if (searchtext.value != "") {
+                                                searchtext.value = ""
+                                            } else {
+                                                isSearchBarActive = false
+                                            }
+                                        }) {
+                                            Icon(Icons.Default.Close, contentDescription = "Close")
+                                        }
+                                    }
+                                }
+                            ) {
+                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    items(searchedPasswords) { password ->
+                                        SearchedPasswordItem(
+                                            password = password,
+                                            onItemClick = {
+                                                isSearchBarActive = false
+                                                itemToView.value = password
+                                                viewPassword = true
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(top = 10.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
+                                    )
+                                    .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                            ) {
+                                BottomSheetSwipeUp(
+                                    modifier = Modifier
+                                        .align(TopCenter)
+                                        .padding(top = 15.dp)
+                                )
+                                LazyColumn(modifier = Modifier.padding(top = 30.dp)) {
+                                    item {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .width(50.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(text = "Recently used passwords")
+                                        }
+                                    }
+                                    items(state.recentlyUsedPasswords.take(3)) { password ->
+                                        PasswordItem(
+                                            password = password,
+                                            onItemClick = {
+                                                itemToView.value = password
+                                                viewPassword = true
+                                            },
+                                            onDeleteClick = {
+                                                onEvent(PasswordEvent.DeletePassword(password = password))
+//                                            scope.launch {
+//                                                val result = snackBarHostState.showSnackbar(
+//                                                    message = "Password deleted",
+//                                                    actionLabel = "Restore",
+//                                                    withDismissAction = true,
+//                                                    duration = SnackbarDuration.Short
+//                                                )
+//                                                if (result == SnackbarResult.ActionPerformed) {
+//                                                    onEvent(PasswordEvent.RestorePassword(password = password))
+//                                                }
+//                                            }
+                                            }
+                                        )
+                                    }
+                                    item {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .width(50.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(text = "All passwords")
+                                        }
+                                    }
+
+                                    items(state.passwords) { password ->
+                                        PasswordItem(
+                                            password = password,
+                                            onItemClick = {
+                                                itemToView.value = password
+                                                viewPassword = true
+                                            },
+                                            onDeleteClick = {
+//                                            onEvent(PasswordEvent.DeletePassword(password = password))
+                                                onEvent(
+                                                    PasswordEvent.UpdateLastUsedPasswordTimeStamp(
+                                                        password = password
+                                                    )
+                                                )
+//                                            scope.launch {
+//                                                val result = snackBarHostState.showSnackbar(
+//                                                    message = "Password deleted",
+//                                                    actionLabel = "Restore",
+//                                                    withDismissAction = true,
+//                                                    duration = SnackbarDuration.Short
+//                                                )
+//                                                if (result == SnackbarResult.ActionPerformed) {
+//                                                    onEvent(PasswordEvent.RestorePassword(password = password))
+//                                                }
+//                                            }
+                                            }
+                                        )
+                                    }
+                                    item {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .width(100.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(text = "This is end of passwords")
+                                        }
+                                    }
+                                }
+                            }
+
                         }
-                        .background(Color(0x80000000)),
-                    contentAlignment = Center
-                ) {
-                    ViewPasswordScreen(
-                        itemToView.value!!,
-                        onCloseButtonClick = {
-                            viewPassword = false
-                        },
-                        onEditButtonClick = {
-                            onSharedPasswordEvent(SharedPasswordEvent.onEditItem(itemToView.value!!))
-                            navigateToAddEditPasswordScreen()
-                        })
+                    }
+                )
+
+                if (multiFloatingState == MultiFloatingState.Expended) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .clickable { multiFloatingState = MultiFloatingState.Collapsed })
                 }
-            }
-            //for Access Alert
-            if (isAlertDialogVisible) {
-                println("check2::")
-                AlertDialog(
-                    onDismissRequest = {
-                        // Dismiss the dialog when the user clicks outside the dialog or on the back
-                        // button. If you want to disable that functionality, simply use an empty
-                        // onDismissRequest.
-                    },
-                    title = {
-                        Text(text = "Warning!", color = MaterialTheme.colorScheme.error)
-                    },
-                    text = {
-                        Text(
-                            text = "You device is not Authorized. If you are not Authorized user then you can't use this account.",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    },
-                    confirmButton = {
-                        Button(onClick = {
-                            navigateToAccessVerificationScreen()
-                        }) {
-                            Text("Ask Permission")
-                        }
+
+
+                if (state.isLoading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                //for view password in separate dialog
+                if (viewPassword) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                viewPassword = false
+                            }
+                            .background(Color(0x80000000)),
+                        contentAlignment = Center
+                    ) {
+                        ViewPasswordScreen(
+                            itemToView.value!!,
+                            onCloseButtonClick = {
+                                viewPassword = false
+                            },
+                            onEditButtonClick = {
+                                onSharedPasswordEvent(SharedPasswordEvent.onEditItem(itemToView.value!!))
+                                navigateToAddEditPasswordScreen()
+                            },
+                            onShareButtonClick = { password ->
+                                onSharedChatEvent(SharedChatEvent.SharePasswordItem(password))
+                                navigateToChatUserListScreen()
+                            })
+                    }
+                }
+
+                //for Access Alert
+                if (isAlertDialogVisible) {
+                    println("check2::")
+                    AlertDialog(
+                        onDismissRequest = {
+                            // Dismiss the dialog when the user clicks outside the dialog or on the back
+                            // button. If you want to disable that functionality, simply use an empty
+                            // onDismissRequest.
+                        },
+                        title = {
+                            Text(text = "Warning!", color = MaterialTheme.colorScheme.error)
+                        },
+                        text = {
+                            Text(
+                                text = "You device is not Authorized. If you are not Authorized user then you can't use this account.",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                navigateToAccessVerificationScreen()
+                            }) {
+                                Text("Ask Permission")
+                            }
 //                        TextButton(
 //                            onClick = {
 //
@@ -399,20 +416,21 @@ fun PasswordScreen(
 //                        ) {
 //                            Text("Ask Permission")
 //                        }
-                    },
-                    dismissButton = {
-                        TextButton(
-                            onClick = {
-                                closeApp()
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    closeApp()
+                                }
+                            ) {
+                                Text("Ok")
                             }
-                        ) {
-                            Text("Ok")
                         }
-                    }
-                )
+                    )
+                }
             }
-        }
-    )
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -431,9 +449,11 @@ fun preview() {
         }, // Using a list of dummy passwords
         onEvent = {},
         onSharedPasswordEvent = {},
+        onSharedChatEvent = {},
         navigateToAddEditPasswordScreen = {},
         navigateToGeneratePasswordScreen = {},
         navigateToProfileScreen = {},
+        navigateToChatUserListScreen = {},
         navigateToAccessVerificationScreen = {},
         closeApp = {}
     ) {}

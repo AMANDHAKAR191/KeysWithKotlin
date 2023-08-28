@@ -51,14 +51,15 @@ class IndividualUserChatsViewModel @Inject constructor(
             is ChatMessageEvent.SendMessage -> {
                 println("Message: ${state.value.chatMessage}")
                 println("commonChatRoomId: ${event.commonChatRoomId}")
-
+                println("passwordItemToShare: ${event.passwordItemValue}")
                 viewModelScope.launch {
                     chatUseCases.sendMessage(
                         event.commonChatRoomId,
                         ChatModelClass(
                             message = state.value.chatMessage,
                             publicUid = publicUID,
-                            type = "text"
+                            type = "text",
+                            passwordModelClass = event.passwordItemValue
                         )
                     ).collect { response ->
                         when (response) {

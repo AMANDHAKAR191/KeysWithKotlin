@@ -35,7 +35,8 @@ fun RootNavGraph(
         accessVerificationNavGraph(navController)
         passwordNavGraph(
             navController = navController,
-            sharedPasswordViewModel = sharedPasswordViewModel
+            sharedPasswordViewModel = sharedPasswordViewModel,
+            sharedChatViewModel = sharedChatViewModel
         )
         chatNavGraph(navController, sharedPasswordViewModel, sharedChatViewModel)
         noteNavGraph(navController, sharedPasswordViewModel)

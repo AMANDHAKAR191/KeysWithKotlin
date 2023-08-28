@@ -21,11 +21,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -33,6 +37,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,9 +54,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
+import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
+import com.aman.keyswithkotlin.chats.presentation.SharedChatState
 import com.aman.keyswithkotlin.chats.presentation.SpacerWidth
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
-import com.aman.keyswithkotlin.di.PublicUID
+import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.ui.theme.Pink80
 import com.aman.keyswithkotlin.ui.theme.RedOrange
 import kotlinx.coroutines.flow.SharedFlow
@@ -57,17 +67,77 @@ import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IndividualChatScreen(
-    data: UserPersonalChatList? = null,
-//    state: ChatMessagesState,
     _state: StateFlow<ChatMessageState>,
+    _sharedChatState: StateFlow<SharedChatState>,
     eventFlowState: SharedFlow<UIEvents>,
     onChatEvent: (ChatMessageEvent) -> Unit,
+    onSharedChatEvent: (SharedChatEvent) -> Unit,
     navigateToPasswordScreen: () -> Unit
 ) {
     val state = _state.collectAsState()
+    val sharedChatState = _sharedChatState.collectAsState()
+    val data = sharedChatState.value.person
     val chatMessages: List<ChatModelClass>? = state.value.chatMessagesList
     val messageTextValue = state.value.chatMessage
     val lazyColumnState = rememberLazyListState()
+
+    var isItemShared by remember { mutableStateOf(false) }
+    var passwordItemToShare:Password? = null
+
+    LaunchedEffect(key1 = sharedChatState.value.sharedPasswordItem) {
+        if (sharedChatState.value.sharedPasswordItem != null) {
+            isItemShared = true
+        }
+
+    }
+    LaunchedEffect(key1 = sharedChatState.value.sharedNoteItem) {
+        if (sharedChatState.value.sharedNoteItem != null) {
+            isItemShared = true
+        }
+    }
+
+    if (isItemShared) {
+        AlertDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
+                isItemShared = false
+                onSharedChatEvent(SharedChatEvent.SharePasswordItem(null))
+                onSharedChatEvent(SharedChatEvent.ShareNoteItem(null))
+            },
+            title = {
+                Text(text = "Share Item", color = MaterialTheme.colorScheme.error)
+            },
+            text = {
+                AsyncImage(model = data?.otherUserProfileUrl, contentDescription = "Profile image")
+                Text(
+                    text = "Your Password/Note will be shared with ${data?.otherUserPublicUname}",
+                    color = MaterialTheme.colorScheme.error
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    println("passwordItemToShare: sharedChatState.value.sharedPasswordItem: ${sharedChatState.value.sharedPasswordItem}")
+                    passwordItemToShare = sharedChatState.value.sharedPasswordItem
+                    isItemShared = false
+                }) {
+                    Text("Share")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        isItemShared = false
+                        onSharedChatEvent(SharedChatEvent.SharePasswordItem(null))
+                        onSharedChatEvent(SharedChatEvent.ShareNoteItem(null))
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
 
 
@@ -133,9 +203,7 @@ fun IndividualChatScreen(
                             ),
                             state = lazyColumnState
                         ) {
-                            println("check:1 chatMessages: $chatMessages")
                             if (chatMessages != null) {
-                                println("check:2 chatMessages: $chatMessages")
                                 val timeStampUtil = TimeStampUtil()
                                 items(chatMessages) {
                                     ChatRow(
@@ -145,7 +213,6 @@ fun IndividualChatScreen(
                                     )
                                 }
                             } else {
-                                println("check:3")
                             }
                         }
                     }
@@ -159,7 +226,9 @@ fun IndividualChatScreen(
                         .padding(horizontal = 10.dp, vertical = 10.dp)
                         .align(Alignment.BottomCenter),
                     onTrailingIconButtonClicked = {
-                        onChatEvent(ChatMessageEvent.SendMessage(data?.commonChatRoomId!!))
+                        onChatEvent(ChatMessageEvent.SendMessage(data?.commonChatRoomId!!, sharedChatState.value.sharedPasswordItem))
+                        onSharedChatEvent(SharedChatEvent.SharePasswordItem(null))
+                        onSharedChatEvent(SharedChatEvent.ShareNoteItem(null))
                     }
                 )
             }
@@ -182,12 +251,30 @@ fun ChatRow(
     chat: ChatModelClass,
     timeStampUtil: TimeStampUtil
 ) {
-    println("chat.publicUid: ${chat.publicUid}")
-    println("receiverPublicUID: $senderPublicUID")
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = if (chat.publicUid != senderPublicUID) Alignment.Start else Alignment.End
     ) {
+        Column(
+            modifier = Modifier
+                .background(
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                    RoundedCornerShape(20f)
+                ),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Center
+        ) {
+            chat.passwordModelClass?.let {
+                Text(
+                    text = it.websiteName, style = TextStyle(
+                        color = Color.Black,
+                        fontSize = 15.sp
+                    ),
+                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 15.dp),
+                    textAlign = TextAlign.End
+                )
+            }
+        }
         Box(
             modifier = Modifier
                 .background(
@@ -195,7 +282,7 @@ fun ChatRow(
                     RoundedCornerShape(100.dp)
                 ),
             contentAlignment = Alignment.Center
-        ) {
+        ){
             Text(
                 text = chat.message ?: "", style = TextStyle(
                     color = Color.Black,
@@ -205,6 +292,7 @@ fun ChatRow(
                 textAlign = TextAlign.End
             )
         }
+
         Text(
             text = timeStampUtil.getTime(chat.dateAndTime!!),
             style = TextStyle(

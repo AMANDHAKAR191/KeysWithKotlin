@@ -19,7 +19,6 @@ class TimeStampUtil {
         // Now you can format the day to your desired pattern
         val outputFormatter = DateTimeFormatter.ofPattern("dd")
         val outputDateString = date.format(outputFormatter)
-        println("outputDateString: $outputDateString")
         return date.format(outputFormatter).toInt()
     }
 
@@ -30,7 +29,6 @@ class TimeStampUtil {
         // Now you can format the month to your desired pattern
         val outputFormatter = DateTimeFormatter.ofPattern("MM")
         val outputDateString = date.format(outputFormatter)
-        println("outputDateString: $outputDateString")
         return date.format(outputFormatter).toInt()
     }
 
@@ -41,7 +39,6 @@ class TimeStampUtil {
         // Now you can format the year to your desired pattern
         val outputFormatter = DateTimeFormatter.ofPattern("yyyy")
         val outputDateString = date.format(outputFormatter)
-        println("outputDateString: $outputDateString")
         return date.format(outputFormatter).toInt()
     }
 
@@ -52,7 +49,6 @@ class TimeStampUtil {
         // Now you can format the time to your desired pattern
         val outputFormatter = DateTimeFormatter.ofPattern("HH:mm:ss a")
         val outputDateString = date.format(outputFormatter)
-        println("outputDateString: $outputDateString")
         return date.format(outputFormatter)
     }
 }

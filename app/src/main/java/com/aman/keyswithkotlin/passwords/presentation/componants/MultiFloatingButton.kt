@@ -1,11 +1,13 @@
-package com.amandhakar.expendable_floating_action_button
+package com.aman.keyswithkotlin.passwords.presentation.componants
 
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -30,20 +32,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 enum class MultiFloatingState {
-    Expended,
-    Collapsed
+    Expended, Collapsed
 }
 
 class MinFabItem(
-    val icon: ImageVector,
-    val label: String,
-    val identifier: String
+    val icon: ImageVector, val label: String, val identifier: String
 )
 
 enum class Identifier {
-    AddEditPassword,
-    GeneratePassword,
-    Profile
+    AddEditPassword, GeneratePassword, Profile
 }
 
 @Composable
@@ -54,65 +51,47 @@ fun ExpendableFloatingButton(
     onMinFabItemClick: (MinFabItem) -> Unit
 ) {
     val transition = updateTransition(
-        targetState = multiFloatingState,
-        label = "transition"
+        targetState = multiFloatingState, label = "transition"
     )
-    val rotate by transition.animateFloat(label = "rotate") {
+    val rotate by transition.animateFloat(label = "rotate", transitionSpec = {
+        tween(durationMillis = 300, easing = FastOutSlowInEasing)
+    }) {
         if (it == MultiFloatingState.Expended) 45f else 0f
     }
-
-    val fabScale by transition.animateFloat(label = "fabScale") {
-        if (it == MultiFloatingState.Expended) 50f else 0f
+    val translateY by transition.animateDp(label = "translateY", transitionSpec = {
+        tween(durationMillis = 300, easing = FastOutSlowInEasing)
+    }) {
+        if (it == MultiFloatingState.Expended) 90.dp else 0.dp
     }
-    val fabImageScale by transition.animateDp(label = "fabImageScale") {
-        if (it == MultiFloatingState.Expended) 50.dp else 0.dp
-    }
-    val translateY by transition.animateDp(
-        label = "translateY",
-        transitionSpec = {
-            tween(durationMillis = 100, easing = FastOutSlowInEasing)
-        }) {
-        if (it == MultiFloatingState.Expended) 0.dp else 100.dp
-    }
-
-    val alpha by transition.animateFloat(
-        label = "alpha",
-        transitionSpec = {
-            tween(durationMillis = 100)
-        }) {
+    val alpha by transition.animateFloat(label = "alpha", transitionSpec = {
+        tween(durationMillis = 300)
+    }) {
         if (it == MultiFloatingState.Expended) 1f else 0f
     }
-    val textShadow by transition.animateDp(
-        label = "alpha",
-        transitionSpec = {
-            tween(durationMillis = 100)
-        }) {
-        if (it == MultiFloatingState.Expended) 0.5.dp else 0.dp
-    }
 
 
-    Column(
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.Bottom,
-        modifier = Modifier
-            .padding(end = 20.dp)
+    Box(
+        modifier = Modifier.padding(end = 20.dp),
+        contentAlignment = Alignment.BottomEnd
     ) {
-        if (transition.currentState == MultiFloatingState.Expended) {
-            item.forEach {
-                MinFab(
-                    item = it,
-                    alpha = alpha,
-                    textShadow = textShadow,
-                    translateY = translateY,
-                    fabScale = fabScale,
-                    fabImageScale = fabImageScale,
-                    onMinFabItemClick = { minFabItem ->
-                        onMinFabItemClick(minFabItem)
-                    })
-                Spacer(modifier = Modifier.size(40.dp))
-            }
-        }
-
+        MinFab(item = item.get(0),
+            alpha = alpha,
+            translateY = translateY,
+            onMinFabItemClick = { minFabItem ->
+                onMinFabItemClick(minFabItem)
+            })
+        MinFab(item = item.get(1),
+            alpha = alpha,
+            translateY = (translateY*16)/9,
+            onMinFabItemClick = { minFabItem ->
+                onMinFabItemClick(minFabItem)
+            })
+        MinFab(item = item.get(2),
+            alpha = alpha,
+            translateY = (translateY*5)/2,
+            onMinFabItemClick = { minFabItem ->
+                onMinFabItemClick(minFabItem)
+            })
         FloatingActionButton(
             onClick = {
                 onMultiFabStateChange(
@@ -122,14 +101,10 @@ fun ExpendableFloatingButton(
                         MultiFloatingState.Expended
                     }
                 )
-            },
-            modifier = Modifier
-                .padding(bottom = 20.dp)
+            }, modifier = Modifier.padding(bottom = 20.dp)
         ) {
             Icon(
-                Icons.Default.Add,
-                contentDescription = "",
-                modifier = Modifier.rotate(rotate)
+                Icons.Default.Add, contentDescription = "", modifier = Modifier.rotate(rotate)
             )
         }
     }
@@ -141,44 +116,35 @@ fun MultiFloatingButtonPreview() {
     var multiFloatingState by remember { mutableStateOf(MultiFloatingState.Collapsed) }
     val items = listOf(
         MinFabItem(
-            icon = Icons.Default.Person,
-            label = "Profile",
-            identifier = Identifier.Profile.name
-        ),
-        MinFabItem(
+            icon = Icons.Default.Person, label = "Profile", identifier = Identifier.Profile.name
+        ), MinFabItem(
             icon = Icons.Default.Password,
             label = "Generate Password",
             identifier = Identifier.GeneratePassword.name
-        ),
-        MinFabItem(
+        ), MinFabItem(
             icon = Icons.Default.Create,
             label = "Add Password",
             identifier = Identifier.AddEditPassword.name
         )
     )
-    ExpendableFloatingButton(
-        multiFloatingState = multiFloatingState,
-        onMultiFabStateChange = {
-            multiFloatingState = it
-        },
-        item = items,
-        onMinFabItemClick = { minFabItem ->
-            when (minFabItem.identifier) {
-                Identifier.AddEditPassword.name -> {
+    ExpendableFloatingButton(multiFloatingState = multiFloatingState, onMultiFabStateChange = {
+        multiFloatingState = it
+    }, item = items, onMinFabItemClick = { minFabItem ->
+        when (minFabItem.identifier) {
+            Identifier.AddEditPassword.name -> {
 //                    navigateToAddEditPasswordScreen()
-                }
-
-                Identifier.GeneratePassword.name -> {
-//                    navigateToGeneratePasswordScreen()
-                }
-
-                Identifier.Profile.name -> {
-//                    navigateToProfileScreen()
-                }
-
             }
+
+            Identifier.GeneratePassword.name -> {
+//                    navigateToGeneratePasswordScreen()
+            }
+
+            Identifier.Profile.name -> {
+//                    navigateToProfileScreen()
+            }
+
         }
-    )
+    })
 }
 
 

@@ -117,6 +117,4 @@ dependencies {
     implementation "io.coil-kt:coil-compose:2.4.0" // Coil image loading library for Compose
     implementation 'com.google.code.gson:gson:2.10.1'
     // Gson library for JSON serialization/deserialization
-
-    implementation project(":expendable_floating_action_button")
 }

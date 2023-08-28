@@ -43,19 +43,18 @@ fun NavGraphBuilder.chatNavGraph(
                     })
                 },
                 navigateToChatScreen = {
-
                     navController.navigate(Screen.IndividualChatScreen.route)
                 }
             )
         }
         composable(Screen.IndividualChatScreen.route) {
             val viewModel: IndividualUserChatsViewModel = hiltViewModel()
-
             IndividualChatScreen(
-                data = sharedChatViewModel.state.value.person,
                 _state = viewModel.state,
+                _sharedChatState = sharedChatViewModel.state,
                 eventFlowState = viewModel.eventFlow,
                 onChatEvent = viewModel::onEvent,
+                onSharedChatEvent = sharedChatViewModel::onEvent,
                 navigateToPasswordScreen = {
                     navController.popBackStack()
                 }
