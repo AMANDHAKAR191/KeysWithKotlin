@@ -17,6 +17,7 @@ import android.util.Log
 import android.view.View
 import android.view.autofill.AutofillId
 import android.widget.RemoteViews
+import android.widget.Toast
 import com.aman.keyswithkotlin.R
 import com.aman.keyswithkotlin.autofill_service.BiometricAuthActivity.Companion.EXTRA_AUTOFILL_IDS
 import com.aman.keyswithkotlin.autofill_service.BiometricAuthActivity.Companion.EXTRA_CLIENT_PACKAGE_NAME
@@ -87,14 +88,19 @@ class KeysAutofillService : AutofillService() {
         println("AUTOFILL_HINT_PASSWORD: ${View.AUTOFILL_HINT_PASSWORD}")
 
         // Traverse the structure and find the AutofillIds
+        println("userNameId: $userNameId")
+        println("passwordId: $passwordId")
         traverseStructure(
             structure,
             requestType = RequestType.OnFillRequest,
             setUsernameId = { _userNameId ->
                 userNameId = _userNameId
+                println("userNameId: $userNameId")
+
             },
             setPasswordId = { _passwordId ->
                 passwordId = _passwordId
+                println("passwordId: $passwordId")
             }
         )
 
@@ -114,11 +120,7 @@ class KeysAutofillService : AutofillService() {
         val intentSender1 = pendingIntent1.intentSender
 
         val responseBuilder = FillResponse.Builder()
-        if (userNameId == null) {
-            responseBuilder.setAuthentication(arrayOf(passwordId), intentSender1, presentation)
-        } else if (passwordId == null) {
-            responseBuilder.setAuthentication(arrayOf(userNameId), intentSender1, presentation)
-        } else {
+        if (userNameId != null && passwordId != null){
             responseBuilder.setAuthentication(
                 arrayOf(userNameId, passwordId),
                 intentSender1,
@@ -131,8 +133,16 @@ class KeysAutofillService : AutofillService() {
                         arrayOf(userNameId, passwordId)
                     ).build()
                 )
+            callback.onSuccess(responseBuilder.build())
+        } else if (userNameId != null) {
+            responseBuilder.setAuthentication(arrayOf(userNameId), intentSender1, presentation)
+            callback.onSuccess(responseBuilder.build())
+        } else if (passwordId != null) {
+            responseBuilder.setAuthentication(arrayOf(passwordId), intentSender1, presentation)
+            callback.onSuccess(responseBuilder.build())
+        }else{
+            Toast.makeText(applicationContext, "No AutoFill fields found. ", Toast.LENGTH_SHORT).show()
         }
-        callback.onSuccess(responseBuilder.build())
     }
 
 
@@ -198,8 +208,8 @@ class KeysAutofillService : AutofillService() {
                     }
                 }
 
-//                println("11: ${Arrays.toString(node.autofillHints)}")
-//                println("1: ${node.autofillId}, 2: ${node.autofillHints} 3: ${node.idEntry} 4: ${node.htmlInfo?.tag} 5: ${node.htmlInfo?.attributes}")
+                println("11: ${Arrays.toString(node.autofillHints)}")
+                println("1: ${node.autofillId}, 2: ${node.autofillHints} 3: ${node.idEntry} 4: ${node.htmlInfo?.tag} 5: ${node.htmlInfo?.attributes}")
 
                 //this check if autofill is then go with 1st block otherwise go with second block
                 if (node.autofillHints?.contains(View.AUTOFILL_HINT_USERNAME) == true) {
