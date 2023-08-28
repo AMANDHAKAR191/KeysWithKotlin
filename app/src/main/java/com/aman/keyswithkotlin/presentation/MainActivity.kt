@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.CancellationSignal
 import android.util.Log
 import android.view.WindowManager
+import android.view.autofill.AutofillManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -21,21 +22,20 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthViewModel
-import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
 import com.aman.keyswithkotlin.core.DeviceInfo
-import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.navigation.Graph
 import com.aman.keyswithkotlin.navigation.RootNavGraph
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+
 
 @AndroidEntryPoint
 @ExperimentalAnimationApi
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
     private val viewModel by viewModels<AuthViewModel>()
+    private var mAutofillManager: AutofillManager? = null
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,10 +51,13 @@ class MainActivity : ComponentActivity() {
             println("deviceInfo.getAppVersion(): ${deviceInfo.getAppVersion()}")
             println("deviceInfo.getLastLoginTimeStamp(): ${deviceInfo.getLastLoginTimeStamp()}")
 
+            mAutofillManager = getSystemService(AutofillManager::class.java) as AutofillManager
+
 
             navController = rememberNavController()
             RootNavGraph(
                 navController = navController,
+                mAutofillManager!!
             )
             checkAuthState()
         }
