@@ -26,17 +26,30 @@ class MyPreference() {
         sharedPreferences = Keys.instance.getSharedPreferences(SHARED_PREF_KEYS, Context.MODE_PRIVATE)
     }
 
-    var aesKey: String?
-        get() = sharedPreferences.getString(AES_CLOUD_KEY, "")
+    var aesCloudKey: String
+        get() = sharedPreferences.getString(AES_CLOUD_KEY, "")!!
         //String getter/setter method
         set(aesKey) {
             sharedPreferences.edit().putString(AES_CLOUD_KEY, aesKey).apply()
         }
-    var aesIv: String?
-        get() = sharedPreferences.getString(AES_CLOUD_IV, "")
+    var aesCloudIv: String
+        get() = sharedPreferences.getString(AES_CLOUD_IV, "")!!
         set(aesIv) {
             sharedPreferences.edit().putString(AES_CLOUD_IV, aesIv).apply()
         }
+
+    var aesLocalKey: String
+        get() = sharedPreferences.getString(AES_LOCAL_KEY, "")!!
+        //String getter/setter method
+        set(aesKey) {
+            sharedPreferences.edit().putString(AES_LOCAL_IV, aesKey).apply()
+        }
+    var aesLocalIv: String
+        get() = sharedPreferences.getString(AES_CLOUD_IV, "")!!
+        set(aesIv) {
+            sharedPreferences.edit().putString(AES_CLOUD_IV, aesIv).apply()
+        }
+
     var publicUid: String?
         get() = sharedPreferences.getString(PUBLIC_UID, "")
         set(publicUid) {

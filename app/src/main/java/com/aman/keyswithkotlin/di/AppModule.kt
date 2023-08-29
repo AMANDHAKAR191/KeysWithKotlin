@@ -45,14 +45,14 @@ class AppModule {
     fun provideAESCloudKeySpecs(
         myPreference: MyPreference
     ): AESKeySpecs =
-        AESKeySpecs(myPreference.AES_CLOUD_KEY, myPreference.AES_CLOUD_IV)
+        AESKeySpecs(myPreference.aesCloudKey, myPreference.aesCloudIv)
 
     @Provides
     @AES_LOCAL_KEY_SPECS
     fun provideAESLocalKeySpecs(
         myPreference: MyPreference
     ): AESKeySpecs =
-        AESKeySpecs("Xv6mxim2Blr58AzECQxQbz==", "Ou8n2PI2X4mJc4m9Zx3Ljb")
+        AESKeySpecs(myPreference.aesCloudKey, myPreference.aesCloudIv)
 
 
 }

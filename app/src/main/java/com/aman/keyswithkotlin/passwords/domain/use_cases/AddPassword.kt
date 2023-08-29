@@ -19,6 +19,8 @@ class AddPassword(
     @Throws(InvalidPasswordException::class)
     operator fun invoke(password: Password): Flow<Response<Pair<String?, Boolean?>>> {
         println("AddPassword: check3")
+        println("aesCloudKeySpecs: ${aesCloudKeySpecs.aesKey} || ${aesCloudKeySpecs.aesIV}")
+        println("aesLocalKeySpecs: ${aesLocalKeySpecs.aesKey} || ${aesLocalKeySpecs.aesIV}")
         if (password.userName.isBlank()) {
             throw InvalidPasswordException("The username can't be empty.")
         }
