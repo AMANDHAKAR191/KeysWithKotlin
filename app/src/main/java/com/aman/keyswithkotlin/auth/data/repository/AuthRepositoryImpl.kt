@@ -12,6 +12,7 @@ import com.aman.keyswithkotlin.chats.domain.model.MessageUserList
 import com.aman.keyswithkotlin.core.AES
 import com.aman.keyswithkotlin.core.Authentication
 import com.aman.keyswithkotlin.core.Authorization
+import com.aman.keyswithkotlin.core.Constants.AES_ALIES_NAME
 import com.aman.keyswithkotlin.core.Constants.SIGN_IN_REQUEST
 import com.aman.keyswithkotlin.core.Constants.SIGN_UP_REQUEST
 import com.aman.keyswithkotlin.core.Constants.USERS
@@ -91,9 +92,10 @@ class AuthRepositoryImpl @Inject constructor(
                         println("new user")
                         val addUserDeferred = async { addUserToFireBase(auth.currentUser) }
                         addUserDeferred.await()
+                        println("new user: check1")
                         async {
                             addDeviceDataToFireBase(
-                                auth.currentUser, DeviceType.Primary, Authorization.NotAuthorized
+                                auth.currentUser, DeviceType.Primary, Authorization.Authorized
                             )
                         }.await()
                     } else { // old user
@@ -147,8 +149,9 @@ class AuthRepositoryImpl @Inject constructor(
     private suspend fun addUserToFireBase(
         user: FirebaseUser?
     ): SignInWithGoogleResponse = coroutineScope {
-        val aesKey = "${generatePassword(22, specialCharacters = false)}=="
-        val aesIV = generatePassword(22, specialCharacters = false)
+//        Dh9sn08fI02mZfYFf3gNZO1NO1M60u/xgaIeqKVb5uo=
+        val aesKey = "${generatePassword(43, specialCharacters = false)}="
+        val aesIV = generatePassword(16, specialCharacters = false)
         user?.let {
             val timeStampUtil = TimeStampUtil()
             val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
@@ -156,7 +159,7 @@ class AuthRepositoryImpl @Inject constructor(
                 deviceInfo.getDeviceId() to getDeviceData(
                     deviceInfo = deviceInfo,
                     deviceType = DeviceType.Primary,
-                    authorization = Authorization.NotAuthorized
+                    authorization = Authorization.Authorized
                 )
             )
 
@@ -171,11 +174,17 @@ class AuthRepositoryImpl @Inject constructor(
                 createdAt = timeStampUtil.generateTimestamp(),
                 userDevicesList = userDevicesList
             )
+            println("addUserToFireBase: check1")
+            //store aesKey in Keystore
+//            addLocalSecretKeyInKeyStore(AES_ALIES_NAME, aesKey)
+
 
             AES.getInstance(aesKey, aesIV)?.let { aes ->
+                println("addUserToFireBase: check: aes: $aes")
                 val encryptedUser = encryptUser(newUser, aes)
 
                 return@coroutineScope try {
+
                     db.reference.child(USERS).child(it.uid).setValue(encryptedUser)
                         .await() // Wait for the first Firebase operation to complete
 
@@ -190,7 +199,6 @@ class AuthRepositoryImpl @Inject constructor(
                     referenceSender.child("messageUserList").child(newUser.publicUID!!)
                         .setValue(userListModel).addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-//                                Response.Success(status = true)
                                 addUserInSharedPreferenceDB(
                                     newUser.aesKey, newUser.aesIV, newUser.publicUID!!
                                 )
@@ -206,7 +214,6 @@ class AuthRepositoryImpl @Inject constructor(
             } ?: Response.Failure(Exception("AES initialization failed."))
         } ?: Response.Failure(Exception("Invalid FirebaseUser."))
     }
-
     private fun getDeviceData(
         deviceInfo: DeviceInfo,
         deviceType: DeviceType,
@@ -370,6 +377,7 @@ class AuthRepositoryImpl @Inject constructor(
                     kotlinx.coroutines.delay(100) // Add a small delay before checking again
                 }
                 _user?.let {
+//                    addLocalSecretKeyInKeyStore(AES_ALIES_NAME, it.aesKey!!)
                     addUserInSharedPreferenceDB(it.aesKey, it.aesIV, it.publicUID!!)
                     Response.Success(
                         _user, true
@@ -379,6 +387,11 @@ class AuthRepositoryImpl @Inject constructor(
                 Response.Failure(e) // Return failure response
             }
         } ?: Response.Failure(Exception("Invalid FirebaseUser."))
+    }
+
+    private fun addLocalSecretKeyInKeyStore(aliesName: String, aesKey: String) {
+        val aes = AES()
+        aes.storeAESKeyAndIVInKeystore(aliesName, aesKey)
     }
 
 

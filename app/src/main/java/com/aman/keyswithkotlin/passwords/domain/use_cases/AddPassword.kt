@@ -19,6 +19,8 @@ class AddPassword(
     @Throws(InvalidPasswordException::class)
     operator fun invoke(password: Password): Flow<Response<Pair<String?, Boolean?>>> {
         println("AddPassword: check3")
+        AES.getKeyStoreInstance()
+        println("AddPassword: check3.1")
         println("aesCloudKeySpecs: ${aesCloudKeySpecs.aesKey} || ${aesCloudKeySpecs.aesIV}")
         println("aesLocalKeySpecs: ${aesLocalKeySpecs.aesKey} || ${aesLocalKeySpecs.aesIV}")
         if (password.userName.isBlank()) {

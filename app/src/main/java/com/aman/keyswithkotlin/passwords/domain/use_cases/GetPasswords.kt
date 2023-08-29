@@ -16,7 +16,7 @@ class GetPasswords(
     private val aesLocalKeySpecs: AESKeySpecs
 ) {
     operator fun invoke(): Flow<Response<Pair<MutableList<Password>?, Boolean?>>> {
-        val aes = AES.getInstance(aesCloudKeySpecs.aesKey, aesCloudKeySpecs.aesIV)
+        val aes = AES.getInstance(aesCloudKeySpecs.aesKey, aesCloudKeySpecs.aesIV, )
             ?: throw IllegalStateException("Failed to initialize AES instance.")
         return passwordRepository.getPasswords()
             .map { response ->

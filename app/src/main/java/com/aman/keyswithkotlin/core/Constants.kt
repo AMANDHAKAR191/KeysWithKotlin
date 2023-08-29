@@ -7,6 +7,8 @@ object Constants {
     //Collection References
     const val USERS = "users"
 
+    const val AES_ALIES_NAME = "aesLocalKey"
+
     //User fields
     const val DISPLAY_NAME = "displayName"
     const val EMAIL = "email"
