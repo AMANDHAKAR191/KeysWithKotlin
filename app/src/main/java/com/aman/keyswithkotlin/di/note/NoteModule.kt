@@ -1,6 +1,8 @@
 package com.aman.keyswithkotlin.di.note
 
 import com.aman.keyswithkotlin.di.AESKeySpecs
+import com.aman.keyswithkotlin.di.AES_CLOUD_KEY_SPECS
+import com.aman.keyswithkotlin.di.AES_LOCAL_KEY_SPECS
 import com.aman.keyswithkotlin.di.UID
 import com.aman.keyswithkotlin.notes.data.repository.NoteRepositoryImpl
 import com.aman.keyswithkotlin.notes.domain.repository.NoteRepository
@@ -23,11 +25,14 @@ class NoteModule {
     @Provides
     fun provideNoteUseCases(
         repository: NoteRepository,
-        aesKeySpecs: AESKeySpecs
+        @AES_CLOUD_KEY_SPECS
+        aesCloudKeySpecs: AESKeySpecs,
+        @AES_LOCAL_KEY_SPECS
+        aesLocalKeySpecs: AESKeySpecs,
     ): NoteUseCases {
         return NoteUseCases(
-            getNotes = GetNotes(repository, aesKeySpecs),
-            addNote = AddNote(repository, aesKeySpecs),
+            getNotes = GetNotes(repository, aesCloudKeySpecs,aesLocalKeySpecs),
+            addNote = AddNote(repository, aesCloudKeySpecs,aesLocalKeySpecs),
             deleteNote = DeleteNote(repository),
             shareNote = ShareNote(repository)
         )
@@ -38,8 +43,11 @@ class NoteModule {
         database: FirebaseDatabase,
         @UID
         UID: String,
-        aesKeySpecs: AESKeySpecs
+        @AES_CLOUD_KEY_SPECS
+        aesCloudKeySpecs: AESKeySpecs,
+        @AES_LOCAL_KEY_SPECS
+        aesLocalKeySpecs: AESKeySpecs,
     ): NoteRepository {
-        return NoteRepositoryImpl(database, UID = UID, aesKeySpecs)
+        return NoteRepositoryImpl(database, UID = UID, aesCloudKeySpecs)
     }
 }

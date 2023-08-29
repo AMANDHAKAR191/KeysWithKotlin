@@ -1,19 +1,22 @@
 package com.aman.keyswithkotlin.passwords.domain.use_cases
 
 import com.aman.keyswithkotlin.core.AES
+import com.aman.keyswithkotlin.core.Constants
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.di.AESKeySpecs
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.domain.repository.PasswordRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Named
 
 class GetRecentlyUsedPasswords(
     private val passwordRepository: PasswordRepository,
-    private val aesKeySpecs: AESKeySpecs
+    private val aesCloudKeySpecs: AESKeySpecs,
+    private val aesLocalKeySpecs: AESKeySpecs
 ) {
     operator fun invoke(): Flow<Response<Pair<MutableList<Password>?, Boolean?>>> {
-        val aes = AES.getInstance(aesKeySpecs.aesKey, aesKeySpecs.aesIV)
+        val aes = AES.getInstance(aesCloudKeySpecs.aesKey, aesCloudKeySpecs.aesIV)
             ?: throw IllegalStateException("Failed to initialize AES instance.")
         return passwordRepository.getRecentlyUsedPasswords()
             .map { response ->

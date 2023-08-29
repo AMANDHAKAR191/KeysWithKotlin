@@ -3,6 +3,8 @@ package com.aman.keyswithkotlin.di.password
 import androidx.compose.animation.ExperimentalAnimationApi
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.di.AESKeySpecs
+import com.aman.keyswithkotlin.di.AES_CLOUD_KEY_SPECS
+import com.aman.keyswithkotlin.di.AES_LOCAL_KEY_SPECS
 import com.aman.keyswithkotlin.di.PublicUID
 import com.aman.keyswithkotlin.di.UID
 import com.aman.keyswithkotlin.passwords.data.repository.PasswordRepositoryImpl
@@ -29,17 +31,20 @@ class PasswordModule {
     @Provides
     fun providePasswordUseCases(
         repository: PasswordRepository,
-        aesKeySpecs: AESKeySpecs,
+        @AES_CLOUD_KEY_SPECS
+        aesCloudKeySpecs: AESKeySpecs,
+        @AES_LOCAL_KEY_SPECS
+        aesLocalKeySpecs: AESKeySpecs,
         @PublicUID
         publicUID: String,
         myPreference: MyPreference
     ): PasswordUseCases {
 
         return PasswordUseCases(
-            getPasswords = GetPasswords(repository, aesKeySpecs),
-            getRecentlyUsedPasswords = GetRecentlyUsedPasswords(repository, aesKeySpecs),
+            getPasswords = GetPasswords(repository, aesCloudKeySpecs, aesLocalKeySpecs),
+            getRecentlyUsedPasswords = GetRecentlyUsedPasswords(repository, aesCloudKeySpecs, aesLocalKeySpecs),
             updateLastUsedPasswordTimeStamp = UpdateLastUsedPasswordTimeStamp(repository),
-            addPassword = AddPassword(repository, aesKeySpecs),
+            addPassword = AddPassword(repository, aesCloudKeySpecs, aesLocalKeySpecs),
             deletePassword = DeletePassword(repository),
             generatePassword = GeneratePassword(repository),
             saveRecentGeneratedPassword = SaveRecentGeneratedPassword(repository),

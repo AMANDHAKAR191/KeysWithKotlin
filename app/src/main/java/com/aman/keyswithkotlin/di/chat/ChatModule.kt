@@ -11,6 +11,8 @@ import com.aman.keyswithkotlin.chats.domain.use_cases.SendMessage
 import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.di.AESKeySpecs
+import com.aman.keyswithkotlin.di.AES_CLOUD_KEY_SPECS
+import com.aman.keyswithkotlin.di.AES_LOCAL_KEY_SPECS
 import com.aman.keyswithkotlin.di.PublicUID
 import com.aman.keyswithkotlin.di.UID
 import com.google.firebase.database.FirebaseDatabase
@@ -30,7 +32,10 @@ class ChatModule {
     @Provides
     fun provideChatUseCases(
         repository: ChatRepository,
-        aesKeySpecs: AESKeySpecs
+        @AES_CLOUD_KEY_SPECS
+        aesCloudKeySpecs: AESKeySpecs,
+        @AES_LOCAL_KEY_SPECS
+        aesLocalKeySpecs: AESKeySpecs,
     ): ChatUseCases {
         return ChatUseCases(
             sendMessage = SendMessage(repository),
@@ -53,9 +58,12 @@ class ChatModule {
         database: FirebaseDatabase,
         @PublicUID
         publicUID: String,
-        aesKeySpecs: AESKeySpecs
+        @AES_CLOUD_KEY_SPECS
+        aesCloudKeySpecs: AESKeySpecs,
+        @AES_LOCAL_KEY_SPECS
+        aesLocalKeySpecs: AESKeySpecs,
     ): ChatRepository {
-        return ChatRepositoryImpl(database, publicUID, aesKeySpecs)
+        return ChatRepositoryImpl(database, publicUID, aesCloudKeySpecs)
     }
 }
 //@Qualifier
