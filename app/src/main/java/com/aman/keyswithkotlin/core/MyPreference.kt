@@ -1,6 +1,5 @@
 package com.aman.keyswithkotlin.core
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import com.aman.keyswithkotlin.Keys
@@ -9,8 +8,10 @@ class MyPreference() {
 //    var context = _context!!
     var sharedPreferences: SharedPreferences
     val SHARED_PREF_KEYS = "keysSharedPreference"
-    val AES_KEY = "aesKey"
-    val AES_IV = "aesIv"
+    val AES_CLOUD_KEY = "aesCloudKey"
+    val AES_CLOUD_IV = "aesCloudIv"
+    val AES_LOCAL_KEY = "aesLocalKey"
+    val AES_LOCAL_IV = "aesLocalIv"
     val PUBLIC_UID = "publicUid"
     val LOCK_APP_OPTIONS = "lock_app"
     val ROOM_ID = "receiverRoomId"
@@ -26,15 +27,15 @@ class MyPreference() {
     }
 
     var aesKey: String?
-        get() = sharedPreferences.getString(AES_KEY, "")
+        get() = sharedPreferences.getString(AES_CLOUD_KEY, "")
         //String getter/setter method
         set(aesKey) {
-            sharedPreferences.edit().putString(AES_KEY, aesKey).apply()
+            sharedPreferences.edit().putString(AES_CLOUD_KEY, aesKey).apply()
         }
     var aesIv: String?
-        get() = sharedPreferences.getString(AES_IV, "")
+        get() = sharedPreferences.getString(AES_CLOUD_IV, "")
         set(aesIv) {
-            sharedPreferences.edit().putString(AES_IV, aesIv).apply()
+            sharedPreferences.edit().putString(AES_CLOUD_IV, aesIv).apply()
         }
     var publicUid: String?
         get() = sharedPreferences.getString(PUBLIC_UID, "")

@@ -1,16 +1,17 @@
 package com.aman.keyswithkotlin.di
 
 import com.aman.keyswithkotlin.core.AESKeySpacsProvider
+import com.aman.keyswithkotlin.core.Constants
 import com.aman.keyswithkotlin.core.MyPreference
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import javax.inject.Named
 import javax.inject.Qualifier
 
 @Module
@@ -40,7 +41,17 @@ class AppModule {
 
 
     @Provides
-    fun provideAESKeySpacs(): AESKeySpecs =
+    @AES_CLOUD_KEY_SPECS
+    fun provideAESCloudKeySpecs(
+        myPreference: MyPreference
+    ): AESKeySpecs =
+        AESKeySpecs(myPreference.AES_CLOUD_KEY, myPreference.AES_CLOUD_IV)
+
+    @Provides
+    @AES_LOCAL_KEY_SPECS
+    fun provideAESLocalKeySpecs(
+        myPreference: MyPreference
+    ): AESKeySpecs =
         AESKeySpecs("Xv6mxim2Blr58AzECQxQbz==", "Ou8n2PI2X4mJc4m9Zx3Ljb")
 
 
@@ -50,6 +61,14 @@ data class AESKeySpecs(
     var aesKey: String = "",
     var aesIV: String = "",
 )
+
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AES_CLOUD_KEY_SPECS
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AES_LOCAL_KEY_SPECS
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

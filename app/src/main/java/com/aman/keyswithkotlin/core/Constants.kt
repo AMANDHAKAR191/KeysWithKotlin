@@ -16,6 +16,8 @@ object Constants {
     //Names
     const val SIGN_IN_REQUEST = "signInRequest"
     const val SIGN_UP_REQUEST = "signUpRequest"
+    const val AES_CLOUD_KEY_SPECS = "aesCloudKeySpecs"
+    const val AES_LOCAL_KEY_SPECS = "aesLocalKeySpecs"
 
     //Buttons
     const val SIGN_IN_WITH_GOOGLE = "Sign in with Google"

@@ -383,8 +383,8 @@ class AuthRepositoryImpl @Inject constructor(
 
     private fun addUserInSharedPreferenceDB(aesKey: String?, aesIV: String?, publicUID: String) {
         val editor = myPreference.sharedPreferences.edit()
-        editor.putString(myPreference.AES_KEY, aesKey)
-        editor.putString(myPreference.AES_IV, aesIV)
+        editor.putString(myPreference.AES_CLOUD_KEY, aesKey)
+        editor.putString(myPreference.AES_CLOUD_IV, aesIV)
         editor.putString(myPreference.PUBLIC_UID, publicUID)
         editor.apply()
     }
