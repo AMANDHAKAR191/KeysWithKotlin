@@ -370,6 +370,7 @@ class AuthRepositoryImpl @Inject constructor(
                     kotlinx.coroutines.delay(100) // Add a small delay before checking again
                 }
                 _user?.let {
+                    addUserInSharedPreferenceDB(it.aesKey, it.aesIV, it.publicUID!!)
                     Response.Success(
                         _user, true
                     ) // Return success response with the user object
