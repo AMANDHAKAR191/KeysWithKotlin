@@ -82,7 +82,7 @@ fun IndividualChatScreen(
     val lazyColumnState = rememberLazyListState()
 
     var isItemShared by remember { mutableStateOf(false) }
-    var passwordItemToShare:Password? = null
+    var passwordItemToShare: Password? = null
 
     LaunchedEffect(key1 = sharedChatState.value.sharedPasswordItem) {
         if (sharedChatState.value.sharedPasswordItem != null) {
@@ -226,7 +226,12 @@ fun IndividualChatScreen(
                         .padding(horizontal = 10.dp, vertical = 10.dp)
                         .align(Alignment.BottomCenter),
                     onTrailingIconButtonClicked = {
-                        onChatEvent(ChatMessageEvent.SendMessage(data?.commonChatRoomId!!, sharedChatState.value.sharedPasswordItem))
+                        onChatEvent(
+                            ChatMessageEvent.SendMessage(
+                                data?.commonChatRoomId!!,
+                                sharedChatState.value.sharedPasswordItem
+                            )
+                        )
                         onSharedChatEvent(SharedChatEvent.SharePasswordItem(null))
                         onSharedChatEvent(SharedChatEvent.ShareNoteItem(null))
                     }
@@ -282,7 +287,7 @@ fun ChatRow(
                     RoundedCornerShape(100.dp)
                 ),
             contentAlignment = Alignment.Center
-        ){
+        ) {
             Text(
                 text = chat.message ?: "", style = TextStyle(
                     color = Color.Black,
