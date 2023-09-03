@@ -389,11 +389,6 @@ class AuthRepositoryImpl @Inject constructor(
         } ?: Response.Failure(Exception("Invalid FirebaseUser."))
     }
 
-    private fun addLocalSecretKeyInKeyStore(aliesName: String, aesKey: String) {
-        val aes = AES()
-        aes.storeAESKeyAndIVInKeystore(aliesName, aesKey)
-    }
-
 
     private fun addUserInSharedPreferenceDB(aesKey: String?, aesIV: String?, publicUID: String) {
         val editor = myPreference.sharedPreferences.edit()

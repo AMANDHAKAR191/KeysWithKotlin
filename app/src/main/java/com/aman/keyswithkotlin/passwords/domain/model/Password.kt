@@ -6,10 +6,11 @@ import android.os.Parcelable
 data class Password constructor(
     var userName: String = "",
     var password: String = "",
-    val websiteName: String = "",
-    val websiteLink: String = "",
-    val timestamp: String = "",
-    val lastUsedTimeStamp: String = ""
+    var websiteName: String = "",
+    var websiteLink: String = "",
+    var timestamp: String = "",
+    var lastUsedTimeStamp: String = "",
+//    var encryptionIV:String = ""
 ):Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
