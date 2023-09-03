@@ -50,6 +50,8 @@ import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
@@ -65,6 +67,7 @@ import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.SearchedPasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
+import com.aman.keyswithkotlin.presentation.CustomCircularProgressBar
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -130,6 +133,7 @@ fun PasswordScreen(
                 }
 
                 is UIEvents.ShowAlertDialog -> {
+                    println("test: check")
                     isAlertDialogVisible = true
                 }
 
@@ -143,7 +147,9 @@ fun PasswordScreen(
 
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .testTag("RootNode")) {
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
             modifier = Modifier.fillMaxSize(),
@@ -254,26 +260,35 @@ fun PasswordScreen(
                                         .align(TopCenter)
                                         .padding(top = 15.dp)
                                 )
-                                LazyColumn(modifier = Modifier.padding(top = 30.dp)) {
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .width(50.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(text = "Recently used passwords")
+                                if (state.passwords.isEmpty()) {
+                                    Text(
+                                        text = "No Password  Saved",
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .testTag("NoPasswordHelperText")
+                                    )
+                                } else {
+                                    LazyColumn(modifier = Modifier.padding(top = 30.dp)) {
+                                        item {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .width(50.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(text = "Recently used passwords")
+                                            }
                                         }
-                                    }
-                                    items(state.recentlyUsedPasswords.take(3)) { password ->
-                                        PasswordItem(
-                                            password = password,
-                                            onItemClick = {
-                                                itemToView.value = password
-                                                viewPassword = true
-                                            },
-                                            onDeleteClick = {
-                                                onEvent(PasswordEvent.DeletePassword(password = password))
+                                        items(state.recentlyUsedPasswords.take(3)) { password ->
+                                            PasswordItem(
+                                                password = password,
+                                                onItemClick = {
+                                                    itemToView.value = password
+                                                    viewPassword = true
+                                                },
+                                                onDeleteClick = {
+                                                    onEvent(PasswordEvent.DeletePassword(password = password))
 //                                            scope.launch {
 //                                                val result = snackBarHostState.showSnackbar(
 //                                                    message = "Password deleted",
@@ -285,34 +300,34 @@ fun PasswordScreen(
 //                                                    onEvent(PasswordEvent.RestorePassword(password = password))
 //                                                }
 //                                            }
-                                            }
-                                        )
-                                    }
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .width(50.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(text = "All passwords")
+                                                }
+                                            )
                                         }
-                                    }
+                                        item {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .width(50.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(text = "All passwords")
+                                            }
+                                        }
 
-                                    items(state.passwords) { password ->
-                                        PasswordItem(
-                                            password = password,
-                                            onItemClick = {
-                                                itemToView.value = password
-                                                viewPassword = true
-                                            },
-                                            onDeleteClick = {
+                                        items(state.passwords) { password ->
+                                            PasswordItem(
+                                                password = password,
+                                                onItemClick = {
+                                                    itemToView.value = password
+                                                    viewPassword = true
+                                                },
+                                                onDeleteClick = {
 //                                            onEvent(PasswordEvent.DeletePassword(password = password))
-                                                onEvent(
-                                                    PasswordEvent.UpdateLastUsedPasswordTimeStamp(
-                                                        password = password
+                                                    onEvent(
+                                                        PasswordEvent.UpdateLastUsedPasswordTimeStamp(
+                                                            password = password
+                                                        )
                                                     )
-                                                )
 //                                            scope.launch {
 //                                                val result = snackBarHostState.showSnackbar(
 //                                                    message = "Password deleted",
@@ -324,17 +339,18 @@ fun PasswordScreen(
 //                                                    onEvent(PasswordEvent.RestorePassword(password = password))
 //                                                }
 //                                            }
+                                                }
+                                            )
+                                        }
+                                        item {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .width(100.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(text = "This is end of passwords")
                                             }
-                                        )
-                                    }
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .width(100.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(text = "This is end of passwords")
                                         }
                                     }
                                 }
@@ -349,13 +365,14 @@ fun PasswordScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.Black.copy(alpha = 0.5f))
-                            .clickable { multiFloatingState = MultiFloatingState.Collapsed })
+                            .clickable { multiFloatingState = MultiFloatingState.Collapsed }
+                    )
                 }
 
 
                 if (state.isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
-                        CircularProgressIndicator()
+                        CustomCircularProgressBar()
                     }
                 }
                 //for view password in separate dialog
@@ -366,7 +383,8 @@ fun PasswordScreen(
                             .clickable {
                                 viewPassword = false
                             }
-                            .background(Color(0x80000000)),
+                            .background(Color(0x80000000))
+                            .testTag("ViewPassword"),
                         contentAlignment = Center
                     ) {
                         ViewPasswordScreen(
@@ -387,7 +405,6 @@ fun PasswordScreen(
 
                 //for Access Alert
                 if (isAlertDialogVisible) {
-                    println("check2::")
                     AlertDialog(
                         onDismissRequest = {
                             // Dismiss the dialog when the user clicks outside the dialog or on the back
@@ -425,7 +442,8 @@ fun PasswordScreen(
                             ) {
                                 Text("Ok")
                             }
-                        }
+                        },
+                        modifier = Modifier.testTag("AuthorizationAlertDialog")
                     )
                 }
             }

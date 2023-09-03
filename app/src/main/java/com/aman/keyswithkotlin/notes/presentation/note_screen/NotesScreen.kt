@@ -124,50 +124,11 @@ fun NotesScreen(
                                 },
                             onDeleteClick = {
                                 onEvent(NotesEvent.DeleteNote(note))
-//                                scope.launch {
-//                                    val result = snackBarHostState.showSnackbar(
-//                                        message = "Note deleted",
-//                                        actionLabel = "Undo",
-//                                        withDismissAction = true,
-//                                        duration = SnackbarDuration.Short
-//                                    )
-//                                    if (result == SnackbarResult.ActionPerformed) {
-//                                        onEvent(NotesEvent.RestoreNote)
-//                                    }
-//                                }
                             }
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
-//                LazyColumn(modifier = Modifier.fillMaxSize()) {
-//                    items(state.notes) { note ->
-//                        NoteItem(
-//                            note = note,
-//                            modifier = Modifier
-//                                .width(170.dp)
-//                                .clickable {
-//                                    //todo code for viewing the note
-//                                },
-//                            onDeleteClick = {
-//                                onEvent(NotesEvent.DeleteNote(note))
-//
-//                                scope.launch {
-//                                    val result = snackBarHostState.showSnackbar(
-//                                        message = "Note deleted",
-//                                        actionLabel = "Undo",
-//                                        withDismissAction = true,
-//                                        duration = SnackbarDuration.Short
-//                                    )
-//                                    if (result == SnackbarResult.ActionPerformed) {
-//                                        onEvent(NotesEvent.RestoreNote)
-//                                    }
-//                                }
-//                            }
-//                        )
-//                        Spacer(modifier = Modifier.height(16.dp))
-//                    }
-//                }
             }
         }
     )

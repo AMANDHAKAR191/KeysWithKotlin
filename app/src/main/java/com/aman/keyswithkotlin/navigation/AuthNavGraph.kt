@@ -26,19 +26,19 @@ fun NavGraphBuilder.authNavGraph(
             AuthScreen(
                 oneTapSignInResponse = viewModel.oneTapSignInResponse,
                 signInWithGoogleResponse = viewModel.signInWithGoogleResponse,
-                oneTapSignIn = {
-                    viewModel.oneTapSignIn()
+                oneTapSignInWithGoogle = {
+                    viewModel.oneTapSignInWithGoogle()
                 },
-                onSignInWithGoogle = { result ->
+                onSignInWithFirebaseGoogleAccount = { result ->
                     val credentials =
                         viewModel.oneTapClient.getSignInCredentialFromIntent(result.data)
                     val googleIdToken = credentials.googleIdToken
                     val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
-                    viewModel.signInWithGoogle(googleCredentials)
+                    viewModel.signInWithFirebaseGoogleAccount(googleCredentials)
                 },
                 navigateToProfileScreen = {
                     navController.popBackStack()
-                    navController.navigate(Graph.SETTING)
+                    navController.navigate(Graph.PROFILE)
                 },
                 navigateToPasswordScreen = {
                     navController.popBackStack()

@@ -41,6 +41,7 @@ class AES {
 
     @Throws(Exception::class)
     private fun decrypt(encryptedMessage: String?): String {
+        println("encryptedMessage1: $encryptedMessage")
         val messageInBytes = decode(encryptedMessage)
         val decryptionCipher = Cipher.getInstance("AES/GCM/NoPadding")
         val spec = GCMParameterSpec(T_LEN, IV)
@@ -51,8 +52,7 @@ class AES {
 
     fun singleEncryption(data: String): String {
         return try {
-            val temp = encrypt(data)
-            encrypt(temp)
+            encrypt(data)
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
@@ -60,36 +60,17 @@ class AES {
 
     fun singleDecryption(encryptionString: String?): String {
         return try {
-            val temp = decrypt(encryptionString)
-            decrypt(temp)
+            decrypt(encryptionString)
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
     }
 
-    fun doubleEncryption(data: String): String {
-        return try {
-            val temp = encrypt(data)
-            encrypt(temp)
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
-    }
-
-    fun doubleDecryption(encryptionString: String?): String {
-        return try {
-            val temp = decrypt(encryptionString)
-            decrypt(temp)
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
-    }
-
-    fun encode(data: ByteArray?): String {
+    private fun encode(data: ByteArray?): String {
         return Base64.getEncoder().encodeToString(data)
     }
 
-    fun decode(data: String?): ByteArray {
+    private fun decode(data: String?): ByteArray {
         return Base64.getDecoder().decode(data)
     }
 

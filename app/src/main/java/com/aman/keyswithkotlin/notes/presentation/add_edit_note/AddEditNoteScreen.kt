@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
@@ -79,7 +80,7 @@ fun AddEditNoteScreen(
         snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
             MediumTopAppBar(
-                title = { Text(text = "My Note") },
+                title = { Text(text = "Add Note") },
                 navigationIcon = {
                     IconButton(onClick = {
                         navigateToNoteScreen()
@@ -103,7 +104,6 @@ fun AddEditNoteScreen(
                 },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
-                    .layoutId("floatingActionButtonAddNote")
                     .padding(all = 20.dp)
             ) {
                 Icon(imageVector = Icons.Default.Save, contentDescription = "Save note")
@@ -119,7 +119,7 @@ fun AddEditNoteScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(8.dp).testTag("ColorBoxParent"),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Note.noteColors.forEach { color ->

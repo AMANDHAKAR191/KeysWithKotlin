@@ -7,6 +7,7 @@ import com.aman.keyswithkotlin.core.util.Response.Failure
 import com.aman.keyswithkotlin.core.util.Response.Loading
 import com.aman.keyswithkotlin.core.util.Response.Success
 import com.aman.keyswithkotlin.core.components.ProgressBar
+import com.aman.keyswithkotlin.presentation.CustomCircularProgressBar
 
 @Composable
 fun SignInWithGoogle(
@@ -14,7 +15,7 @@ fun SignInWithGoogle(
     navigateToHomeScreen: (signedIn: Boolean) -> Unit
 ) {
     when (signInWithGoogleResponse) {
-        is Loading -> ProgressBar()
+        is Loading -> CustomCircularProgressBar(showStatus = true, status = "Authenticating account with firebase...")
         is Success -> signInWithGoogleResponse.status?.let { signedIn ->
             LaunchedEffect(signedIn) {
                 navigateToHomeScreen(signedIn)

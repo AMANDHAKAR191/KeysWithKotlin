@@ -29,8 +29,8 @@ import com.google.firebase.auth.GoogleAuthProvider.getCredential
 fun AuthScreen(
     oneTapSignInResponse:OneTapSignInResponse,
     signInWithGoogleResponse:SignInWithGoogleResponse,
-    oneTapSignIn:()->Unit,
-    onSignInWithGoogle:(ActivityResult)->Unit,
+    oneTapSignInWithGoogle:()->Unit,
+    onSignInWithFirebaseGoogleAccount:(ActivityResult)->Unit,
     navigateToProfileScreen: () -> Unit,
     navigateToPasswordScreen: () -> Unit
 ) {
@@ -42,7 +42,7 @@ fun AuthScreen(
             AuthContent(
                 padding = padding,
                 oneTapSignIn = {
-                    oneTapSignIn()
+                    oneTapSignInWithGoogle()
                 }
             )
         }
@@ -51,7 +51,7 @@ fun AuthScreen(
     val launcher = rememberLauncherForActivityResult(StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             try {
-                onSignInWithGoogle(result)
+                onSignInWithFirebaseGoogleAccount(result)
             } catch (it: ApiException) {
                 print(it)
             }
@@ -86,8 +86,8 @@ fun preview(){
     AuthScreen(
         oneTapSignInResponse = Response.Success(null),
         signInWithGoogleResponse = Response.Success(status = true),
-        oneTapSignIn = { /*TODO*/ },
-        onSignInWithGoogle = {},
+        oneTapSignInWithGoogle = { /*TODO*/ },
+        onSignInWithFirebaseGoogleAccount = {},
         navigateToProfileScreen = { /*TODO*/ }) {
 
     }

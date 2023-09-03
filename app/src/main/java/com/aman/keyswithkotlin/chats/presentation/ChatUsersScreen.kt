@@ -228,7 +228,6 @@ fun HeaderOrViewStory() {
 fun BottomSheetSwipeUp(
     modifier: Modifier
 ) {
-
     Box(
         modifier = modifier
             .background(
