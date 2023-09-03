@@ -33,7 +33,7 @@ import com.aman.keyswithkotlin.ui.theme.passwordWeak
 fun CustomProgressIndicator(
     totalBudgetAmount: Float,
     progress: Float,
-    strokeWidth: Dp = 10.dp,
+    strokeWidth: Dp = 15.dp,
 ) {
     val normalizeValue = progress / totalBudgetAmount
     val size by animateFloatAsState(
@@ -42,7 +42,7 @@ fun CustomProgressIndicator(
             durationMillis = 1500,
             delayMillis = 200,
             easing = LinearOutSlowInEasing
-        )
+        ), label = ""
     )
 
 
@@ -53,19 +53,19 @@ fun CustomProgressIndicator(
     }
     when {
         percentage <= 50 -> {
-            val color by animateColorAsState(targetValue = passwordPoor)
+            val color by animateColorAsState(targetValue = passwordPoor, label = "")
             progressBarColor.value = color
             textValue.value = "Weak password"
         }
 
         (percentage >= 50) && (percentage < 70) -> {
-            val color by animateColorAsState(targetValue = passwordWeak)
+            val color by animateColorAsState(targetValue = passwordWeak, label = "")
             progressBarColor.value = color
             textValue.value = "Poor password"
         }
 
         percentage >= 70 -> {
-            val color by animateColorAsState(targetValue = passwordStrong)
+            val color by animateColorAsState(targetValue = passwordStrong, label = "")
             progressBarColor.value = color
             textValue.value = "Strong password"
         }

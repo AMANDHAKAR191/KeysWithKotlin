@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,12 +20,15 @@ import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
@@ -196,22 +200,20 @@ fun PasswordScreen(
                     color = Color.Black,
                     content = {
                         Column(modifier = Modifier.fillMaxSize()) {
-                            SearchBar(
+                            DockedSearchBar(
                                 modifier = Modifier.padding(horizontal = 10.dp),
                                 query = searchtext.value,
                                 onQueryChange = {
                                     onEvent(PasswordEvent.OnSearchTextChange(it))
                                     searchtext.value = it
                                 },
-                                onSearch = {
-
-                                },
-                                active = isSearchBarActive,
-                                onActiveChange = { isSearchBarActive = it },
+                                onSearch = {},
                                 colors = SearchBarDefaults.colors(
                                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                                 ),
                                 placeholder = { Text(text = "Search") },
+                                active = isSearchBarActive,
+                                onActiveChange = {isSearchBarActive = it},
                                 leadingIcon = {
                                     IconButton(onClick = {}) {
                                         Icon(Icons.Default.Search, contentDescription = "Search")
@@ -229,22 +231,22 @@ fun PasswordScreen(
                                             Icon(Icons.Default.Close, contentDescription = "Close")
                                         }
                                     }
-                                }
-                            ) {
-                                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                    items(searchedPasswords) { password ->
-                                        SearchedPasswordItem(
-                                            password = password,
-                                            onItemClick = {
-                                                isSearchBarActive = false
-                                                itemToView.value = password
-                                                viewPassword = true
-                                            }
-                                        )
+                                },
+                                content = {
+                                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                                        items(searchedPasswords.take(3)) { password ->
+                                            SearchedPasswordItem(
+                                                password = password,
+                                                onItemClick = {
+                                                    isSearchBarActive = false
+                                                    itemToView.value = password
+                                                    viewPassword = true
+                                                }
+                                            )
+                                        }
                                     }
                                 }
-                            }
-
+                            )
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -274,10 +276,11 @@ fun PasswordScreen(
                                             Column(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .width(50.dp),
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                    .width(50.dp)
+                                                    .padding(start = 10.dp),
+                                                horizontalAlignment = Alignment.Start
                                             ) {
-                                                Text(text = "Recently used passwords")
+                                                Text(text = "Recently used passwords", textAlign = TextAlign.Start)
                                             }
                                         }
                                         items(state.recentlyUsedPasswords.take(3)) { password ->
@@ -307,8 +310,9 @@ fun PasswordScreen(
                                             Column(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .width(50.dp),
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                    .width(50.dp)
+                                                    .padding(start = 10.dp),
+                                                horizontalAlignment = Alignment.Start
                                             ) {
                                                 Text(text = "All passwords")
                                             }
@@ -346,7 +350,8 @@ fun PasswordScreen(
                                             Column(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .width(100.dp),
+                                                    .height(50.dp)
+                                                    .padding(top = 10.dp),
                                                 horizontalAlignment = Alignment.CenterHorizontally
                                             ) {
                                                 Text(text = "This is end of passwords")
