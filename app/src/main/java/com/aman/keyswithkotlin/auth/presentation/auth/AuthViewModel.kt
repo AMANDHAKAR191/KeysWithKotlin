@@ -32,14 +32,14 @@ class AuthViewModel @Inject constructor(
         private set
 
 
-    fun oneTapSignIn() = viewModelScope.launch {
+    fun oneTapSignInWithGoogle() = viewModelScope.launch {
         oneTapSignInResponse = Loading
         authUseCases.oneTapSignInWithGoogle().collect { response ->
             oneTapSignInResponse = response
         }
     }
 
-    fun signInWithGoogle(googleCredential: AuthCredential) = viewModelScope.launch {
+    fun signInWithFirebaseGoogleAccount(googleCredential: AuthCredential) = viewModelScope.launch {
         signInWithGoogleResponse = Loading
         authUseCases.firebaseSignInWithGoogle(googleCredential).collect { response ->
             when(response){

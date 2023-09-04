@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -21,12 +21,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 
 @Composable
@@ -36,16 +40,17 @@ fun PasswordItem(
     onItemClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
-    Row(modifier = modifier
-        .fillMaxWidth()
-        .padding(horizontal = 10.dp, vertical = 10.dp)) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp, vertical = 10.dp)
+    ) {
         Surface(
             shape = RoundedCornerShape(10f),
             tonalElevation = 5.dp,
             shadowElevation = 5.dp,
             modifier = Modifier
-                .weight(2.5f)
-                .wrapContentSize()
+                .size(width = 80.dp, height = 50.dp)
                 .clickable {
                     onItemClick()
                 }
@@ -54,16 +59,33 @@ fun PasswordItem(
             content = {
                 Box(
                     modifier = Modifier
-                        .wrapContentWidth()
-                        .padding(vertical = 5.dp, horizontal = 10.dp)
-                        .aspectRatio(1f),
+                        .fillMaxSize()
+                        .padding(vertical = 5.dp, horizontal = 10.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (password != null) {
+                        val temp = try {
+                            password.websiteName.split('_')[2]
+                        } catch (e: IndexOutOfBoundsException) {
+                            password.websiteName
+                        }
+
+                        val scaleFactor =  80 / temp.length
+                        val calculatedSize =  (temp.length).toInt()
+
+                        val adjustedSize = when {
+                                calculatedSize in 10..12 -> 10.sp
+                                calculatedSize in 6..9 -> 12.sp // upper limit
+                                calculatedSize in 3..5 -> 20.sp // lower limit
+                                calculatedSize <= 2 -> 30.sp
+                                else -> 10.sp
+                            }
                         Text(
-                            text = password.websiteName,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            text = temp,
+                            style = TextStyle(
+                                fontSize = adjustedSize,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
                     }
                 }
@@ -72,13 +94,13 @@ fun PasswordItem(
 
         Column(
             modifier = Modifier
-                .wrapContentSize()
                 .padding(16.dp)
-                .padding(end = 32.dp)
-                .weight(5f)
+                .padding(start = 20.dp)
+                .weight(1f)
                 .clickable {
                     onItemClick()
-                }
+                },
+            horizontalAlignment = Alignment.Start
         ) {
             if (password != null) {
                 Text(
@@ -99,17 +121,11 @@ fun PasswordItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            if (password != null) {
-                CustomProgressIndicator(
-                    totalBudgetAmount = 40f,
-                    progress = (password.password.length.toFloat())
-                )
-            }
         }
 
         IconButton(
-            onClick = {onDeleteClick()},
-            modifier = Modifier.weight(1f)
+            onClick = { onDeleteClick() },
+            modifier = Modifier.size(40.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Delete,
@@ -125,7 +141,7 @@ fun PasswordItem(
 @Preview
 fun Preview() {
     PasswordItem(
-        password = Password("AMAN", "DFSFS", "AMAN", "", "CDJSCJSOI"),
+        password = Password("AMAN", "DFSFS", "AMAN DHAKAR", "", "CDJSCJSOI"),
         onItemClick = { /*TODO*/ },
         onDeleteClick = {})
 }

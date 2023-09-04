@@ -18,7 +18,7 @@ import com.aman.keyswithkotlin.navigation.BottomBarScreen
 @Composable
 fun BottomBar(
     navController: NavController,
-    navigateTo: (String) -> Unit
+    navigateTo: (String,Int, Int) -> Unit
 ) {
     val screens = listOf(
         BottomBarScreen.Password,
@@ -34,8 +34,8 @@ fun BottomBar(
             AddItem(
                 screen = itemScreen,
                 currentDestination = currentDestination,
-                onClicked = {
-                    navigateTo(itemScreen.route)
+                onClicked = {destIndex->
+                    navigateTo(itemScreen.route, index, destIndex)
                 }
             )
         }
@@ -47,7 +47,7 @@ fun BottomBar(
 fun RowScope.AddItem(
     screen: BottomBarScreen,
     currentDestination: NavDestination?,
-    onClicked: () -> Unit
+    onClicked: (Int) -> Unit
 ) {
     NavigationBarItem(
         selected = currentDestination?.hierarchy?.any {
@@ -63,7 +63,7 @@ fun RowScope.AddItem(
             unselectedIconColor = Color.LightGray
         ),
         onClick = {
-            onClicked()
+            onClicked(screen.index)
         }
     )
 }

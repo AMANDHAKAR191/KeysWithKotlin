@@ -23,8 +23,8 @@ fun NavGraphBuilder.settingNavGraph(
             }
             SettingScreen(
                 bottomBar = {
-                    BottomBar(navController, navigateTo = {
-                        navController.navigate(it) {
+                    BottomBar(navController, navigateTo = {destScreen, intialIndex, destIndex->
+                        navController.navigate(destScreen) {
                             launchSingleTop = true
                         }
                     })

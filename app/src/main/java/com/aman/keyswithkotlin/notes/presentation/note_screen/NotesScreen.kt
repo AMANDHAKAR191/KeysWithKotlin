@@ -27,15 +27,21 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.aman.keyswithkotlin.core.Constants
+import com.aman.keyswithkotlin.navigation.EnterAnimation
 import com.aman.keyswithkotlin.notes.presentation.note_screen.components.NoteItem
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -72,6 +78,21 @@ fun NotesScreen(
 
     }
 
+    var isVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(Constants.EXIT_DURATION.toLong())  // This delay ensures that isVisible is set to true after the initial composition
+        isVisible = true
+    }
+
+    // Define a separate lambda for handling back navigation
+    val handleNavigation: () -> Unit = {
+        isVisible = false
+        scope.launch {
+            delay(Constants.EXIT_DURATION.toLong()) // Adjust this to match your animation duration
+            navigateToAddEditNoteScreen()
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
@@ -83,7 +104,7 @@ fun NotesScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navigateToAddEditNoteScreen()
+                    handleNavigation()
                 },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
@@ -124,50 +145,11 @@ fun NotesScreen(
                                 },
                             onDeleteClick = {
                                 onEvent(NotesEvent.DeleteNote(note))
-//                                scope.launch {
-//                                    val result = snackBarHostState.showSnackbar(
-//                                        message = "Note deleted",
-//                                        actionLabel = "Undo",
-//                                        withDismissAction = true,
-//                                        duration = SnackbarDuration.Short
-//                                    )
-//                                    if (result == SnackbarResult.ActionPerformed) {
-//                                        onEvent(NotesEvent.RestoreNote)
-//                                    }
-//                                }
                             }
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
-//                LazyColumn(modifier = Modifier.fillMaxSize()) {
-//                    items(state.notes) { note ->
-//                        NoteItem(
-//                            note = note,
-//                            modifier = Modifier
-//                                .width(170.dp)
-//                                .clickable {
-//                                    //todo code for viewing the note
-//                                },
-//                            onDeleteClick = {
-//                                onEvent(NotesEvent.DeleteNote(note))
-//
-//                                scope.launch {
-//                                    val result = snackBarHostState.showSnackbar(
-//                                        message = "Note deleted",
-//                                        actionLabel = "Undo",
-//                                        withDismissAction = true,
-//                                        duration = SnackbarDuration.Short
-//                                    )
-//                                    if (result == SnackbarResult.ActionPerformed) {
-//                                        onEvent(NotesEvent.RestoreNote)
-//                                    }
-//                                }
-//                            }
-//                        )
-//                        Spacer(modifier = Modifier.height(16.dp))
-//                    }
-//                }
             }
         }
     )

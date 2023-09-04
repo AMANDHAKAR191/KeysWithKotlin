@@ -4,10 +4,13 @@ import UIEvents
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,13 +22,19 @@ import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -36,6 +45,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -43,6 +53,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
@@ -50,10 +61,15 @@ import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
 import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
+import com.aman.keyswithkotlin.core.Constants.ENTER_DURATION
+import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
+import com.aman.keyswithkotlin.navigation.EnterAnimation
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
@@ -65,16 +81,19 @@ import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.SearchedPasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
+import com.aman.keyswithkotlin.presentation.CustomCircularProgressBar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PasswordScreen(
     state: PasswordState,
     eventFlowState: SharedFlow<UIEvents>,
-    searchedPasswordState: State<List<Password>>,
+    searchedPasswordState: State<List<Password>?>,
     onEvent: (PasswordEvent) -> Unit,
     onSharedPasswordEvent: (SharedPasswordEvent) -> Unit,
     onSharedChatEvent: (SharedChatEvent) -> Unit,
@@ -87,6 +106,9 @@ fun PasswordScreen(
     bottomBar: @Composable (() -> Unit)
 ) {
     val scope = rememberCoroutineScope()
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false
+    )
     val searchedPasswords = searchedPasswordState.value
     val snackBarHostState = remember { SnackbarHostState() }
     var multiFloatingState by remember { mutableStateOf(MultiFloatingState.Collapsed) }
@@ -130,6 +152,7 @@ fun PasswordScreen(
                 }
 
                 is UIEvents.ShowAlertDialog -> {
+                    println("test: check")
                     isAlertDialogVisible = true
                 }
 
@@ -143,14 +166,46 @@ fun PasswordScreen(
 
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    var isVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(ENTER_DURATION.toLong())  // This delay ensures that isVisible is set to true after the initial composition
+        isVisible = true
+    }
+
+
+    // Define a separate lambda for handling back navigation
+    val handleNavigation: (String) -> Unit = {identifier->
+        isVisible = false
+        scope.launch {
+            delay(ENTER_DURATION.toLong()) // Adjust this to match your animation duration
+            when (identifier) {
+                Identifier.AddEditPassword.name -> {
+                    navigateToAddEditPasswordScreen()
+                }
+
+                Identifier.GeneratePassword.name -> {
+                    navigateToGeneratePasswordScreen()
+                }
+
+                Identifier.Profile.name -> {
+                    navigateToProfileScreen()
+                }
+
+            }
+        }
+    }
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .testTag("RootNode")
+    ) {
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 TopBar(title = "Keys",
                     onClickActionButton = {
-                        navigateToProfileScreen()
+                        handleNavigation(Identifier.Profile.toString())
                     }
                 )
             },
@@ -162,20 +217,7 @@ fun PasswordScreen(
                     },
                     item = items,
                     onMinFabItemClick = { minFabItem ->
-                        when (minFabItem.identifier) {
-                            Identifier.AddEditPassword.name -> {
-                                navigateToAddEditPasswordScreen()
-                            }
-
-                            Identifier.GeneratePassword.name -> {
-                                navigateToGeneratePasswordScreen()
-                            }
-
-                            Identifier.Profile.name -> {
-                                navigateToProfileScreen()
-                            }
-
-                        }
+                        handleNavigation(minFabItem.identifier)
                     }
                 )
             },
@@ -189,23 +231,21 @@ fun PasswordScreen(
                         .padding(innerPadding),
                     color = Color.Black,
                     content = {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            SearchBar(
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            DockedSearchBar(
                                 modifier = Modifier.padding(horizontal = 10.dp),
                                 query = searchtext.value,
                                 onQueryChange = {
                                     onEvent(PasswordEvent.OnSearchTextChange(it))
                                     searchtext.value = it
                                 },
-                                onSearch = {
-
-                                },
-                                active = isSearchBarActive,
-                                onActiveChange = { isSearchBarActive = it },
+                                onSearch = {},
                                 colors = SearchBarDefaults.colors(
                                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                                 ),
                                 placeholder = { Text(text = "Search") },
+                                active = isSearchBarActive,
+                                onActiveChange = {isSearchBarActive = it},
                                 leadingIcon = {
                                     IconButton(onClick = {}) {
                                         Icon(Icons.Default.Search, contentDescription = "Search")
@@ -223,26 +263,28 @@ fun PasswordScreen(
                                             Icon(Icons.Default.Close, contentDescription = "Close")
                                         }
                                     }
-                                }
-                            ) {
-                                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                    items(searchedPasswords) { password ->
-                                        SearchedPasswordItem(
-                                            password = password,
-                                            onItemClick = {
-                                                isSearchBarActive = false
-                                                itemToView.value = password
-                                                viewPassword = true
+                                },
+                                content = {
+                                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                                        searchedPasswords?.let {searchedPasswords->
+                                            items(searchedPasswords.take(3)) { password ->
+                                                SearchedPasswordItem(
+                                                    password = password,
+                                                    onItemClick = {
+                                                        isSearchBarActive = false
+                                                        itemToView.value = password
+                                                        viewPassword = true
+                                                    }
+                                                )
                                             }
-                                        )
+                                        }
                                     }
                                 }
-                            }
-
+                            )
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(top = 10.dp)
+                                    .padding(top = 65.dp)
                                     .background(
                                         MaterialTheme.colorScheme.surfaceVariant,
                                         shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
@@ -254,87 +296,77 @@ fun PasswordScreen(
                                         .align(TopCenter)
                                         .padding(top = 15.dp)
                                 )
-                                LazyColumn(modifier = Modifier.padding(top = 30.dp)) {
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .width(50.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(text = "Recently used passwords")
-                                        }
-                                    }
-                                    items(state.recentlyUsedPasswords.take(3)) { password ->
-                                        PasswordItem(
-                                            password = password,
-                                            onItemClick = {
-                                                itemToView.value = password
-                                                viewPassword = true
-                                            },
-                                            onDeleteClick = {
-                                                onEvent(PasswordEvent.DeletePassword(password = password))
-//                                            scope.launch {
-//                                                val result = snackBarHostState.showSnackbar(
-//                                                    message = "Password deleted",
-//                                                    actionLabel = "Restore",
-//                                                    withDismissAction = true,
-//                                                    duration = SnackbarDuration.Short
-//                                                )
-//                                                if (result == SnackbarResult.ActionPerformed) {
-//                                                    onEvent(PasswordEvent.RestorePassword(password = password))
-//                                                }
-//                                            }
+                                if (state.passwords.isEmpty()) {
+                                    Text(
+                                        text = "No Password  Saved",
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .testTag("NoPasswordHelperText")
+                                    )
+                                } else {
+                                    LazyColumn(modifier = Modifier.padding(top = 30.dp)) {
+                                        item {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .width(50.dp)
+                                                    .padding(start = 10.dp),
+                                                horizontalAlignment = Alignment.Start
+                                            ) {
+                                                Text(text = "Recently used passwords", textAlign = TextAlign.Start)
                                             }
-                                        )
-                                    }
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .width(50.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(text = "All passwords")
                                         }
-                                    }
+                                        items(state.recentlyUsedPasswords.take(3)) { password ->
+                                            PasswordItem(
+                                                password = password,
+                                                onItemClick = {
+                                                    itemToView.value = password
+                                                    viewPassword = true
+                                                },
+                                                onDeleteClick = {
+                                                    onEvent(PasswordEvent.DeletePassword(password = password))
+                                                }
+                                            )
+                                        }
+                                        item {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .width(50.dp)
+                                                    .padding(start = 10.dp),
+                                                horizontalAlignment = Alignment.Start
+                                            ) {
+                                                Text(text = "All passwords")
+                                            }
+                                        }
 
-                                    items(state.passwords) { password ->
-                                        PasswordItem(
-                                            password = password,
-                                            onItemClick = {
-                                                itemToView.value = password
-                                                viewPassword = true
-                                            },
-                                            onDeleteClick = {
-//                                            onEvent(PasswordEvent.DeletePassword(password = password))
-                                                onEvent(
-                                                    PasswordEvent.UpdateLastUsedPasswordTimeStamp(
-                                                        password = password
+                                        items(state.passwords) { password ->
+                                            PasswordItem(
+                                                password = password,
+                                                onItemClick = {
+                                                    itemToView.value = password
+                                                    viewPassword = true
+                                                },
+                                                onDeleteClick = {
+                                                    onEvent(
+                                                        PasswordEvent.UpdateLastUsedPasswordTimeStamp(
+                                                            password = password
+                                                        )
                                                     )
-                                                )
-//                                            scope.launch {
-//                                                val result = snackBarHostState.showSnackbar(
-//                                                    message = "Password deleted",
-//                                                    actionLabel = "Restore",
-//                                                    withDismissAction = true,
-//                                                    duration = SnackbarDuration.Short
-//                                                )
-//                                                if (result == SnackbarResult.ActionPerformed) {
-//                                                    onEvent(PasswordEvent.RestorePassword(password = password))
-//                                                }
-//                                            }
+                                                }
+                                            )
+                                        }
+                                        item {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(50.dp)
+                                                    .padding(top = 10.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(text = "This is end of passwords")
                                             }
-                                        )
-                                    }
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .width(100.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(text = "This is end of passwords")
                                         }
                                     }
                                 }
@@ -349,45 +381,19 @@ fun PasswordScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.Black.copy(alpha = 0.5f))
-                            .clickable { multiFloatingState = MultiFloatingState.Collapsed })
+                            .clickable { multiFloatingState = MultiFloatingState.Collapsed }
+                    )
                 }
 
 
                 if (state.isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-                //for view password in separate dialog
-                if (viewPassword) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable {
-                                viewPassword = false
-                            }
-                            .background(Color(0x80000000)),
-                        contentAlignment = Center
-                    ) {
-                        ViewPasswordScreen(
-                            itemToView.value!!,
-                            onCloseButtonClick = {
-                                viewPassword = false
-                            },
-                            onEditButtonClick = {
-                                onSharedPasswordEvent(SharedPasswordEvent.onEditItem(itemToView.value!!))
-                                navigateToAddEditPasswordScreen()
-                            },
-                            onShareButtonClick = { password ->
-                                onSharedChatEvent(SharedChatEvent.SharePasswordItem(password))
-                                navigateToChatUserListScreen()
-                            })
+                        CustomCircularProgressBar()
                     }
                 }
 
                 //for Access Alert
                 if (isAlertDialogVisible) {
-                    println("check2::")
                     AlertDialog(
                         onDismissRequest = {
                             // Dismiss the dialog when the user clicks outside the dialog or on the back
@@ -425,11 +431,36 @@ fun PasswordScreen(
                             ) {
                                 Text("Ok")
                             }
-                        }
+                        },
+                        modifier = Modifier.testTag("AuthorizationAlertDialog")
                     )
                 }
             }
         )
+        // Sheet content
+        if (viewPassword) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    viewPassword = false
+                },
+                sheetState = bottomSheetState,
+                containerColor = MaterialTheme.colorScheme.onTertiaryContainer
+            ) {
+                ViewPasswordScreen(
+                    itemToView.value!!,
+                    onCloseButtonClick = {
+                        viewPassword = false
+                    },
+                    onEditButtonClick = {
+                        onSharedPasswordEvent(SharedPasswordEvent.onEditItem(itemToView.value!!))
+                        navigateToAddEditPasswordScreen()
+                    },
+                    onShareButtonClick = { password ->
+                        onSharedChatEvent(SharedChatEvent.SharePasswordItem(password))
+                        navigateToChatUserListScreen()
+                    })
+            }
+        }
     }
 }
 

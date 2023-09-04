@@ -25,7 +25,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -39,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,9 +54,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
+import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
+import com.aman.keyswithkotlin.navigation.EnterAnimation
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatsScreen(
@@ -66,7 +70,7 @@ fun ChatsScreen(
     onEvent: (ChatUserEvent) -> Unit,
     onSharedChatEvent: (SharedChatEvent) -> Unit,
     bottomBar: @Composable (() -> Unit),
-    navigateToChatScreen: () -> Unit
+    navigateToChatScreen: () -> Unit,
 ) {
 
     var isDialogVisible by remember { mutableStateOf(false) }
@@ -80,10 +84,12 @@ fun ChatsScreen(
                 UIEvents.ShowLoadingBar -> {
                     isLoadingBarVisible = true
                 }
-                UIEvents.ChatUsrCreatedSuccessFully->{
+
+                UIEvents.ChatUsrCreatedSuccessFully -> {
                     isDialogVisible = false
                 }
-                is UIEvents.ShowError->{
+
+                is UIEvents.ShowError -> {
                     errorMessage = event.errorMessage
                     isLoadingBarVisible = false
                 }
@@ -93,6 +99,11 @@ fun ChatsScreen(
         }
     }
 
+    var isVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(10)  // This delay ensures that isVisible is set to true after the initial composition
+        isVisible = true
+    }
     Scaffold(
         topBar = {
             TopBar(
@@ -130,7 +141,7 @@ fun ChatsScreen(
                         .fillMaxSize()
                         .padding(top = 30.dp)
                 ) {
-                    HeaderOrViewStory()
+                    Header(title)
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -151,7 +162,12 @@ fun ChatsScreen(
                             if (!chatUsersList.isNullOrEmpty()) {
                                 items(items = chatUsersList) { person ->
                                     UserEachRow(person = person, onClick = {
-                                        onSharedChatEvent(SharedChatEvent.OpenSharedChat(person, person.commonChatRoomId!!))
+                                        onSharedChatEvent(
+                                            SharedChatEvent.OpenSharedChat(
+                                                person,
+                                                person.commonChatRoomId!!
+                                            )
+                                        )
                                         navigateToChatScreen()
                                     })
                                 }
@@ -180,7 +196,7 @@ fun ChatsScreen(
                                 value = otherUserPublicUid,
                                 onValueChange = { otherUserPublicUid = it },
                                 trailingIcon = {
-                                    if(isLoadingBarVisible){
+                                    if (isLoadingBarVisible) {
                                         CircularProgressIndicator(modifier = Modifier.size(25.dp))
                                     }
                                 })
@@ -214,13 +230,34 @@ fun ChatsScreen(
 
 
 @Composable
-fun HeaderOrViewStory() {
+fun Header(userName:String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 20.dp, top = 20.dp, bottom = 20.dp)
     ) {
-        Header()
+        val annotatedString = buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.W300
+                )
+            ) {
+                append("Welcome back ")
+            }
+            withStyle(
+                style = SpanStyle(
+                    color = Color.Yellow,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                )
+            ) {
+                append(userName)
+            }
+        }
+
+        Text(text = annotatedString)
     }
 }
 
@@ -228,7 +265,6 @@ fun HeaderOrViewStory() {
 fun BottomSheetSwipeUp(
     modifier: Modifier
 ) {
-
     Box(
         modifier = modifier
             .background(
@@ -300,34 +336,6 @@ fun UserEachRow(
             Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
         }
     }
-
-}
-
-@Composable
-fun Header() {
-
-    val annotatedString = buildAnnotatedString {
-        withStyle(
-            style = SpanStyle(
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.W300
-            )
-        ) {
-            append("Welcome back ")
-        }
-        withStyle(
-            style = SpanStyle(
-                color = Color.Yellow,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-            )
-        ) {
-            append("Aman")
-        }
-    }
-
-    Text(text = annotatedString)
 
 }
 

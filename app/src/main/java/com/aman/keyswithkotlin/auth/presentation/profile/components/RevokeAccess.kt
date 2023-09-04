@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.auth.presentation.profile.components
 
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -9,6 +10,7 @@ import com.aman.keyswithkotlin.core.util.Response.Loading
 import com.aman.keyswithkotlin.core.util.Response.Success
 import com.aman.keyswithkotlin.core.components.ProgressBar
 import com.aman.keyswithkotlin.auth.presentation.profile.ProfileViewModel
+import com.aman.keyswithkotlin.presentation.CustomCircularProgressBar
 
 @Composable
 fun RevokeAccess(
@@ -17,7 +19,7 @@ fun RevokeAccess(
     showSnackBar: () -> Unit
 ) {
     when (revokeAccessResponse) {
-        is Loading -> ProgressBar()
+        is Loading -> CustomCircularProgressBar()
         is Success -> revokeAccessResponse.data?.let { accessRevoked ->
             LaunchedEffect(accessRevoked) {
                 navigateToAuthScreen(accessRevoked)

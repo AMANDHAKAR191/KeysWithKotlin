@@ -23,6 +23,9 @@ class AppModule {
     fun provideUID() = Firebase.auth.currentUser!!.uid
 
     @Provides
+    fun provideUserName() = Firebase.auth.currentUser!!.displayName?:"userName"
+
+    @Provides
     fun provideFirebaseDatabase() = Firebase.database
 
     @Provides

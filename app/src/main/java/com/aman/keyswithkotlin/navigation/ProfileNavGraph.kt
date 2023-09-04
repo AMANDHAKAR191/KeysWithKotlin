@@ -45,14 +45,6 @@ fun NavGraphBuilder.profileNavGraph(
                     navController.navigate(Graph.HOME) {
                         popUpTo(Graph.HOME)
                     }
-                },
-                bottomBar = {
-                    BottomBar(navController, navigateTo = {
-                        navController.popBackStack()
-                        navController.navigate(it) {
-                            launchSingleTop = true
-                        }
-                    })
                 }
             )
         }
