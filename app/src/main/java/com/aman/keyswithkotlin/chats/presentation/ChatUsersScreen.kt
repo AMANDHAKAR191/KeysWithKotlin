@@ -70,7 +70,7 @@ fun ChatsScreen(
     onEvent: (ChatUserEvent) -> Unit,
     onSharedChatEvent: (SharedChatEvent) -> Unit,
     bottomBar: @Composable (() -> Unit),
-    navigateToChatScreen: () -> Unit
+    navigateToChatScreen: () -> Unit,
 ) {
 
     var isDialogVisible by remember { mutableStateOf(false) }
@@ -141,7 +141,7 @@ fun ChatsScreen(
                         .fillMaxSize()
                         .padding(top = 30.dp)
                 ) {
-                    HeaderOrViewStory()
+                    Header(title)
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -230,13 +230,34 @@ fun ChatsScreen(
 
 
 @Composable
-fun HeaderOrViewStory() {
+fun Header(userName:String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 20.dp, top = 20.dp, bottom = 20.dp)
     ) {
-        Header()
+        val annotatedString = buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.W300
+                )
+            ) {
+                append("Welcome back ")
+            }
+            withStyle(
+                style = SpanStyle(
+                    color = Color.Yellow,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                )
+            ) {
+                append(userName)
+            }
+        }
+
+        Text(text = annotatedString)
     }
 }
 
@@ -315,34 +336,6 @@ fun UserEachRow(
             Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
         }
     }
-
-}
-
-@Composable
-fun Header() {
-
-    val annotatedString = buildAnnotatedString {
-        withStyle(
-            style = SpanStyle(
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.W300
-            )
-        ) {
-            append("Welcome back ")
-        }
-        withStyle(
-            style = SpanStyle(
-                color = Color.Yellow,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-            )
-        ) {
-            append("Aman")
-        }
-    }
-
-    Text(text = annotatedString)
 
 }
 

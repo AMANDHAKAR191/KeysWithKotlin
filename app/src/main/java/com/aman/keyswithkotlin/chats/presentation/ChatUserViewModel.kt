@@ -21,7 +21,8 @@ import javax.inject.Inject
 class ChatUserViewModel @Inject constructor(
     private val chatUseCases: ChatUseCases,
     @PublicUID
-    private val publicUID: String
+    private val publicUID: String,
+    private val userName:String
 ) : ViewModel() {
 
     private val _eventFlow = MutableSharedFlow<UIEvents>()
@@ -31,6 +32,9 @@ class ChatUserViewModel @Inject constructor(
     val state: State<ChatUserState> = _state
 
     init {
+        _state.value = state.value.copy(
+            username = userName
+        )
         getChatUsers()
     }
 

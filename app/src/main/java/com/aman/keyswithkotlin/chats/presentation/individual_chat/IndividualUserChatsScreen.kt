@@ -160,7 +160,7 @@ fun IndividualChatScreen(
         topBar = {
             TopAppBar(
                 modifier = Modifier.fillMaxWidth(),
-                title = { Text(text = "Add Password") },
+                title = { Text(text = "") },
                 navigationIcon = {
                     Icon(
                         Icons.Default.ArrowBack,

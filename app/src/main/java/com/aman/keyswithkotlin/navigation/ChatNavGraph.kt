@@ -29,7 +29,7 @@ fun NavGraphBuilder.chatNavGraph(
         composable(BottomBarScreen.Chats.route) {
             val viewModel: ChatUserViewModel = hiltViewModel()
             ChatsScreen(
-                title = BottomBarScreen.Chats.title,
+                title = viewModel.state.value.username,
                 chatUsersList = viewModel.state.value.chatUsersList,
                 eventFlowState = viewModel.eventFlow,
                 onEvent = viewModel::onEvent,
