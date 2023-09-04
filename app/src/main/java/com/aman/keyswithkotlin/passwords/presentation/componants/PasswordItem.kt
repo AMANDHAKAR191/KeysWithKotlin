@@ -80,11 +80,6 @@ fun PasswordItem(
                                 calculatedSize <= 2 -> 30.sp
                                 else -> 10.sp
                             }
-
-
-                        println("Title: $temp")
-                        println("Title length: ${temp.length}")
-                        println("Title size: $adjustedSize")
                         Text(
                             text = temp,
                             style = TextStyle(

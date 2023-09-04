@@ -25,7 +25,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -39,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,9 +54,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
+import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
+import com.aman.keyswithkotlin.navigation.EnterAnimation
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatsScreen(
@@ -80,10 +84,12 @@ fun ChatsScreen(
                 UIEvents.ShowLoadingBar -> {
                     isLoadingBarVisible = true
                 }
-                UIEvents.ChatUsrCreatedSuccessFully->{
+
+                UIEvents.ChatUsrCreatedSuccessFully -> {
                     isDialogVisible = false
                 }
-                is UIEvents.ShowError->{
+
+                is UIEvents.ShowError -> {
                     errorMessage = event.errorMessage
                     isLoadingBarVisible = false
                 }
@@ -93,6 +99,11 @@ fun ChatsScreen(
         }
     }
 
+    var isVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(10)  // This delay ensures that isVisible is set to true after the initial composition
+        isVisible = true
+    }
     Scaffold(
         topBar = {
             TopBar(
@@ -151,7 +162,12 @@ fun ChatsScreen(
                             if (!chatUsersList.isNullOrEmpty()) {
                                 items(items = chatUsersList) { person ->
                                     UserEachRow(person = person, onClick = {
-                                        onSharedChatEvent(SharedChatEvent.OpenSharedChat(person, person.commonChatRoomId!!))
+                                        onSharedChatEvent(
+                                            SharedChatEvent.OpenSharedChat(
+                                                person,
+                                                person.commonChatRoomId!!
+                                            )
+                                        )
                                         navigateToChatScreen()
                                     })
                                 }
@@ -180,7 +196,7 @@ fun ChatsScreen(
                                 value = otherUserPublicUid,
                                 onValueChange = { otherUserPublicUid = it },
                                 trailingIcon = {
-                                    if(isLoadingBarVisible){
+                                    if (isLoadingBarVisible) {
                                         CircularProgressIndicator(modifier = Modifier.size(25.dp))
                                     }
                                 })

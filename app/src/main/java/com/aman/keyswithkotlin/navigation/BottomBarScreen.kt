@@ -7,29 +7,34 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomBarScreen(
+    val index:Int,
     val route: String,
     val title: String,
     val icon: ImageVector
 ) {
     object Password : BottomBarScreen(
+        index = 0,
         route = "Password",
         title = "Password",
         icon = Icons.Default.Home
     )
 
     object Chats : BottomBarScreen(
+        index = 1,
         route = "Chat",
         title = "Chats",
         icon = Icons.Default.Person
     )
 
     object Notes : BottomBarScreen(
+        index = 2,
         route = "Note",
         title = "Notes",
         icon = Icons.Default.Settings
     )
 
     object Settings : BottomBarScreen(
+        index = 3,
         route = "Setting",
         title = "Settings",
         icon = Icons.Default.Settings

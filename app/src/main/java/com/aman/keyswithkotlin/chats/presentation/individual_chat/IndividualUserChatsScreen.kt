@@ -1,14 +1,22 @@
 package com.aman.keyswithkotlin.chats.presentation.individual_chat
 
 import UIEvents
+import android.view.ViewTreeObserver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,13 +36,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,9 +53,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -64,7 +78,7 @@ import com.aman.keyswithkotlin.ui.theme.RedOrange
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun IndividualChatScreen(
     _state: StateFlow<ChatMessageState>,
@@ -80,6 +94,9 @@ fun IndividualChatScreen(
     val chatMessages: List<ChatModelClass>? = state.value.chatMessagesList
     val messageTextValue = state.value.chatMessage
     val lazyColumnState = rememberLazyListState()
+    val scrollState = rememberLazyListState()
+    val topBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
     var isItemShared by remember { mutableStateOf(false) }
     var passwordItemToShare: Password? = null
@@ -139,8 +156,6 @@ fun IndividualChatScreen(
         )
     }
 
-
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -161,63 +176,70 @@ fun IndividualChatScreen(
                     titleContentColor = Color.White,
                     actionIconContentColor = Color.White,
                     navigationIconContentColor = Color.White
-                )
+                ),
+                scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
             )
         },
+//        // Exclude ime and navigation bar padding so this can be added by the UserInput composable
+//        contentWindowInsets = ScaffoldDefaults
+//            .contentWindowInsets
+//            .exclude(WindowInsets.navigationBars)
+//            .exclude(WindowInsets.ime),
         content = { innerPadding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
                     .background(Color.Black)
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    UserNameRow(
-                        person = data,
-                        modifier = Modifier.padding(
-                            top = 60.dp,
+                UserNameRow(
+                    person = data,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .padding(
+                            top = 5.dp,
                             start = 20.dp,
                             end = 20.dp,
                             bottom = 20.dp
                         )
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Color.White, RoundedCornerShape(
-                                    topStart = 30.dp, topEnd = 30.dp
-                                )
+                        .navigationBarsPadding()
+                        .imePadding()
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 80.dp)
+                        .background(
+                            Color.White, RoundedCornerShape(
+                                topStart = 30.dp, topEnd = 30.dp
                             )
-                            .padding(top = 25.dp),
-                        contentAlignment = Alignment.BottomCenter
+                        ),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.padding(
+                            start = 15.dp,
+                            top = 25.dp,
+                            end = 15.dp,
+                            bottom = 75.dp
+                        ),
+                        state = lazyColumnState
                     ) {
-                        LazyColumn(
-                            modifier = Modifier.padding(
-                                start = 15.dp,
-                                top = 25.dp,
-                                end = 15.dp,
-                                bottom = 75.dp
-                            ),
-                            state = lazyColumnState
-                        ) {
-                            if (chatMessages != null) {
-                                val timeStampUtil = TimeStampUtil()
-                                items(chatMessages) {
-                                    ChatRow(
-                                        chat = it,
-                                        timeStampUtil = timeStampUtil,
-                                        senderPublicUID = state.value.senderPublicUID!!
-                                    )
-                                }
-                            } else {
+                        if (chatMessages != null) {
+                            val timeStampUtil = TimeStampUtil()
+                            items(chatMessages) {
+                                ChatRow(
+                                    chat = it,
+                                    timeStampUtil = timeStampUtil,
+                                    senderPublicUID = state.value.senderPublicUID!!
+                                )
                             }
+                        } else {
                         }
                     }
                 }
-
                 CustomTextField(
                     text = messageTextValue, onValueChange = {
                         onChatEvent(ChatMessageEvent.OnMessageEntered(it))

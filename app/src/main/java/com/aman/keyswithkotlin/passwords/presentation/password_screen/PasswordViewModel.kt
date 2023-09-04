@@ -49,7 +49,7 @@ class PasswordViewModel @Inject constructor(
     val searchedPasswords = searchText
         .combine(_passwords) { text, passwords ->
             if (text.isBlank()) {
-                passwords
+                null
             } else {
                 passwords.filter { it.doesMatchSearchQuery(text) }
             }
