@@ -58,65 +58,6 @@ fun RootNavGraph(
         settingNavGraph(navController, mAutofillManager)
     }
 }
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun EnterAnimation(visible: Boolean, content: @Composable () -> Unit) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = slideIn(
-            initialOffset = { IntOffset(-1000, 0) },  // slide in from right
-            animationSpec = tween(ENTER_DURATION, easing = LinearOutSlowInEasing),
-        ),
-        exit = slideOut(
-            targetOffset = { IntOffset(-1000, 0) },  // slide out to right
-            animationSpec = tween(EXIT_DURATION, easing = LinearOutSlowInEasing),
-        ),
-        content = content,
-        initiallyVisible = visible
-    )
-}
-
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun EnterAnimationForProfileScreen(visible: Boolean, content: @Composable () -> Unit) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn() + scaleIn(
-            initialScale = 0.3f,
-            animationSpec = tween(ENTER_DURATION, easing = FastOutSlowInEasing),
-            transformOrigin = TransformOrigin(1f, 0f)
-        ),
-        exit = fadeOut() + scaleOut(
-            targetScale = 0.3f,
-            animationSpec = tween(EXIT_DURATION, easing = FastOutSlowInEasing),
-            transformOrigin = TransformOrigin(1f, 0f)
-        ),
-        content = content,
-        initiallyVisible = false
-    )
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun EnterAnimationForFAB(visible: Boolean, content: @Composable () -> Unit) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn() + scaleIn(
-            initialScale = 0.3f,
-            animationSpec = tween(ENTER_DURATION, easing = FastOutSlowInEasing),
-            transformOrigin = TransformOrigin(1f, 1f)
-        ),
-        exit = fadeOut() + scaleOut(
-            targetScale = 0.3f,
-            animationSpec = tween(EXIT_DURATION, easing = FastOutSlowInEasing),
-            transformOrigin = TransformOrigin(1f, 1f)
-        ),
-        content = content,
-        initiallyVisible = false
-    )
-}
 object Graph {
     const val AUTHENTICATION = "auth_graph"
     const val PROFILE = "profile_graph"

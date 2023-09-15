@@ -37,7 +37,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.core.Constants
-import com.aman.keyswithkotlin.navigation.EnterAnimation
 import com.aman.keyswithkotlin.notes.presentation.note_screen.components.NoteItem
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
@@ -78,15 +77,9 @@ fun NotesScreen(
 
     }
 
-    var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        delay(Constants.EXIT_DURATION.toLong())  // This delay ensures that isVisible is set to true after the initial composition
-        isVisible = true
-    }
 
     // Define a separate lambda for handling back navigation
     val handleNavigation: () -> Unit = {
-        isVisible = false
         scope.launch {
             delay(Constants.EXIT_DURATION.toLong()) // Adjust this to match your animation duration
             navigateToAddEditNoteScreen()

@@ -10,6 +10,7 @@ import com.aman.keyswithkotlin.access_verification.domain.use_cases.GetAccessReq
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.GiveAuthorizationAccessOfSecondaryDevice
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.RemoveAuthorizationAccessOfSecondaryDevice
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.RequestAuthorizationAccess
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.di.UID
 import com.google.firebase.database.FirebaseDatabase
 import dagger.Module
@@ -32,9 +33,10 @@ class AccessVerificationModule {
 
     @Provides
     fun provideAccessVerificationUseCases(
-        accessVerificationRepository: AccessVerificationRepository
+        accessVerificationRepository: AccessVerificationRepository,
+        myPreference: MyPreference
     ): AccessVerificationUseCases = AccessVerificationUseCases(
-        checkAuthorizationOfDevice = CheckAuthorizationOfDevice(accessVerificationRepository),
+        checkAuthorizationOfDevice = CheckAuthorizationOfDevice(accessVerificationRepository, myPreference),
         giveAuthorizationAccessOfSecondaryDevice = GiveAuthorizationAccessOfSecondaryDevice(accessVerificationRepository),
         removeAuthorizationAccessOfSecondaryDevice = RemoveAuthorizationAccessOfSecondaryDevice(accessVerificationRepository),
         getAccessRequesterClient = GetAccessRequesterClient(accessVerificationRepository),

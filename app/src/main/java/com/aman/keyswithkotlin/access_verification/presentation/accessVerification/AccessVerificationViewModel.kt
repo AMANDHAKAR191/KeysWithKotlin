@@ -9,6 +9,7 @@ import com.aman.keyswithkotlin.access_verification.domain.use_cases.AccessVerifi
 import com.aman.keyswithkotlin.auth.domain.model.RequestAuthorizationAccess
 import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.DeviceInfo
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AccessVerificationViewModel @Inject constructor(
-    private val accessVerificationUseCases: AccessVerificationUseCases
+    private val accessVerificationUseCases: AccessVerificationUseCases,
+    private val myPreference: MyPreference
 ) : ViewModel() {
     private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -34,11 +36,12 @@ class AccessVerificationViewModel @Inject constructor(
 
     fun onEvent(event: AccessVerificationEvent) {
         val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+        println("primary device id11: ${myPreference.primaryUserDeviceId}")
         when (event) {
             AccessVerificationEvent.AskAccessPermission -> {
                 viewModelScope.launch {
                     accessVerificationUseCases.requestAuthorizationAccess(
-                        primaryDeviceId = "aa32850c3b944554",
+                        primaryDeviceId = myPreference.primaryUserDeviceId!!,
                         requestingDeviceId = deviceInfo.getDeviceId()
                     ).collect {
 

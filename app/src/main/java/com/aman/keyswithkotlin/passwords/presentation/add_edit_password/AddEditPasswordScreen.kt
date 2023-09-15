@@ -28,8 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
-import com.aman.keyswithkotlin.navigation.EnterAnimation
-import com.aman.keyswithkotlin.navigation.EnterAnimationForFAB
 import com.aman.keyswithkotlin.notes.presentation.add_edit_note.components.TransparentHintTextField
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import kotlinx.coroutines.delay
@@ -56,7 +54,7 @@ fun AddEditPasswordScreen(
     }
     //if generatedPassword is not null then we are coming from GeneratePasswordScreen
     println("generatedPassword: ${generatedPassword}")
-    if (!generatedPassword.equals("")){
+    if (!generatedPassword.equals("")) {
         generatedPassword?.let {
             onEvent(PasswordEvent.EnteredPassword(it))
         }
@@ -87,106 +85,102 @@ fun AddEditPasswordScreen(
             }
         }
     }
-    var isVisible by remember { mutableStateOf(true) }
 
     // Define a separate lambda for handling back navigation
     val handleBackNavigation: () -> Unit = {
-        isVisible = false
         coroutineScope.launch {
             delay(EXIT_DURATION.toLong()) // Adjust this to match your animation duration
             navigateToPasswordScreen()
         }
     }
 
-    EnterAnimationForFAB(visible = isVisible) {
-        Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    modifier = Modifier.fillMaxWidth(),
-                    title = { Text(text = "Add Password") },
-                    navigationIcon = {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = null,
-                            modifier = Modifier.clickable {
-                                onSharedPasswordEvent(SharedPasswordEvent.resetViewmodel)
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.fillMaxWidth(),
+                title = { Text(text = "Add Password") },
+                navigationIcon = {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = null,
+                        modifier = Modifier.clickable {
+                            onSharedPasswordEvent(SharedPasswordEvent.resetViewmodel)
 //                                navigateToPasswordScreen()
-                                handleBackNavigation()
-                            }
-                        )
-                    }
-                )
-            }, content = {innerPadding->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                ) {
-                    TransparentHintTextField(
-                        text = state.username,
-                        label = "Username",
-                        hint = "Enter userName",
-                        onValueChange = {
-                            onEvent(PasswordEvent.EnteredUsername(it))
-                        },
-                        showIndicator = false,
-
-                        )
-                    TransparentHintTextField(
-                        text = state.password,
-                        label = "Password",
-                        hint = "Enter Password",
-                        onValueChange = {
-                            onEvent(PasswordEvent.EnteredPassword(it))
-                        },
-                        showIndicator = false,
-                        trailingIcon = {
-                            if (focusState.value) {
-                                TextButton(onClick = {
-                                    navigateToGeneratePasswordScreen()
-                                }) {
-                                    Text(text = "Generate")
-                                }
-                            }
-                        },
-                        onFocusChange = {
-                            focusState.value = it.isFocused
+                            handleBackNavigation()
                         }
                     )
-                    TransparentHintTextField(
-                        text = state.websiteName,
-                        label = "Website name",
-                        hint = "Enter website name",
-                        onValueChange = {
-                            onEvent(PasswordEvent.EnteredWebsiteName(it))
-                        },
-                        showIndicator = false,
-                    )
-                    TransparentHintTextField(
-                        text = state.username,
-                        label = "Website Link (optional)",
-                        hint = "Enter userName",
-                        onValueChange = {
-//                        onEvent(PasswordEvent.EnteredUsername(it))
-                        },
-                        showIndicator = false,
-                    )
-                    Button(
-                        onClick = {
-                            onEvent(PasswordEvent.SavePassword)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 100.dp)
-                            .padding(top = 20.dp)
-                    ) {
-                        Text(text = "Save")
-                    }
                 }
-            })
-    }
+            )
+        }, content = { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                TransparentHintTextField(
+                    text = state.username,
+                    label = "Username",
+                    hint = "Enter userName",
+                    onValueChange = {
+                        onEvent(PasswordEvent.EnteredUsername(it))
+                    },
+                    showIndicator = false,
+
+                    )
+                TransparentHintTextField(
+                    text = state.password,
+                    label = "Password",
+                    hint = "Enter Password",
+                    onValueChange = {
+                        onEvent(PasswordEvent.EnteredPassword(it))
+                    },
+                    showIndicator = false,
+                    trailingIcon = {
+                        if (focusState.value) {
+                            TextButton(onClick = {
+                                navigateToGeneratePasswordScreen()
+                            }) {
+                                Text(text = "Generate")
+                            }
+                        }
+                    },
+                    onFocusChange = {
+                        focusState.value = it.isFocused
+                    }
+                )
+                TransparentHintTextField(
+                    text = state.websiteName,
+                    label = "Website name",
+                    hint = "Enter website name",
+                    onValueChange = {
+                        onEvent(PasswordEvent.EnteredWebsiteName(it))
+                    },
+                    showIndicator = false,
+                )
+                TransparentHintTextField(
+                    text = state.username,
+                    label = "Website Link (optional)",
+                    hint = "Enter userName",
+                    onValueChange = {
+//                        onEvent(PasswordEvent.EnteredUsername(it))
+                    },
+                    showIndicator = false,
+                )
+                Button(
+                    onClick = {
+                        onEvent(PasswordEvent.SavePassword)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 100.dp)
+                        .padding(top = 20.dp)
+                ) {
+                    Text(text = "Save")
+                }
+            }
+        })
 }
 
 

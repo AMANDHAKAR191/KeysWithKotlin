@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
-import com.aman.keyswithkotlin.navigation.EnterAnimation
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
@@ -97,12 +96,6 @@ fun ChatsScreen(
                 else -> {}
             }
         }
-    }
-
-    var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        delay(10)  // This delay ensures that isVisible is set to true after the initial composition
-        isVisible = true
     }
     Scaffold(
         topBar = {

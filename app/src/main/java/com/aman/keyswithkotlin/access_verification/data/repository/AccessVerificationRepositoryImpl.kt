@@ -1,6 +1,7 @@
 package com.aman.keyswithkotlin.access_verification.data.repository
 
 import com.aman.keyswithkotlin.access_verification.domain.repository.AccessVerificationRepository
+import com.aman.keyswithkotlin.auth.domain.model.DeviceData
 import com.aman.keyswithkotlin.auth.domain.model.RequestAuthorizationAccess
 import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.util.Response
@@ -18,21 +19,29 @@ class AccessVerificationRepositoryImpl(
     @UID private val UID: String,
 ) : AccessVerificationRepository {
 
-    override fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
+    override fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<List<DeviceData>?, Boolean?>>> =
         callbackFlow {
+            var deviceList = mutableListOf<DeviceData>()
+//            val reference = db.reference.child("users")
+//                .child(UID).child("userDevicesList").child(deviceId).child(deviceId)
+//                .child("authorization")
             val reference = db.reference.child("users")
-                .child(UID).child("userDevicesList").child(deviceId).child(deviceId)
-                .child("authorization")
+                .child(UID).child("userDevicesList")
+
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    println("dataSnapshot: $dataSnapshot")
-                    val item = dataSnapshot.getValue(String::class.java)
-                    item?.let {
-                        if (it == Authorization.Authorized.toString()) {
-                            trySend(Response.Success(Authorization.Authorized.toString()))
-                        } else {
-                            trySend(Response.Success(Authorization.NotAuthorized.toString()))
+                    if (dataSnapshot.exists()){
+                        println("dataSnapshot: ${dataSnapshot}")
+                        for (ds in dataSnapshot.children){
+                            for (ds1 in ds.children){
+                                println("ds: ${ds1}")
+                                val item = ds1.getValue(DeviceData::class.java)
+                                item?.let {
+                                    deviceList.add(item)
+                                }
+                            }
                         }
+                        trySend(Response.Success(deviceList))
                     }
                 }
 

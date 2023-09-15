@@ -19,6 +19,7 @@ class MyPreference() {
     val USER_RESTRICTED = "userRestricted"
     val USER_AUTHENTICATED = "userAuthenticated"
     val COMMON_CHAT_ROOM_ID = "commonChatRoomId"
+    val PRIMARY_USER_DEVICE_ID = "primaryUserDeviceId"
 
     init {
 //        sharedPreferences =
@@ -89,6 +90,12 @@ class MyPreference() {
         //integer getter/setter method
         set(selectedOption) {
             sharedPreferences.edit().putInt(LOCK_APP_OPTIONS, selectedOption).apply()
+        }
+
+    var primaryUserDeviceId:String?
+        get() = sharedPreferences.getString(PRIMARY_USER_DEVICE_ID,"")
+        set(deviceId) {
+            sharedPreferences.edit().putString(PRIMARY_USER_DEVICE_ID,deviceId).apply()
         }
 
 //    companion object {

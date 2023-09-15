@@ -69,7 +69,6 @@ import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
 import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
 import com.aman.keyswithkotlin.core.Constants.ENTER_DURATION
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
-import com.aman.keyswithkotlin.navigation.EnterAnimation
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent

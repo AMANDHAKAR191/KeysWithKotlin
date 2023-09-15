@@ -42,7 +42,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         setContent {
-            val scope = rememberCoroutineScope()
             Firebase.database.setPersistenceEnabled(true)
             val context = LocalContext.current
             val deviceInfo = DeviceInfo(context)
