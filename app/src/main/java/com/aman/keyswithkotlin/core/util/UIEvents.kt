@@ -14,6 +14,7 @@ sealed class UIEvents {
         }
     }
     object SavePassword : UIEvents()
+    data class SendNotification(val publicUid:String, val messageBody:String? = null) :UIEvents()
 
     object ShowLoadingBar:UIEvents()
 

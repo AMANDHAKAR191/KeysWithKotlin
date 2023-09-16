@@ -1,5 +1,8 @@
 package com.aman.keyswithkotlin.navigation
 
+import android.app.Activity
+import android.content.Context
+import android.widget.Toast
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -12,6 +15,7 @@ import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
 import com.aman.keyswithkotlin.chats.presentation.individual_chat.IndividualChatScreen
 import com.aman.keyswithkotlin.core.components.BottomBar
 import com.aman.keyswithkotlin.di.PublicUID
+import com.aman.keyswithkotlin.notification_service.FCMNotificationSender
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePasswordViewModel
 import javax.inject.Inject
 
@@ -19,6 +23,8 @@ fun NavGraphBuilder.chatNavGraph(
     navController: NavController,
     sharedPasswordViewModel: SharePasswordViewModel,
     sharedChatViewModel: SharedChatViewModel,
+    activity: Activity,
+    context: Context
 ) {
 
 
@@ -57,6 +63,18 @@ fun NavGraphBuilder.chatNavGraph(
                 onSharedChatEvent = sharedChatViewModel::onEvent,
                 navigateToPasswordScreen = {
                     navController.popBackStack()
+                },
+                sendNotification = {otherUserPublicUid, senderPublicUid, body->
+                    val notificationSender = FCMNotificationSender(
+                        "/topics/$otherUserPublicUid",
+                        senderPublicUid,
+                        body,
+                        context,
+                        activity
+                    )
+                    notificationSender.sendNotification()
+                    Toast.makeText(context, "Notification Sent", Toast.LENGTH_SHORT).show()
+
                 }
             )
         }

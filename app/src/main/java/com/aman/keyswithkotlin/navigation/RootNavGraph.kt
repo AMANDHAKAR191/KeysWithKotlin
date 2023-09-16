@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.navigation
 
+import android.app.Activity
 import android.content.Context
 import android.view.autofill.AutofillManager
 import androidx.compose.animation.AnimatedVisibility
@@ -34,7 +35,9 @@ import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePas
 @ExperimentalAnimationApi
 fun RootNavGraph(
     navController: NavHostController,
-    mAutofillManager: AutofillManager
+    mAutofillManager: AutofillManager,
+    activity: Activity,
+    context: Context
 ) {
     val sharedPasswordViewModel: SharePasswordViewModel = hiltViewModel()
     val sharedChatViewModel: SharedChatViewModel = hiltViewModel()
@@ -53,7 +56,7 @@ fun RootNavGraph(
             sharedPasswordViewModel = sharedPasswordViewModel,
             sharedChatViewModel = sharedChatViewModel
         )
-        chatNavGraph(navController, sharedPasswordViewModel, sharedChatViewModel)
+        chatNavGraph(navController, sharedPasswordViewModel, sharedChatViewModel, activity, context)
         noteNavGraph(navController, sharedPasswordViewModel)
         settingNavGraph(navController, mAutofillManager)
     }

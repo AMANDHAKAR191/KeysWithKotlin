@@ -8,6 +8,7 @@ import com.aman.keyswithkotlin.chats.domain.use_cases.ChatUseCases
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.di.PublicUID
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -35,6 +37,7 @@ class IndividualUserChatsViewModel @Inject constructor(
 
 
     init {
+        FirebaseMessaging.getInstance().subscribeToTopic(publicUID)
         _state.value = state.value.copy(
             senderPublicUID = publicUID
         )
@@ -61,7 +64,7 @@ class IndividualUserChatsViewModel @Inject constructor(
                             type = "text",
                             passwordModelClass = event.passwordItemValue
                         )
-                    ).collect { response ->
+                    ).collectLatest { response ->
                         when (response) {
                             is Response.Loading -> {
 
@@ -71,10 +74,15 @@ class IndividualUserChatsViewModel @Inject constructor(
                                 _state.value = state.value.copy(
                                     chatMessage = ""
                                 )
-                                _eventFlow.emit(
-                                    UIEvents.ShowSnackBar(
-                                        message = response.data.toString()
+                                if (event.passwordItemValue != null){
+                                    _eventFlow.emit(
+                                        UIEvents.SendNotification(publicUID, messageBody = "shared a Password")
                                     )
+                                    println("check122333")
+                                }
+                                println("check1123")
+                                _eventFlow.emit(
+                                    UIEvents.SendNotification(publicUID)
                                 )
                             }
 
@@ -82,9 +90,6 @@ class IndividualUserChatsViewModel @Inject constructor(
 
                             }
                         }
-                        _eventFlow.emit(
-                            UIEvents.SavePassword
-                        )
                     }
                 }
             }

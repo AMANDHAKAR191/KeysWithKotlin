@@ -116,4 +116,14 @@ dependencies {
     implementation 'com.airbnb.android:lottie-compose:6.0.0' // Check for the latest version
 
 
+    //for send notification
+    implementation 'com.android.volley:volley:1.2.1'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.2.1'
+
+    implementation 'com.github.bumptech.glide:glide:4.13.0'
+    kapt 'com.github.bumptech.glide:compiler:4.13.0'
+
+//    implementation 'com.github.bumptech.glide:glide:4.13.0'
+//    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
+
 }

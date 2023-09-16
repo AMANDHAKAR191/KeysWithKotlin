@@ -22,9 +22,6 @@ import com.aman.keyswithkotlin.R
 import com.aman.keyswithkotlin.autofill_service.BiometricAuthActivity.Companion.EXTRA_AUTOFILL_IDS
 import com.aman.keyswithkotlin.autofill_service.BiometricAuthActivity.Companion.EXTRA_CLIENT_PACKAGE_NAME
 import com.aman.keyswithkotlin.autofill_service.SaveAutofillPasswordActivity.Companion.EXTRA_PASSWORD_DATA
-import com.aman.keyswithkotlin.passwords.domain.model.Password
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import java.util.Arrays
 
 
@@ -39,40 +36,14 @@ class KeysAutofillService : AutofillService() {
     var hasDataSet: Boolean = false
 
     private val TAG: String = "KeysAutofillService"
-    val scope = CoroutineScope(Dispatchers.IO)
-    private var passwordList1 = mutableListOf<Password>()
-    private var passwordList = mutableListOf(
-        Password(
-            "user1",
-            "pass1",
-            "example1.com",
-            "https://www.example1.com",
-            "timestamp1",
-            "lastUsed1"
-        ),
-        Password(
-            "user2",
-            "pass2",
-            "example2.com",
-            "https://www.example2.com",
-            "timestamp2",
-            "lastUsed2"
-        ),
-        Password(
-            "user3",
-            "pass3",
-            "example3.com",
-            "https://www.example3.com",
-            "timestamp3",
-            "lastUsed3"
-        )
-    )
 
     override fun onFillRequest(
         request: FillRequest,
         cancellationSignal: CancellationSignal,
         callback: FillCallback
     ) {
+
+        val inlineRequest = request.inlineSuggestionsRequest
 
         val fillContexts = request.fillContexts
         val structure = fillContexts.last().structure
@@ -120,7 +91,7 @@ class KeysAutofillService : AutofillService() {
         val intentSender1 = pendingIntent1.intentSender
 
         val responseBuilder = FillResponse.Builder()
-        if (userNameId != null && passwordId != null){
+        if (userNameId != null && passwordId != null) {
             responseBuilder.setAuthentication(
                 arrayOf(userNameId, passwordId),
                 intentSender1,
@@ -140,8 +111,9 @@ class KeysAutofillService : AutofillService() {
         } else if (passwordId != null) {
             responseBuilder.setAuthentication(arrayOf(passwordId), intentSender1, presentation)
             callback.onSuccess(responseBuilder.build())
-        }else{
-            Toast.makeText(applicationContext, "No AutoFill fields found. ", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(applicationContext, "No AutoFill fields found. ", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 

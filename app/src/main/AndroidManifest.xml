@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
 
     <application
@@ -33,7 +34,7 @@
         <service
             android:name=".autofill_service.KeysAutofillService"
             android:exported="true"
-            android:label="Keys (kotlin)"
+            android:label="Keys"
             android:permission="android.permission.BIND_AUTOFILL_SERVICE">
             <intent-filter>
                 <action android:name="android.service.autofill.AutofillService" />
@@ -43,6 +44,29 @@
                 android:name="android.autofill"
                 android:resource="@xml/keys_autofill_service" />
         </service>
+
+        <service
+            android:name=".notification_service.CustomMessagingService"
+            android:exported="false"
+            >
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_google_logo" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/teal_700" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
+        <receiver android:name=".notification_service.NotificationReceiver" android:enabled="true"
+            android:exported="false"/>
     </application>
 
 </manifest>

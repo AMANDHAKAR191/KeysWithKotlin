@@ -35,6 +35,7 @@ import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.componants.SearchedPasswordItem
 import com.aman.keyswithkotlin.ui.theme.KeysWithKotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.invoke.MethodType
 
 
 @AndroidEntryPoint
@@ -131,8 +132,7 @@ class BiometricAuthActivity : ComponentActivity() {
                 if (it.get(1) != null) {
                     datasetBuilder.setValue(
                         it.get(1),
-                        AutofillValue.forText(password.password),
-                        presentation
+                        AutofillValue.forText(password.password)
                     )
                 }
             }

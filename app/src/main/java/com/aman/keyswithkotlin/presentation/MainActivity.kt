@@ -12,21 +12,21 @@ import android.os.CancellationSignal
 import android.util.Log
 import android.view.WindowManager
 import android.view.autofill.AutofillManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthViewModel
-import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.navigation.Graph
 import com.aman.keyswithkotlin.navigation.RootNavGraph
+import com.aman.keyswithkotlin.notification_service.FCMNotificationSender
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -43,20 +43,16 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         setContent {
             Firebase.database.setPersistenceEnabled(true)
-            val context = LocalContext.current
-            val deviceInfo = DeviceInfo(context)
-
-            println("deviceInfo.getDeviceId(): ${deviceInfo.getDeviceId()}")
-            println("deviceInfo.getAppVersion(): ${deviceInfo.getAppVersion()}")
-            println("deviceInfo.getLastLoginTimeStamp(): ${deviceInfo.getLastLoginTimeStamp()}")
-
             mAutofillManager = getSystemService(AutofillManager::class.java) as AutofillManager
 
+            FirebaseMessaging.getInstance().subscribeToTopic("UserName")
 
             navController = rememberNavController()
             RootNavGraph(
                 navController = navController,
-                mAutofillManager!!
+                mAutofillManager!!,
+                this@MainActivity,
+                this@MainActivity
             )
             checkAuthState()
         }
@@ -64,6 +60,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onRestart() {
         super.onRestart()
+        val notificationSender = FCMNotificationSender(
+            "/topics/" + "UserName",
+            "FCMessage test",
+            "this is a test notification, Please ignore this notification.\nthis is a test notification, Please ignore this notification",
+            this@MainActivity,
+            this@MainActivity
+        )
+        notificationSender.sendNotification()
+        Toast.makeText(this@MainActivity, "Notification Sent", Toast.LENGTH_SHORT).show()
 //        launchBiometric()
     }
 

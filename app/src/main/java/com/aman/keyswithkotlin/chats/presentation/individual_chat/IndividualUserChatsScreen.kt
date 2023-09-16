@@ -37,6 +37,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -73,10 +75,12 @@ import com.aman.keyswithkotlin.chats.presentation.SharedChatState
 import com.aman.keyswithkotlin.chats.presentation.SpacerWidth
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
 import com.aman.keyswithkotlin.passwords.domain.model.Password
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.ui.theme.Pink80
 import com.aman.keyswithkotlin.ui.theme.RedOrange
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -86,7 +90,8 @@ fun IndividualChatScreen(
     eventFlowState: SharedFlow<UIEvents>,
     onChatEvent: (ChatMessageEvent) -> Unit,
     onSharedChatEvent: (SharedChatEvent) -> Unit,
-    navigateToPasswordScreen: () -> Unit
+    navigateToPasswordScreen: () -> Unit,
+    sendNotification: (String, String, String) -> Unit
 ) {
     val state = _state.collectAsState()
     val sharedChatState = _sharedChatState.collectAsState()
@@ -100,6 +105,19 @@ fun IndividualChatScreen(
 
     var isItemShared by remember { mutableStateOf(false) }
     var passwordItemToShare: Password? = null
+
+    LaunchedEffect(key1 = true) {
+        eventFlowState.collectLatest { event ->
+            when (event) {
+                is UIEvents.SendNotification->{
+                    sendNotification(data?.otherUserPublicUid!!, event.publicUid, event.messageBody?:"test message")
+                }
+
+                else -> {}
+            }
+        }
+
+    }
 
     LaunchedEffect(key1 = sharedChatState.value.sharedPasswordItem) {
         if (sharedChatState.value.sharedPasswordItem != null) {
