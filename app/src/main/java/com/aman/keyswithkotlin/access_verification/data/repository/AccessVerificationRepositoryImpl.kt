@@ -22,9 +22,6 @@ class AccessVerificationRepositoryImpl(
     override fun checkAuthorizationOfDevice(deviceId: String): Flow<Response<Pair<List<DeviceData>?, Boolean?>>> =
         callbackFlow {
             var deviceList = mutableListOf<DeviceData>()
-//            val reference = db.reference.child("users")
-//                .child(UID).child("userDevicesList").child(deviceId).child(deviceId)
-//                .child("authorization")
             val reference = db.reference.child("users")
                 .child(UID).child("userDevicesList")
 
@@ -35,7 +32,7 @@ class AccessVerificationRepositoryImpl(
                         for (ds in dataSnapshot.children){
                             for (ds1 in ds.children){
                                 println("ds: ${ds1}")
-                                val item = ds1.getValue(DeviceData::class.java)
+                                val item = convertDataSnapshotToDeviceData(ds1)
                                 item?.let {
                                     deviceList.add(item)
                                 }
@@ -58,14 +55,16 @@ class AccessVerificationRepositoryImpl(
 
     override fun removeAuthorizationAccessOfSecondaryDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
-            db.reference.child("users")
-                .child(UID).child("userDevicesList").child(deviceId).child(deviceId)
-                .child("authorization")
-                .setValue(Authorization.NotAuthorized.toString()).addOnCompleteListener {
-                    trySend(Response.Success(data = "Access Removed"))
-                }.addOnFailureListener {
-                    trySend(Response.Failure(Throwable(it.message)))
-                }
+            try {
+                db.reference.child("users")
+                    .child(UID).child("userDevicesList").child(deviceId).child(deviceId)
+                    .child("authorization")
+                    .setValue(Authorization.NotAuthorized.toString()).addOnCompleteListener {
+                        trySend(Response.Success(data = "Access Removed"))
+                    }
+            } catch (e: Exception) {
+                trySend(Response.Failure(e))
+            }
             awaitClose {
                 close()
             }
@@ -73,14 +72,16 @@ class AccessVerificationRepositoryImpl(
 
     override fun giveAuthorizationAccessOfSecondaryDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
-            db.reference.child("users")
-                .child(UID).child("userDevicesList").child(deviceId).child(deviceId)
-                .child("authorization")
-                .setValue(Authorization.Authorized.toString()).addOnCompleteListener {
-                    trySend(Response.Success(data = "Access Given"))
-                }.addOnFailureListener {
-                    trySend(Response.Failure(Throwable(it.message)))
-                }
+            try {
+                db.reference.child("users")
+                    .child(UID).child("userDevicesList").child(deviceId).child(deviceId)
+                    .child("authorization")
+                    .setValue(Authorization.Authorized.toString()).addOnCompleteListener {
+                        trySend(Response.Success(data = "Access Given"))
+                    }
+            } catch (e: Exception) {
+                trySend(Response.Failure(e))
+            }
             awaitClose {
                 close()
             }
@@ -90,14 +91,16 @@ class AccessVerificationRepositoryImpl(
         callbackFlow {
             val _requestAuthorizationAccess =
                 RequestAuthorizationAccess(requesterID = requestingDeviceId, requestingAccess = true)
-            db.reference.child("users")
-                .child(UID).child("userDevicesList").child(primaryDeviceId).child(primaryDeviceId)
-                .child("requestAuthorizationAccess").setValue(_requestAuthorizationAccess)
-                .addOnCompleteListener {
-                    trySend(Response.Success(status = true))
-                }.addOnFailureListener{
-                    trySend(Response.Failure(Throwable(it)))
-                }
+            try {
+                db.reference.child("users")
+                    .child(UID).child("userDevicesList").child(primaryDeviceId).child(primaryDeviceId)
+                    .child("requestAuthorizationAccess").setValue(_requestAuthorizationAccess)
+                    .addOnCompleteListener {
+                        trySend(Response.Success(status = true))
+                    }
+            } catch (e: Exception) {
+                trySend(Response.Failure(e))
+            }
             awaitClose {
                 close()
             }
@@ -109,14 +112,16 @@ class AccessVerificationRepositoryImpl(
             println("primaryDeviceId: $primaryDeviceId")
             val _requestAuthorizationAccess =
                 RequestAuthorizationAccess(requesterID = "", requestingAccess = false)
-            db.reference.child("users")
-                .child(UID).child("userDevicesList").child(primaryDeviceId).child(primaryDeviceId)
-                .child("requestAuthorizationAccess").setValue(_requestAuthorizationAccess)
-                .addOnCompleteListener {
-                    trySend(Response.Success(status = true))
-                }.addOnFailureListener{
-                    trySend(Response.Failure(Throwable(it)))
-                }
+            try {
+                db.reference.child("users")
+                    .child(UID).child("userDevicesList").child(primaryDeviceId).child(primaryDeviceId)
+                    .child("requestAuthorizationAccess").setValue(_requestAuthorizationAccess)
+                    .addOnCompleteListener {
+                        trySend(Response.Success(status = true))
+                    }
+            } catch (e: Exception) {
+                trySend(Response.Failure(e))
+            }
             awaitClose {
                 close()
             }
@@ -147,4 +152,9 @@ class AccessVerificationRepositoryImpl(
                 reference.removeEventListener(listener)
             }
         }
+
+    private fun convertDataSnapshotToDeviceData(dataSnapshot: DataSnapshot): DeviceData? {
+        // Conversion logic here
+        return dataSnapshot.getValue(DeviceData::class.java)
+    }
 }
