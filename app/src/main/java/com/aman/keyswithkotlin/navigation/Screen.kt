@@ -2,6 +2,7 @@ package com.aman.keyswithkotlin.navigation
 
 
 sealed class Screen(val route: String) {
+    object OnBoardingScreen : Screen(ON_BOARDING_SCREEN)
     object AuthScreen : Screen(AUTH_SCREEN)
     object ProfileScreen : Screen(PROFILE_SCREEN)
 
@@ -17,6 +18,7 @@ sealed class Screen(val route: String) {
 }
 
 //Screens
+const val ON_BOARDING_SCREEN = "OnBoardingScreen"
 const val AUTH_SCREEN = "AuthenticationScreen"
 const val PROFILE_SCREEN = "ProfileScreen"
 const val ACCESS_VERIFICATION_SCREEN = "AccessVerificationScreen"

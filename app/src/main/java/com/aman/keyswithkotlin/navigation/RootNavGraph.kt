@@ -48,6 +48,7 @@ fun RootNavGraph(
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
+        onBoardingGraph(navController)
         authNavGraph(navController)
         profileNavGraph(navController)
         accessVerificationNavGraph(navController)
@@ -62,6 +63,7 @@ fun RootNavGraph(
     }
 }
 object Graph {
+    const val ON_BOARDING = "on_boarding_graph"
     const val AUTHENTICATION = "auth_graph"
     const val PROFILE = "profile_graph"
     const val ACCESS_VERIFICATION = "access_verification"

@@ -17,6 +17,7 @@ class MyPreference() {
     val ROOM_ID = "receiverRoomId"
     val RECEIVER_PUBLIC_UID = "receiverPublicId"
     val USER_RESTRICTED = "userRestricted"
+    val USER_TYPE = "userType"
     val USER_AUTHENTICATED = "userAuthenticated"
     val COMMON_CHAT_ROOM_ID = "commonChatRoomId"
     val PRIMARY_USER_DEVICE_ID = "primaryUserDeviceId"
@@ -80,6 +81,13 @@ class MyPreference() {
         set(isUserRestricted) {
             sharedPreferences.edit().putBoolean(USER_RESTRICTED, isUserRestricted).apply()
         }
+
+    var isOldUser: Boolean
+        get() = sharedPreferences.getBoolean(USER_TYPE, false)
+        set(isUserRestricted) {
+            sharedPreferences.edit().putBoolean(USER_TYPE, isUserRestricted).apply()
+        }
+
     var isUserAuthenticated: Boolean
         get() = sharedPreferences.getBoolean(USER_AUTHENTICATED, false)
         set(isUserRestricted) {

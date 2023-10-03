@@ -21,6 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthViewModel
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.navigation.Graph
 import com.aman.keyswithkotlin.navigation.RootNavGraph
 import com.aman.keyswithkotlin.notification_service.FCMNotificationSender
@@ -54,9 +55,19 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity,
                 this@MainActivity
             )
-            checkAuthState()
+            val myPreference = MyPreference()
+            println("myPreference.isNewUser: ${myPreference.isOldUser}")
+            if (myPreference.isOldUser){
+                println("check1")
+                checkAuthState()
+            }else{
+                println("check2")
+                navigateToOnBoardingScreens()
+            }
+//            checkAuthState()
         }
     }
+
 
     override fun onRestart() {
         super.onRestart()
@@ -81,7 +92,12 @@ class MainActivity : ComponentActivity() {
 
     private fun navigateToProfileScreen() {
         navController.popBackStack()
-        navController.navigate(Graph.ACCESS_VERIFICATION)
+        navController.navigate(Graph.HOME)
+    }
+
+    private fun navigateToOnBoardingScreens() {
+        navController.popBackStack()
+        navController.navigate(Graph.ON_BOARDING)
     }
 
     private fun launchBiometric() {
