@@ -9,11 +9,5 @@ import com.aman.keyswithkotlin.navigation.AUTH_SCREEN
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthTopBar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = AUTH_SCREEN
-            )
-        }
-    )
+
 }

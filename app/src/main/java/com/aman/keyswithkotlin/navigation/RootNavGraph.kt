@@ -59,7 +59,7 @@ fun RootNavGraph(
         )
         chatNavGraph(navController, sharedPasswordViewModel, sharedChatViewModel, activity, context)
         noteNavGraph(navController, sharedPasswordViewModel)
-        settingNavGraph(navController, mAutofillManager)
+        settingNavGraph(packageName = activity.packageName, navController, mAutofillManager)
     }
 }
 object Graph {

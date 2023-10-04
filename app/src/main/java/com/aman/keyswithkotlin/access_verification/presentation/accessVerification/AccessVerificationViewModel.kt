@@ -75,7 +75,7 @@ class AccessVerificationViewModel @Inject constructor(
             }
 
             AccessVerificationEvent.CancelAuthorizationAccessProcess -> {
-                completeAccessGrantingProcess("aa32850c3b944554")
+                completeAccessGrantingProcess(myPreference.primaryUserDeviceId!!)
             }
         }
     }

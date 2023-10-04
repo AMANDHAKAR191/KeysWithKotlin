@@ -3,6 +3,7 @@ package com.aman.keyswithkotlin.core
 import android.content.Context
 import android.content.SharedPreferences
 import com.aman.keyswithkotlin.Keys
+import com.aman.keyswithkotlin.setting.presentation.LockAppType
 
 class MyPreference() {
 //    var context = _context!!
@@ -93,11 +94,11 @@ class MyPreference() {
         set(isUserRestricted) {
             sharedPreferences.edit().putBoolean(USER_AUTHENTICATED, isUserRestricted).apply()
         }
-    var lockAppSelectedOption: Int
-        get() = sharedPreferences.getInt(LOCK_APP_OPTIONS, 0)
+    var lockAppSelectedOption: String?
+        get() = sharedPreferences.getString(LOCK_APP_OPTIONS, LockAppType.NEVER.toString())
         //integer getter/setter method
         set(selectedOption) {
-            sharedPreferences.edit().putInt(LOCK_APP_OPTIONS, selectedOption).apply()
+            sharedPreferences.edit().putString(LOCK_APP_OPTIONS, selectedOption).apply()
         }
 
     var primaryUserDeviceId:String?

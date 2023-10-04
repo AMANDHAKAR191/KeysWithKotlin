@@ -232,7 +232,7 @@ fun PasswordScreen(
                     content = {
                         Box(modifier = Modifier.fillMaxSize()) {
                             DockedSearchBar(
-                                modifier = Modifier.padding(horizontal = 10.dp),
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 7.dp),
                                 query = searchtext.value,
                                 onQueryChange = {
                                     onEvent(PasswordEvent.OnSearchTextChange(it))

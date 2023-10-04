@@ -1,11 +1,10 @@
-package com.aman.keyswithkotlin.auth.presentation.profile
+package com.aman.keyswithkotlin.setting.presentation
 
 import com.aman.keyswithkotlin.auth.domain.model.DeviceData
-import com.aman.keyswithkotlin.auth.domain.use_cases.PhotoUrl
-
-data class ProfileState(
+data class SettingState(
     var displayName:String? = "",
     var email:String? = "",
     var profilePhotoUrl: String = "",
+    var lockAppSelectedOption:String = LockAppType.NEVER.toString(),
     var loggedInDeviceList:List<DeviceData> = mutableListOf()
 )

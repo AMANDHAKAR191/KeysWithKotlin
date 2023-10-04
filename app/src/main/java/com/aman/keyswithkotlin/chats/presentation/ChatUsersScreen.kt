@@ -293,8 +293,9 @@ fun UserEachRow(
                     person.otherUserProfileUrl?.let {
                         AsyncImage(
                             model = it,
-                            contentDescription = "",
+                            contentDescription = "Profile Image",
                             modifier = Modifier
+                                .size(55.dp)
                                 .clip(
                                     CircleShape
                                 )

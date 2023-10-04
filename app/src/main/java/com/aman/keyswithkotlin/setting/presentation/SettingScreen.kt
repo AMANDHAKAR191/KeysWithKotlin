@@ -1,7 +1,18 @@
 package com.aman.keyswithkotlin.setting.presentation
 
+import UIEvents
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import android.view.autofill.AutofillManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,142 +20,358 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat.startActivityForResult
+import coil.compose.AsyncImage
+import com.aman.keyswithkotlin.Keys
+import com.aman.keyswithkotlin.auth.domain.model.DeviceData
 import com.aman.keyswithkotlin.chats.presentation.noRippleEffect
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
-import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
+import com.aman.keyswithkotlin.core.DeviceInfo
+import com.aman.keyswithkotlin.core.DeviceType
+import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScreen(
+    _state: StateFlow<SettingState>,
+    displayName: String,
+    email: String,
+    photoUrl: String,
+    packageName:String,
+    onEvent: (SettingEvent) -> Unit,
+    eventFlowState: SharedFlow<UIEvents>,
+    autofillManager: AutofillManager,
     bottomBar: @Composable (() -> Unit),
     navigateToProfileScreen: () -> Unit
 ) {
 
-    var isDevicesVisible by remember { mutableStateOf(false) }
+//    var isDevicesVisible by remember { mutableStateOf(false) }
+
+    val state = _state.collectAsState()
+
+    var lockAppSelectedOption by remember {
+        mutableStateOf("")
+    }
+
+    LaunchedEffect(state.value.lockAppSelectedOption){
+        println("check11")
+        lockAppSelectedOption = state.value.lockAppSelectedOption
+    }
 
     var isVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         delay(EXIT_DURATION.toLong())  // This delay ensures that isVisible is set to true after the initial composition
         isVisible = true
     }
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            try {
+
+            } catch (it: ApiException) {
+                print(it)
+            }
+        }
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopBar(title = "Keys",
-                onClickActionButton = {
-                    navigateToProfileScreen()
-                }
+            TopAppBar(
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Setting")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Black,
+                    titleContentColor = Color.White,
+                    actionIconContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                ),
+                modifier = Modifier.fillMaxWidth()
             )
         },
         bottomBar = {
             bottomBar()
         },
         content = { innerPadding ->
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                color = Color.Black,
-                content = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(top = 10.dp)
-                            .background(
-                                MaterialTheme.colorScheme.surfaceVariant,
-                                shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
-                            )
-                            .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-                            .padding(top = 30.dp, start = 20.dp, end = 20.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = "Lock App", fontSize = 20.sp)
-                            Text(text = "After1 Minute", fontSize = 12.sp)
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Column {
-                            Text(
-                                text = "Devices",
-                                fontSize = 20.sp,
-                                modifier = Modifier.noRippleEffect {
-                                    isDevicesVisible = !isDevicesVisible
-                                }
-                            )
-                            if (isDevicesVisible) {
-                                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                                    item {
-                                        Column(modifier = Modifier.padding(10.dp)) {
-                                            Text(text = "Devices name1", fontSize = 20.sp)
-                                            Text(text = "Devices id1", fontSize = 20.sp)
+            Box(modifier = Modifier.fillMaxSize()) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    color = Color.Black,
+                    content = {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Header(
+                                photoUrl = photoUrl,
+                                displayName = displayName,
+                                email = email,
+                                navigateToProfileScreen = {
+                                    navigateToProfileScreen()
+                                })
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
+                                    )
+                                    .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                                    .padding(top = 30.dp, start = 20.dp, end = 20.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(text = "Lock App", fontSize = 20.sp)
+                                    MenuSample(
+                                        selectedOption = lockAppSelectedOption,
+                                        updateLockAppSetting = {
+                                            onEvent(SettingEvent.UpdateLockAppSetting(it.toString()))
                                         }
-                                    }
-                                    item {
-                                        Column(modifier = Modifier.padding(10.dp)) {
-                                            Text(text = "Devices name2", fontSize = 20.sp)
-                                            Text(text = "Devices id2", fontSize = 20.sp)
-                                        }
-                                    }
+                                    )
+//                                    Text(text = "After1 Minute", fontSize = 12.sp)
                                 }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                SingleDeviceCard(loggedInDeviceList = state.value.loggedInDeviceList)
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = "Autofill Password",
+                                    fontSize = 20.sp,
+                                    modifier = Modifier.clickable {
+                                        if (autofillManager.isAutofillSupported && !autofillManager.hasEnabledAutofillServices()){
+                                            val intent = Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE)
+                                            intent.data = Uri.parse("package:" + packageName)
+                                            launcher.launch(intent)
+                                        }else{
+                                            autofillManager.disableAutofillServices()
+                                        }
+                                    })
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(text = "User Guide", fontSize = 20.sp)
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(text = "App Info", fontSize = 20.sp)
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(text = "Contact Us", fontSize = 20.sp)
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(text = "Privacy Policy", fontSize = 20.sp)
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(text = "Terms & conditions", fontSize = 20.sp)
                             }
-
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = "User Guide", fontSize = 20.sp)
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = "App Info", fontSize = 20.sp)
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = "Contact Us", fontSize = 20.sp)
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = "Privacy Policy", fontSize = 20.sp)
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = "Terms & conditions", fontSize = 20.sp)
                     }
-                }
-            )
+                )
+            }
         }
     )
 }
 
-@Preview
 @Composable
-fun Preview() {
-    SettingScreen(bottomBar = { /*TODO*/ }) {
+fun MenuSample(
+    selectedOption: String,
+    updateLockAppSetting: (LockAppType) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
 
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentSize(Alignment.TopEnd)
+    ) {
+        Text(text = selectedOption, fontSize = 12.sp, modifier = Modifier.clickable {
+            expanded = true
+        })
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(onClick = {
+                updateLockAppSetting(LockAppType.IMMEDIATELY)
+                expanded = false
+            }, text = {
+                Text("Immediately")
+            })
+            DropdownMenuItem(onClick = {
+                updateLockAppSetting(LockAppType.AFTER_1_MINUTE)
+                expanded = false
+            }, text = {
+                Text("After 1 Minute")
+            })
+            DropdownMenuItem(onClick = {
+                updateLockAppSetting(LockAppType.NEVER)
+                expanded = false
+            }, text = {
+                Text("Never")
+            })
+        }
     }
+}
+
+@Composable
+fun Header(
+    photoUrl: String,
+    displayName: String,
+    email: String,
+    navigateToProfileScreen: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+            .height(80.dp)
+            .clickable {
+                navigateToProfileScreen()
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            model = photoUrl,
+            contentDescription = "Profile Image",
+            modifier = Modifier
+                .size(55.dp)
+                .clip(
+                    CircleShape
+                )
+                .background(Color.Yellow)
+                .padding(2.dp)
+                .clip(CircleShape)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Column {
+            Text(
+                text = displayName,
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.W300
+            )
+            Text(
+                text = email,
+                color = Color.White,
+                fontWeight = FontWeight.Normal,
+                fontSize = 12.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun SingleDeviceCard(loggedInDeviceList: List<DeviceData>) {
+    var isDevicesVisible by remember { mutableStateOf(false) }
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Devices (${loggedInDeviceList.size})",
+                fontSize = 20.sp,
+                modifier = Modifier.noRippleEffect {
+                    isDevicesVisible = !isDevicesVisible
+                }
+            )
+            if (isDevicesVisible) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    colors = CardDefaults.elevatedCardColors(containerColor = Color.Transparent)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = "Manage Devices")
+                    }
+                }
+            }
+        }
+        AnimatedVisibility(visible = isDevicesVisible) {
+            Column {
+                val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+                var isCurrentUserPrimary by remember { mutableStateOf(false) }
+                //to check is current device is primary
+                for (deviceData in loggedInDeviceList) {
+                    if (deviceData.deviceId == deviceInfo.getDeviceId()) {
+                        if (deviceData.deviceType == DeviceType.Primary.toString()) {
+                            isCurrentUserPrimary = true
+                            break
+                        }
+                    }
+                }
+                LazyColumn(modifier = Modifier.height(150.dp)) {
+                    items(loggedInDeviceList) { deviceData ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(5.dp),
+                            shape = CardDefaults.elevatedShape,
+                            colors = CardDefaults.elevatedCardColors()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(
+                                    horizontal = 10.dp,
+                                    vertical = 5.dp
+                                )
+                            ) {
+                                Text(text = "Device name: ${deviceData.deviceName}")
+                                Text(text = "Device type: ${deviceData.deviceType}")
+                                Text(text = "Last login time: ${deviceData.lastLoginTimeStamp}")
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+enum class LockAppType {
+    IMMEDIATELY, AFTER_1_MINUTE, NEVER
 }

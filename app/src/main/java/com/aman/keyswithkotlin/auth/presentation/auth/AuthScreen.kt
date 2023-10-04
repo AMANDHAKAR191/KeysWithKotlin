@@ -8,6 +8,8 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -18,6 +20,7 @@ import com.aman.keyswithkotlin.auth.presentation.auth.components.AuthTopBar
 import com.aman.keyswithkotlin.auth.presentation.auth.components.OneTapSignIn
 import com.aman.keyswithkotlin.auth.presentation.auth.components.SignInWithGoogle
 import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.navigation.AUTH_SCREEN
 import com.google.android.gms.auth.api.identity.BeginSignInResult
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthCredential
@@ -36,7 +39,13 @@ fun AuthScreen(
 ) {
     Scaffold(
         topBar = {
-            AuthTopBar()
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Keys"
+                    )
+                }
+            )
         },
         content = { padding ->
             AuthContent(

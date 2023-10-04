@@ -193,7 +193,7 @@ fun OnBoardingPager(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            if (pagerState.currentPage != 2) {
+                            if (pagerState.currentPage != 3) {
                                 TextButton(onClick = {
                                     //skip
                                     navigateToAuthScreen()

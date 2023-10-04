@@ -10,6 +10,7 @@ import com.aman.keyswithkotlin.auth.domain.repository.AuthRepository
 import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.CheckAuthorizationOfDevice
 import com.aman.keyswithkotlin.auth.domain.use_cases.DisplayName
+import com.aman.keyswithkotlin.auth.domain.use_cases.Email
 import com.aman.keyswithkotlin.auth.domain.use_cases.FirebaseSignInWithGoogle
 import com.aman.keyswithkotlin.auth.domain.use_cases.GetLoggedInDevices
 import com.aman.keyswithkotlin.auth.domain.use_cases.IsUserAuthenticated
@@ -121,6 +122,7 @@ class AuthModule {
         return AuthUseCases(
             isUserAuthenticated = IsUserAuthenticated(authRepository),
             displayName = DisplayName(authRepository),
+            email = Email(authRepository),
             photoUrl = PhotoUrl(authRepository),
             oneTapSignInWithGoogle = OneTapSignInWithGoogle(authRepository),
             firebaseSignInWithGoogle = FirebaseSignInWithGoogle(authRepository),

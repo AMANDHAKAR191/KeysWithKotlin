@@ -56,6 +56,7 @@ class AuthRepositoryImpl @Inject constructor(
     private val _userData: User? = null
 
     override val displayName = auth.currentUser?.displayName.toString()
+    override val email = auth.currentUser?.email.toString()
     override val photoUrl = auth.currentUser?.photoUrl.toString()
 
 

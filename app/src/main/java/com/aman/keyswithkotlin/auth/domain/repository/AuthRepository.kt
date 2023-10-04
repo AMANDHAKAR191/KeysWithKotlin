@@ -22,6 +22,7 @@ interface AuthRepository {
     suspend fun firebaseSignInWithGoogle(googleCredential: AuthCredential): Flow<SignInWithGoogleResponse>
 
     val displayName: String
+    val email:String
     val photoUrl: String
 
     suspend fun signOut(): Flow<SignOutResponse>

@@ -16,13 +16,17 @@ import com.aman.keyswithkotlin.auth.domain.repository.SignOutResponse
 import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
 import com.aman.keyswithkotlin.auth.presentation.AuthEvent
 import com.aman.keyswithkotlin.core.DeviceInfo
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.core.util.Response.Loading
 import com.aman.keyswithkotlin.core.util.Response.Success
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -30,13 +34,14 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val authUseCases: AuthUseCases,
-    private val accessVerificationUseCases: AccessVerificationUseCases
+    private val accessVerificationUseCases: AccessVerificationUseCases,
+    private val myPreference: MyPreference
 ) : ViewModel() {
     val displayName get() = authUseCases.displayName
     val photoUrl get() = authUseCases.photoUrl
 
-    private val _state = mutableStateOf(ProfileState())
-    val state: State<ProfileState> = _state
+    private val _state = MutableStateFlow(ProfileState())
+    val state = _state.asStateFlow()
 
     private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -55,9 +60,9 @@ class ProfileViewModel @Inject constructor(
                 when (response) {
                     is Success -> {
 //                        println("response.data: ${response.data as List<DeviceData>}")
-                        _state.value = state.value.copy(
+                        _state.update { it.copy(
                             loggedInDeviceList = response.data as List<DeviceData>
-                        )
+                        ) }
                     }
 
                     is Response.Failure -> {
@@ -123,51 +128,10 @@ class ProfileViewModel @Inject constructor(
             }
             AuthEvent.DeclineAuthorizationAccessProcess -> {
                 completeAccessGrantingProcess(deviceInfo.getDeviceId())
-//                viewModelScope.launch(Dispatchers.IO) {
-//                    accessVerificationUseCases.cancelAuthorizationAccessProcess(deviceInfo.getDeviceId())
-//                        .collect { response ->
-//                            withContext(Dispatchers.Main) {
-//                                when (response) {
-//                                    is Success<*, *> -> {
-//                                        _eventFlow.emit(UIEvents.NavigateToNextScreen)
-//                                    }
-//
-//                                    is Response.Failure -> {
-//
-//                                    }
-//
-//                                    is Loading -> {
-//
-//                                    }
-//                                }
-//                            }
-//                        }
-//                }
             }
 
             AuthEvent.CancelAuthorizationAccessProcess -> {
-                completeAccessGrantingProcess("aa32850c3b944554")
-//                viewModelScope.launch(Dispatchers.IO) {
-//                    val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
-//                    accessVerificationUseCases.completeAuthorizationAccessProcess("aa32850c3b944554")
-//                        .collect { response ->
-//                            withContext(Dispatchers.Main) {
-//                                when (response) {
-//                                    is Success<*, *> -> {
-//                                        _eventFlow.emit(UIEvents.NavigateToNextScreen)
-//                                    }
-//
-//                                    is Response.Failure -> {
-//
-//                                    }
-//
-//                                    is Loading -> {
-//
-//                                    }
-//                                }
-//                            }
-//                        }
-//                }
+                completeAccessGrantingProcess(myPreference.primaryUserDeviceId!!)
             }
         }
     }

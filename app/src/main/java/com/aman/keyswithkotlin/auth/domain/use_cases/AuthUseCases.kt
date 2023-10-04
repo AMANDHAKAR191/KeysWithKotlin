@@ -4,6 +4,7 @@ import com.aman.keyswithkotlin.access_verification.domain.use_cases.CheckAuthori
 
 data class AuthUseCases(
     val displayName: DisplayName,
+    val email: Email,
     val photoUrl: PhotoUrl,
     val isUserAuthenticated: IsUserAuthenticated,
     val oneTapSignInWithGoogle: OneTapSignInWithGoogle,
