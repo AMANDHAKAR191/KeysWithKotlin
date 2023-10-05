@@ -3,7 +3,6 @@ package com.aman.keyswithkotlin.core
 import android.content.Context
 import android.content.SharedPreferences
 import com.aman.keyswithkotlin.Keys
-import com.aman.keyswithkotlin.setting.presentation.LockAppType
 
 class MyPreference() {
 //    var context = _context!!

@@ -60,6 +60,7 @@ import com.aman.keyswithkotlin.chats.presentation.noRippleEffect
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
 import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.DeviceType
+import com.aman.keyswithkotlin.core.LockAppType
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
@@ -372,6 +373,3 @@ fun SingleDeviceCard(loggedInDeviceList: List<DeviceData>) {
     }
 }
 
-enum class LockAppType {
-    IMMEDIATELY, AFTER_1_MINUTE, NEVER
-}
