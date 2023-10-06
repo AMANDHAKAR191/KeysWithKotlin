@@ -11,6 +11,8 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
@@ -19,12 +21,14 @@ import com.aman.keyswithkotlin.presentation.MainActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import okhttp3.internal.notify
 import org.json.JSONArray
 
 class CustomMessagingService : FirebaseMessagingService() {
     private var notificationManager: NotificationManager? = null
     private var notification: Notification? = null
     private var defaultSoundUri: Uri? = null
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
@@ -89,18 +93,21 @@ class CustomMessagingService : FirebaseMessagingService() {
         notificationManager.notify(1, notificationBuilder.build())
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     private fun bigTextNotification(dataMap: Map<String?, String?>) {
-        val title = dataMap["title"]
+        val from = dataMap["title"]
         val message = dataMap["message"]
         val channelId: String = getString(R.string.default_notification_channel_id)
         val channelName = "FCMPush"
         val builder1: NotificationCompat.Builder = NotificationCompat.Builder(this, channelId)
+
         val chan =
-            NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationChannel(NotificationChannel.EDIT_CONVERSATION, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+//        chan.setConversationId(channelId,from!!)
         notificationManager!!.createNotificationChannel(chan)
         val style: NotificationCompat.BigTextStyle = NotificationCompat.BigTextStyle()
         style.bigText(message)
-        style.setSummaryText(title)
+        style.setSummaryText(from)
         builder1.setContentTitle("Message received")
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
@@ -114,7 +121,7 @@ class CustomMessagingService : FirebaseMessagingService() {
 //        } else {
 //            notificationManager.notify(1, notification);
 //        }
-        notificationManager!!.notify((0..2).random(), notification)
+        notificationManager!!.notify((10..99).random(), notification)
     }
 
     private fun bigPicNotification(dataMap: Map<String?, String?>) {

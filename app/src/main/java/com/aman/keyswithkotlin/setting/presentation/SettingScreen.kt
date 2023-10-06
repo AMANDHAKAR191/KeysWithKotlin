@@ -91,7 +91,6 @@ fun SettingScreen(
     }
 
     LaunchedEffect(state.value.lockAppSelectedOption){
-        println("check11")
         lockAppSelectedOption = state.value.lockAppSelectedOption
     }
 

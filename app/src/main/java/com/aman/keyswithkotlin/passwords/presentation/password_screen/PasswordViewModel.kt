@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -35,8 +36,8 @@ class PasswordViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    val _state = mutableStateOf(PasswordState())
-    val state: State<PasswordState> = _state
+    val _state = MutableStateFlow(PasswordState())
+    val state= _state.asStateFlow()
 
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asSharedFlow()

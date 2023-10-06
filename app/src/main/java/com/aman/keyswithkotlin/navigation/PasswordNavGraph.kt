@@ -29,7 +29,7 @@ fun NavGraphBuilder.passwordNavGraph(
         composable(BottomBarScreen.Password.route) {
             val viewModel: PasswordViewModel = hiltViewModel()
             PasswordScreen(
-                state = viewModel.state.value,
+                _state = viewModel.state,
                 eventFlowState = viewModel.eventFlow,
                 searchedPasswordState = viewModel.searchedPasswords.collectAsState(),
                 onEvent = viewModel::onEvent,

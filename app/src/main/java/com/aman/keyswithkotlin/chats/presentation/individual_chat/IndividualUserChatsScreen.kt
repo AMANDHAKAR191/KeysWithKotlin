@@ -99,7 +99,6 @@ fun IndividualChatScreen(
     val chatMessages: List<ChatModelClass>? = state.value.chatMessagesList
     val messageTextValue = state.value.chatMessage
     val lazyColumnState = rememberLazyListState()
-    val scrollState = rememberLazyListState()
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
@@ -128,6 +127,15 @@ fun IndividualChatScreen(
     LaunchedEffect(key1 = sharedChatState.value.sharedNoteItem) {
         if (sharedChatState.value.sharedNoteItem != null) {
             isItemShared = true
+        }
+    }
+    // Scroll to the bottom of the LazyColumn when a new item is added
+    LaunchedEffect(key1 = state.value.chatMessagesList?.size, key2 = state.value.isMessageReceived) {
+        if (chatMessages.isNullOrEmpty()) {
+            //todo do nothing
+        } else {
+//            lazyColumnState.scrollToItem(1)
+            lazyColumnState.animateScrollToItem(lazyColumnState.layoutInfo.totalItemsCount)
         }
     }
 
@@ -198,11 +206,6 @@ fun IndividualChatScreen(
                 scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
             )
         },
-//        // Exclude ime and navigation bar padding so this can be added by the UserInput composable
-//        contentWindowInsets = ScaffoldDefaults
-//            .contentWindowInsets
-//            .exclude(WindowInsets.navigationBars)
-//            .exclude(WindowInsets.ime),
         content = { innerPadding ->
             Box(
                 modifier = Modifier
@@ -279,15 +282,7 @@ fun IndividualChatScreen(
             }
         }
     )
-    // Scroll to the bottom of the LazyColumn when a new item is added
-    LaunchedEffect(state.value) {
-        if (chatMessages.isNullOrEmpty()) {
-            //todo do nothing
-        } else {
-//            lazyColumnState.scrollToItem(1)
-            lazyColumnState.animateScrollToItem(lazyColumnState.layoutInfo.totalItemsCount)
-        }
-    }
+
 }
 
 @Composable

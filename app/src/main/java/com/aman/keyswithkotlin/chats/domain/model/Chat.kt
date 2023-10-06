@@ -1,7 +1,11 @@
 package com.aman.keyswithkotlin.chats.domain.model
 
+import com.aman.keyswithkotlin.auth.data.repository.AuthRepositoryImpl
+import com.aman.keyswithkotlin.core.GeneratorClass
+
 
 data class Chat(
+//    val messageId:Int = GeneratorClass().randomIdGenerator(5),
     val message: String,
     val time: String,
     val userType: String = UserType.SENDER.toString(),

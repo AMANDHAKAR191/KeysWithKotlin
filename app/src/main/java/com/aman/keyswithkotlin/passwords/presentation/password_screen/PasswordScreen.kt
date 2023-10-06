@@ -49,6 +49,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,13 +85,14 @@ import com.aman.keyswithkotlin.presentation.CustomCircularProgressBar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PasswordScreen(
-    state: PasswordState,
+    _state: StateFlow<PasswordState>,
     eventFlowState: SharedFlow<UIEvents>,
     searchedPasswordState: State<List<Password>?>,
     onEvent: (PasswordEvent) -> Unit,
@@ -104,6 +106,7 @@ fun PasswordScreen(
     closeApp: () -> Unit,
     bottomBar: @Composable (() -> Unit)
 ) {
+    val state = _state.collectAsState()
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
@@ -232,7 +235,9 @@ fun PasswordScreen(
                     content = {
                         Box(modifier = Modifier.fillMaxSize()) {
                             DockedSearchBar(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 7.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 7.dp),
                                 query = searchtext.value,
                                 onQueryChange = {
                                     onEvent(PasswordEvent.OnSearchTextChange(it))
@@ -295,7 +300,7 @@ fun PasswordScreen(
                                         .align(TopCenter)
                                         .padding(top = 15.dp)
                                 )
-                                if (state.passwords.isEmpty()) {
+                                if (state.value.passwords.isEmpty()) {
                                     Text(
                                         text = "No Password  Saved",
                                         textAlign = TextAlign.Center,
@@ -316,7 +321,7 @@ fun PasswordScreen(
                                                 Text(text = "Recently used passwords", textAlign = TextAlign.Start)
                                             }
                                         }
-                                        items(state.recentlyUsedPasswords.take(3)) { password ->
+                                        items(state.value.recentlyUsedPasswords.take(3)) { password ->
                                             PasswordItem(
                                                 password = password,
                                                 onItemClick = {
@@ -340,7 +345,7 @@ fun PasswordScreen(
                                             }
                                         }
 
-                                        items(state.passwords) { password ->
+                                        items(state.value.passwords) { password ->
                                             PasswordItem(
                                                 password = password,
                                                 onItemClick = {
@@ -385,7 +390,7 @@ fun PasswordScreen(
                 }
 
 
-                if (state.isLoading) {
+                if (state.value.isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
                         CustomCircularProgressBar()
                     }
@@ -461,30 +466,4 @@ fun PasswordScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun preview() {
-    PasswordScreen(
-        state = PasswordState(),
-        eventFlowState = MutableSharedFlow(), // Using MutableSharedFlow as dummy value
-        searchedPasswordState = remember {
-            mutableStateOf(
-                listOf(
-                    Password(),
-                    Password()
-                )
-            )
-        }, // Using a list of dummy passwords
-        onEvent = {},
-        onSharedPasswordEvent = {},
-        onSharedChatEvent = {},
-        navigateToAddEditPasswordScreen = {},
-        navigateToGeneratePasswordScreen = {},
-        navigateToProfileScreen = {},
-        navigateToChatUserListScreen = {},
-        navigateToAccessVerificationScreen = {},
-        closeApp = {}
-    ) {}
 }

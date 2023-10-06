@@ -14,7 +14,7 @@ import org.json.JSONObject
 
 class FCMNotificationSender(
     var userFcmToken: String,
-    var title: String,
+    var from: String,
     var body: String,
     var mContext: Context,
     var mActivity: Activity
@@ -31,7 +31,7 @@ class FCMNotificationSender(
         try {
             mainObj.put("to", userFcmToken)
             val notiObject = JSONObject()
-            notiObject.put("title", title)
+            notiObject.put("title", from)
             notiObject.put("message", body)
             notiObject.put("type", CustomMessagingService.BIG_TEXT)
             mainObj.put("data", notiObject)

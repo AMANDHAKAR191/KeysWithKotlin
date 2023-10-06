@@ -17,9 +17,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class IndividualUserChatsViewModel @Inject constructor(
@@ -41,9 +43,6 @@ class IndividualUserChatsViewModel @Inject constructor(
         _state.value = state.value.copy(
             senderPublicUID = publicUID
         )
-//        println("sharedChatViewModel.state.value.commonChatRoomId: ${sharedChatViewModel.state.value.commonChatRoomId}")
-//        state.value.commonChatRoomId = sharedChatViewModel.state.value.commonChatRoomId
-        println("commonChatRoomId: ${myPreference.commonChatRoomId}")
         myPreference.commonChatRoomId?.let {
             getChatUserList(it)
         }
@@ -52,9 +51,6 @@ class IndividualUserChatsViewModel @Inject constructor(
     fun onEvent(event: ChatMessageEvent) {
         when (event) {
             is ChatMessageEvent.SendMessage -> {
-                println("Message: ${state.value.chatMessage}")
-                println("commonChatRoomId: ${event.commonChatRoomId}")
-                println("passwordItemToShare: ${event.passwordItemValue}")
                 viewModelScope.launch {
                     chatUseCases.sendMessage(
                         event.commonChatRoomId,
@@ -71,19 +67,25 @@ class IndividualUserChatsViewModel @Inject constructor(
                             }
 
                             is Response.Success<*, *> -> {
-                                _state.value = state.value.copy(
-                                    chatMessage = ""
-                                )
-                                if (event.passwordItemValue != null){
+                                if (event.passwordItemValue != null) {
                                     _eventFlow.emit(
-                                        UIEvents.SendNotification(publicUID, messageBody = "shared a Password")
+                                        UIEvents.SendNotification(
+                                            publicUID,
+                                            messageBody = "shared a Password"
+                                        )
                                     )
-                                    println("check122333")
                                 }
-                                println("check1123")
                                 _eventFlow.emit(
-                                    UIEvents.SendNotification(publicUID)
+                                    UIEvents.SendNotification(
+                                        publicUID,
+                                        messageBody = state.value.chatMessage
+                                    )
                                 )
+                                _state.update {
+                                    it.copy(
+                                        chatMessage = ""
+                                    )
+                                }
                             }
 
                             is Response.Failure -> {
@@ -104,17 +106,13 @@ class IndividualUserChatsViewModel @Inject constructor(
 
     private fun getChatUserList(commonChatRoomId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            println("commonChatRoomId??: $commonChatRoomId")
             chatUseCases.getUserChatMessages(commonChatRoomId).collect { response ->
                 println(this.coroutineContext)
                 withContext(Dispatchers.Main) {
                     println(this.coroutineContext)
                     when (response) {
                         is Response.Success<*, *> -> {
-                            println("userList: ${response.data as List<*>}")
-                            _state.value = state.value.copy(
-                                chatMessagesList = response.data as List<ChatModelClass>
-                            )
+                            _state.update { it.copy(chatMessagesList = response.data as List<ChatModelClass>, isMessageReceived = (0..9).random()) }
                         }
 
                         is Response.Failure -> {

@@ -1,8 +1,6 @@
 package com.aman.keyswithkotlin.notes.presentation.note_screen
 
 import UIEvents
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.core.util.Response
@@ -11,7 +9,10 @@ import com.aman.keyswithkotlin.notes.domain.use_cases.NoteUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,8 +25,8 @@ class NotesViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    private val _state = mutableStateOf(NotesState())
-    val state: State<NotesState> = _state
+    private val _state = MutableStateFlow(NotesState())
+    val state = _state.asStateFlow()
 
     private var recentlyDeletedNote: Note? = null
 
@@ -90,10 +91,12 @@ class NotesViewModel @Inject constructor(
                     println(this.coroutineContext)
                     when (response) {
                         is Response.Success<*, *> -> {
-                            _state.value = state.value.copy(
-                                notes = response.data as List<Note>,
-                                isLoading = false
-                            )
+                            _state.update {
+                                it.copy(
+                                    notes = response.data as List<Note>,
+                                    isLoading = false
+                                )
+                            }
                         }
 
                         is Response.Failure -> {

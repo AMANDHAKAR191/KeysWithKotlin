@@ -18,6 +18,7 @@ import com.aman.keyswithkotlin.core.Constants.SIGN_UP_REQUEST
 import com.aman.keyswithkotlin.core.Constants.USERS
 import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.DeviceType
+import com.aman.keyswithkotlin.core.GeneratorClass
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
@@ -151,8 +152,9 @@ class AuthRepositoryImpl @Inject constructor(
         user: FirebaseUser?
     ): SignInWithGoogleResponse = coroutineScope {
 //        Dh9sn08fI02mZfYFf3gNZO1NO1M60u/xgaIeqKVb5uo=
-        val aesKey = "${generatePassword(43, specialCharacters = false)}="
-        val aesIV = generatePassword(16, specialCharacters = false)
+
+        val aesKey = "${GeneratorClass().generatePassword(43, specialCharacters = false)}="
+        val aesIV = GeneratorClass().generatePassword(16, specialCharacters = false)
         user?.let {
             val timeStampUtil = TimeStampUtil()
             val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
@@ -447,49 +449,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
 
-    private fun generatePassword(
-        max_length: Int,
-        upperCase: Boolean = true,
-        lowerCase: Boolean = true,
-        numbers: Boolean = true,
-        specialCharacters: Boolean = true
-    ): String {
-        val rn = Random()
-        val sb = StringBuilder(max_length)
-        try {
-            val upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            val lowerCaseChars = "abcdefghijklmnopqrstuvwxyz"
-            val numberChars = "0123456789"
-            val specialChars = "!@#$%^&*()_-+=<>?/{}~|"
-            var allowedChars = ""
 
-
-            //this will fulfill the requirements of atleast one character of a type.
-            if (upperCase) {
-                allowedChars += upperCaseChars
-                sb.append(upperCaseChars[rn.nextInt(upperCaseChars.length - 1)])
-            }
-            if (lowerCase) {
-                allowedChars += lowerCaseChars
-                sb.append(lowerCaseChars[rn.nextInt(lowerCaseChars.length - 1)])
-            }
-            if (numbers) {
-                allowedChars += numberChars
-                sb.append(numberChars[rn.nextInt(numberChars.length - 1)])
-            }
-            if (specialCharacters) {
-                allowedChars += specialChars
-                sb.append(specialChars[rn.nextInt(specialChars.length - 1)])
-            }
-            //fill the allowed length from different chars now.
-            for (i in sb.length until max_length) {
-                sb.append(allowedChars[rn.nextInt(allowedChars.length)])
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return sb.toString()
-    }
 
 
 }

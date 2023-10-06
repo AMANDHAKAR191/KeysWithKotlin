@@ -23,7 +23,7 @@ fun NavGraphBuilder.noteNavGraph(
         composable(BottomBarScreen.Notes.route) {
             val viewModel: NotesViewModel = hiltViewModel()
             NotesScreen(
-                state = viewModel.state.value,
+                _state = viewModel.state,
                 eventFlowState = viewModel.eventFlow,
                 onEvent = viewModel::onEvent,
                 bottomBar = {

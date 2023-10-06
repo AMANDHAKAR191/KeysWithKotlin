@@ -34,7 +34,6 @@ class ChatRepositoryImpl(
             val timeStampUtil = TimeStampUtil()
 
             val reference = database.reference.child("messages").child(chatRoomId)
-            trySend(Response.Success("Sending..."))
 
             val _message = ChatModelClass(
                 message = chat.message,
@@ -49,11 +48,7 @@ class ChatRepositoryImpl(
             _message.dateAndTime?.let { timeStamp ->
                 reference.child((timeStamp)).setValue(_message)
                     .addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            trySend(Response.Success("sent"))
-                        } else {
-                            trySend(Response.Success("Failed!"))
-                        }
+                        trySend(Response.Success("sent"))
                     }
                     .addOnFailureListener {
                         trySend(Response.Failure(it))
@@ -71,6 +66,9 @@ class ChatRepositoryImpl(
         trySend(Response.Loading)
         database.reference.child("messageUserList").child(publicUID)
             .child("UserPersonalChatList").child(otherUserPublicUid)
+            .setValue(userPersonalChatList).await()
+        database.reference.child("messageUserList").child(otherUserPublicUid)
+            .child("UserPersonalChatList").child(publicUID)
             .setValue(userPersonalChatList).await()
         trySend(Response.Success(data = "Chat User Created"))
         awaitClose { close() }

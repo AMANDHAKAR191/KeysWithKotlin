@@ -27,6 +27,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,17 +43,20 @@ import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.Password
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
 fun NotesScreen(
-    state: NotesState,
+    _state: StateFlow<NotesState>,
     eventFlowState: SharedFlow<UIEvents>,
     onEvent: (NotesEvent) -> Unit,
     bottomBar: @Composable (() -> Unit),
     navigateToAddEditNoteScreen: () -> Unit
 ) {
+
+    val state = _state.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -127,7 +131,7 @@ fun NotesScreen(
                     columns = StaggeredGridCells.Fixed(2),
                     contentPadding = PaddingValues(8.dp)
                 ) {
-                    items(state.notes) { note ->
+                    items(state.value.notes) { note ->
                         NoteItem(
                             note = note,
                             modifier = Modifier
