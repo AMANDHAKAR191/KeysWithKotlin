@@ -18,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -29,7 +30,7 @@ class PasswordScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
-    private val dummyState = PasswordState()  // Initialize with your default state
+    private val dummyState =  MutableStateFlow(PasswordState()).asStateFlow()  // Initialize with your default state
     private val dummySharedPasswordState = PasswordState()  // Initialize with your default state
 
     private val _dummyEventFlow = MutableSharedFlow<UIEvents>()
@@ -60,11 +61,11 @@ class PasswordScreenTest {
 
         val searchedPasswords =  MutableStateFlow<List<Password>>(listOf(dummyPassword1, dummyPassword2))
 
-        val dummyState = PasswordState(passwords = listOf(dummyPassword1, dummyPassword2))
+        val dummyState = MutableStateFlow(PasswordState(passwords = listOf(dummyPassword1, dummyPassword2)))
 
         composeTestRule.setContent {
             PasswordScreen(
-                state = dummyState,
+                _state = dummyState,
                 eventFlowState =dummyEventFlow,
                 searchedPasswordState = searchedPasswords.collectAsState(),
                 onEvent =dummyOnEvent,
@@ -88,11 +89,11 @@ class PasswordScreenTest {
 
         val searchedPasswords =  MutableStateFlow<List<Password>>(listOf())
 
-        val dummyState = PasswordState(passwords = listOf())
+        val dummyState = MutableStateFlow(PasswordState(passwords = listOf()))
 
         composeTestRule.setContent {
             PasswordScreen(
-                state = dummyState,
+                _state = dummyState,
                 eventFlowState =dummyEventFlow,
                 searchedPasswordState = searchedPasswords.collectAsState(),
                 onEvent =dummyOnEvent,
@@ -131,11 +132,11 @@ class PasswordScreenTest {
 
         val searchedPasswords =  MutableStateFlow<List<Password>>(listOf(dummyPassword1, dummyPassword2))
 
-        val dummyState = PasswordState(passwords = listOf(dummyPassword1, dummyPassword2))
+        val dummyState = MutableStateFlow(PasswordState(passwords = listOf(dummyPassword1, dummyPassword2))).asStateFlow()
 
         composeTestRule.setContent {
             PasswordScreen(
-                state = dummyState,
+                _state = dummyState,
                 eventFlowState =dummyEventFlow,
                 searchedPasswordState = searchedPasswords.collectAsState(),
                 onEvent =dummyOnEvent,
@@ -159,7 +160,7 @@ class PasswordScreenTest {
         val searchedPasswords =  MutableStateFlow<List<Password>>(listOf())
         composeTestRule.setContent {
             PasswordScreen(
-                state = dummyState,
+                _state = dummyState,
                 eventFlowState =dummyEventFlow,
                 searchedPasswordState = searchedPasswords.collectAsState(),
                 onEvent =dummyOnEvent,

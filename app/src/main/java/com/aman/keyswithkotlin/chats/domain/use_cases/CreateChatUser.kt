@@ -15,10 +15,8 @@ class CreateChatUser(
     ): Flow<Response<Pair<String?, Boolean?>>> {
         val aesKey = "${generatePassword(22, specialCharacters = false)}=="
         val aesIV = generatePassword(22, specialCharacters = false)
-        println("userPersonalChatList: $userPersonalChatList")
         val _userPersonalChatList =
             if (userPersonalChatList.commonEncryptionKey == "") {
-                println("check55")
                 UserPersonalChatList(
                     otherUserPublicUid = userPersonalChatList.otherUserPublicUid,
                     otherUserPublicUname = userPersonalChatList.otherUserPublicUname,
@@ -28,7 +26,6 @@ class CreateChatUser(
                     commonEncryptionIv = aesIV
                 )
             }else{
-                println("check55")
                 UserPersonalChatList(
                     otherUserPublicUid = userPersonalChatList.otherUserPublicUid,
                     otherUserPublicUname = userPersonalChatList.otherUserPublicUname,
@@ -38,7 +35,7 @@ class CreateChatUser(
                     commonEncryptionIv = userPersonalChatList.commonEncryptionIv
                 )
             }
-        return repository.createChatUser(otherUserPublicUid, _userPersonalChatList)
+        return repository.createUserInSenderChat(otherUserPublicUid, _userPersonalChatList)
     }
 }
 

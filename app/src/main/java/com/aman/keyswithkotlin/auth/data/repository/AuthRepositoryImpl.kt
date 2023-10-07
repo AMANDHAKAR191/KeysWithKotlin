@@ -72,6 +72,7 @@ class AuthRepositoryImpl @Inject constructor(
                 val signUpResult = oneTapClient.beginSignIn(signUpRequest).await()
                 trySend(Response.Success(signUpResult, true))
             } catch (e: Exception) {
+                println("check456456")
                 trySend(Response.Failure(e))
             }
         }

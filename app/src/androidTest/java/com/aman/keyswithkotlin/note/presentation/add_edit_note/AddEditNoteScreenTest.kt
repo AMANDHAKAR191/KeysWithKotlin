@@ -27,7 +27,7 @@ class AddEditNoteScreenTest {
     val composeTestRule = createComposeRule()
 
     private val dummyState = AddEditNoteState()  // Initialize with your default state
-    private val _dummyEventFlow = MutableSharedFlow<AddEditNoteViewModel.UiEvent>()
+    private val _dummyEventFlow = MutableSharedFlow<UIEvents>()
     private val dummyEventFlow = _dummyEventFlow.asSharedFlow()
     private val dummyOnEvent: (AddEditNoteEvent) -> Unit = {}
     private val dummyNavigateToNoteScreen: () -> Unit = {}
@@ -83,7 +83,7 @@ class AddEditNoteScreenTest {
             )
         }
         // Trigger the event to show Snackbar
-        _dummyEventFlow.tryEmit(AddEditNoteViewModel.UiEvent.ShowSnackBar("Test message"))
+        _dummyEventFlow.tryEmit(UIEvents.ShowSnackBar("Test message"))
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("Test message").assertExists()
     }
@@ -100,7 +100,7 @@ class AddEditNoteScreenTest {
             )
         }
         // Trigger the event to navigate
-        _dummyEventFlow.tryEmit(AddEditNoteViewModel.UiEvent.SaveNote)
+        _dummyEventFlow.tryEmit(UIEvents.SaveNote)
         composeTestRule.waitForIdle()
         assertTrue(navigationTriggered.get())
     }

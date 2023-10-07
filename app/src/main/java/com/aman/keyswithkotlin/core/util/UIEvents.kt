@@ -13,7 +13,10 @@ sealed class UIEvents {
             }
         }
     }
+
+    data class ShowErrorDialog(val message: String):UIEvents()
     object SavePassword : UIEvents()
+    object SaveNote : UIEvents()
     data class SendNotification(val publicUid:String, val messageBody:String? = null) :UIEvents()
 
     object ShowLoadingBar:UIEvents()

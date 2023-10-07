@@ -15,7 +15,9 @@ import com.aman.keyswithkotlin.notes.presentation.note_screen.NotesEvent
 import com.aman.keyswithkotlin.notes.presentation.note_screen.NotesScreen
 import com.aman.keyswithkotlin.notes.presentation.note_screen.NotesState
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,7 +29,8 @@ class NoteScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val dummyState = NotesState()  // Initialize with your default state
+    private val _dummyState = MutableStateFlow(NotesState())  // Initialize with your default state
+    private val dummyState = _dummyState.asStateFlow()  // Initialize with your default state
     private val _dummyEventFlow = MutableSharedFlow<UIEvents>()
     private val dummyEventFlow = _dummyEventFlow.asSharedFlow()
     private val dummyOnEvent: (NotesEvent) -> Unit = {}
@@ -38,7 +41,7 @@ class NoteScreenTest {
         val snackBarText = "Test Snack"
         composeTestRule.setContent {
             NotesScreen(
-                state = dummyState,
+                _state = dummyState,
                 eventFlowState = dummyEventFlow,
                 onEvent = dummyOnEvent,
                 bottomBar = {},
@@ -55,7 +58,7 @@ class NoteScreenTest {
     fun checkFloatingActionButtonExists() {
         composeTestRule.setContent {
             NotesScreen(
-                state = dummyState,
+                _state = dummyState,
                 eventFlowState = dummyEventFlow,
                 onEvent = {},
                 bottomBar = {},
@@ -69,11 +72,11 @@ class NoteScreenTest {
     fun checkNotesAreDisplayed() {
         val dummyNote = Note("Test Title1", "Test Content1")
         val dummyNote1 = Note("Test Title2", "Test Content2")
-        val dummyState = NotesState(notes = listOf(dummyNote, dummyNote1))
+        val dummyState = MutableStateFlow(NotesState(notes = listOf(dummyNote, dummyNote1))).asStateFlow()
 
         composeTestRule.setContent {
             NotesScreen(
-                state = dummyState,
+                _state = dummyState,
                 eventFlowState = dummyEventFlow,
                 onEvent = {},
                 bottomBar = {},

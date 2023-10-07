@@ -59,7 +59,7 @@ class ChatRepositoryImpl(
             }
         }
 
-    override fun createChatUser(
+    override fun createUserInSenderChat(
         otherUserPublicUid: String,
         userPersonalChatList: UserPersonalChatList
     ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
@@ -67,7 +67,15 @@ class ChatRepositoryImpl(
         database.reference.child("messageUserList").child(publicUID)
             .child("UserPersonalChatList").child(otherUserPublicUid)
             .setValue(userPersonalChatList).await()
-        database.reference.child("messageUserList").child(otherUserPublicUid)
+        trySend(Response.Success(data = "Chat User Created"))
+        awaitClose { close() }
+    }
+    override fun createUserInReceiverChat(
+        otherUserPublicUid: String,
+        userPersonalChatList: UserPersonalChatList
+    ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
+        trySend(Response.Loading)
+        database.reference.child("messageUserList").child(userPersonalChatList.otherUserPublicUid!!)
             .child("UserPersonalChatList").child(publicUID)
             .setValue(userPersonalChatList).await()
         trySend(Response.Success(data = "Chat User Created"))

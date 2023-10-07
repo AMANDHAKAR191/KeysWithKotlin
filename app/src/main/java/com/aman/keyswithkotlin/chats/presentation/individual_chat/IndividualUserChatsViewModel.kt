@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -85,6 +86,10 @@ class IndividualUserChatsViewModel @Inject constructor(
                                     it.copy(
                                         chatMessage = ""
                                     )
+                                }
+                                event.person?.let {
+                                    chatUseCases.createUserInReceiverChat(publicUID, it).collectLatest{
+                                    }
                                 }
                             }
 

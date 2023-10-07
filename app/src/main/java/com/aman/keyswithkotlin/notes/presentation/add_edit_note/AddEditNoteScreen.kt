@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.notes.presentation.add_edit_note
 
+import UIEvents
 import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -38,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import com.aman.keyswithkotlin.core.Constants
+import com.aman.keyswithkotlin.core.components.ShowInfoToUser
 import com.aman.keyswithkotlin.notes.domain.model.Note
 import com.aman.keyswithkotlin.notes.presentation.add_edit_note.components.TransparentHintTextField
 import kotlinx.coroutines.delay
@@ -50,7 +52,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddEditNoteScreen(
     state: AddEditNoteState,
-    eventFlow: SharedFlow<AddEditNoteViewModel.UiEvent>,
+    eventFlow: SharedFlow<UIEvents>,
     onEvent: (AddEditNoteEvent) -> Unit,
     navigateToNoteScreen: () -> Unit
 ) {
@@ -63,6 +65,12 @@ fun AddEditNoteScreen(
         )
     }
     val scope = rememberCoroutineScope()
+    var showErrorDialog = remember {
+        mutableStateOf(false)
+    }
+    var errorMessage = remember {
+        mutableStateOf("")
+    }
 
     // Define a separate lambda for handling back navigation
     val handleBackNavigation: () -> Unit = {
@@ -74,20 +82,32 @@ fun AddEditNoteScreen(
     LaunchedEffect(key1 = true) {
         eventFlow.collectLatest { event ->
             when (event) {
-                is AddEditNoteViewModel.UiEvent.ShowSnackBar -> {
+                is UIEvents.ShowSnackBar -> {
                     snackBarHostState.showSnackbar(
                         message = event.message
                     )
                 }
 
-                is AddEditNoteViewModel.UiEvent.SaveNote -> {
+                is UIEvents.SaveNote -> {
                     handleBackNavigation()
                 }
+
+                is UIEvents.ShowErrorDialog->{
+                    println("check456456")
+                    errorMessage.value = event.message
+                    showErrorDialog.value = true
+                }
+
+                else -> {}
             }
         }
     }
 
-
+    if (showErrorDialog.value){
+        ShowInfoToUser(showDialog = true, title = "Error", message = "Hello"){
+            showErrorDialog.value = false
+        }
+    }
     Scaffold(
         snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
@@ -184,24 +204,5 @@ fun AddEditNoteScreen(
                 )
             }
         }
-    )
-}
-
-
-@Preview
-@Composable
-fun Preview() {
-    val state = AddEditNoteState() // Provide the desired state object
-    val eventFlow =
-        remember { MutableSharedFlow<AddEditNoteViewModel.UiEvent>() } // Create an instance of MutableSharedFlow
-    val onEvent: (AddEditNoteEvent) -> Unit = {} // Provide an empty lambda function for onEvent
-    val navigateToNoteScreen: () -> Unit =
-        {} // Provide an empty lambda function for navigateToNoteScreen
-
-    AddEditNoteScreen(
-        state = state,
-        eventFlow = eventFlow,
-        onEvent = onEvent,
-        navigateToNoteScreen = navigateToNoteScreen
     )
 }

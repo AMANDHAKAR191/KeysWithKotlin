@@ -12,11 +12,15 @@ interface ChatRepository {
         chat: ChatModelClass
     ): Flow<Response<Pair<String?, Boolean?>>>
 
-    fun createChatUser(
+    fun createUserInSenderChat(
         otherUserPublicUid: String,
         userPersonalChatList: UserPersonalChatList
     ): Flow<Response<Pair<String?, Boolean?>>>
 
+    fun createUserInReceiverChat(
+        otherUserPublicUid: String,
+        userPersonalChatList: UserPersonalChatList
+    ): Flow<Response<Pair<String?, Boolean?>>>
     fun getChatUsers(): Flow<Response<Pair<MutableList<UserPersonalChatList>?, Boolean?>>>
 
     fun getChatProfileDataByPublicUID(otherUserPublicUid: String): Flow<Response<Pair<MessageUserList?, Boolean?>>>

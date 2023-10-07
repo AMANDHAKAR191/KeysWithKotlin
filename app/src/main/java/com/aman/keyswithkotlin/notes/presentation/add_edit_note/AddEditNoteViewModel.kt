@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.notes.presentation.add_edit_note
 
+import UIEvents
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -22,7 +23,7 @@ class AddEditNoteViewModel @Inject constructor(
     private val _state = mutableStateOf(AddEditNoteState())
     val state: State<AddEditNoteState> = _state
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     fun onEvent(event: AddEditNoteEvent) {
@@ -47,7 +48,6 @@ class AddEditNoteViewModel @Inject constructor(
 
             is AddEditNoteEvent.SaveNote -> {
                 viewModelScope.launch {
-                    println("inside AddEditNoteEvent.SaveNote")
                     try {
                         noteUseCases.addNote(
                             Note(
@@ -60,29 +60,26 @@ class AddEditNoteViewModel @Inject constructor(
                             when (response) {
                                 is Response.Success<*, *> -> {
                                     _eventFlow.emit(
-                                        UiEvent.ShowSnackBar(
+                                        UIEvents.ShowSnackBar(
                                             message = response.data.toString()
                                         )
                                     )
                                     _eventFlow.emit(
-                                        UiEvent.SaveNote
+                                        UIEvents.SaveNote
                                     )
                                 }
 
                                 is Response.Failure -> {
-                                    UiEvent.ShowSnackBar(
-                                        message = response.e.message.toString()
-                                    )
+                                    UIEvents.ShowErrorDialog(response.e.message?:"Unexpected error occurred!")
                                 }
 
                                 else -> {}
                             }
 
                         }
-                        _eventFlow.emit(UiEvent.SaveNote)
                     } catch (e: InvalidNoteException) {
                         _eventFlow.emit(
-                            UiEvent.ShowSnackBar(
+                            UIEvents.ShowSnackBar(
                                 message = e.message ?: "Couldn't save note"
                             )
                         )

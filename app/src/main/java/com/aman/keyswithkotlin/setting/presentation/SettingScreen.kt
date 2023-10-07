@@ -61,6 +61,7 @@ import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
 import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.DeviceType
 import com.aman.keyswithkotlin.core.LockAppType
+import com.aman.keyswithkotlin.core.components.ShowInfoToUser
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
@@ -107,6 +108,14 @@ fun SettingScreen(
             } catch (it: ApiException) {
                 print(it)
             }
+        }
+    }
+    var showErrorDialog = remember {
+        mutableStateOf(false)
+    }
+    if (showErrorDialog.value){
+        ShowInfoToUser(showDialog = true, title = "Error", message = "Hello"){
+            showErrorDialog.value = false
         }
     }
     Scaffold(
@@ -192,7 +201,9 @@ fun SettingScreen(
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(text = "User Guide", fontSize = 20.sp)
                                 Spacer(modifier = Modifier.height(10.dp))
-                                Text(text = "App Info", fontSize = 20.sp)
+                                Text(text = "App Info", fontSize = 20.sp, modifier = Modifier.clickable {
+                                    showErrorDialog.value = true
+                                })
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(text = "Contact Us", fontSize = 20.sp)
                                 Spacer(modifier = Modifier.height(10.dp))

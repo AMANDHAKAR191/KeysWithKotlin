@@ -269,12 +269,23 @@ fun IndividualChatScreen(
                         .padding(horizontal = 10.dp, vertical = 10.dp)
                         .align(Alignment.BottomCenter),
                     onTrailingIconButtonClicked = {
-                        onChatEvent(
-                            ChatMessageEvent.SendMessage(
-                                data?.commonChatRoomId!!,
-                                sharedChatState.value.sharedPasswordItem
+                        if (chatMessages.isNullOrEmpty()){
+                            onChatEvent(
+                                ChatMessageEvent.SendMessage(
+                                    data?.commonChatRoomId!!,
+                                    person = data,
+                                    sharedChatState.value.sharedPasswordItem
+                                )
                             )
-                        )
+                        }else{
+                            onChatEvent(
+                                ChatMessageEvent.SendMessage(
+                                    data?.commonChatRoomId!!,
+                                    person = null,
+                                    sharedChatState.value.sharedPasswordItem
+                                )
+                            )
+                        }
                         onSharedChatEvent(SharedChatEvent.SharePasswordItem(null))
                         onSharedChatEvent(SharedChatEvent.ShareNoteItem(null))
                     }

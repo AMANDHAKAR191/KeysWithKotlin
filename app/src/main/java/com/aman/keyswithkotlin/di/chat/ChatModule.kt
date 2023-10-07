@@ -4,6 +4,7 @@ import com.aman.keyswithkotlin.chats.data.repository.ChatRepositoryImpl
 import com.aman.keyswithkotlin.chats.domain.repository.ChatRepository
 import com.aman.keyswithkotlin.chats.domain.use_cases.ChatUseCases
 import com.aman.keyswithkotlin.chats.domain.use_cases.CreateChatUser
+import com.aman.keyswithkotlin.chats.domain.use_cases.CreateUserInReceiverChat
 import com.aman.keyswithkotlin.chats.domain.use_cases.GetChatProfileDataByPublicUID
 import com.aman.keyswithkotlin.chats.domain.use_cases.GetChatUsers
 import com.aman.keyswithkotlin.chats.domain.use_cases.GetUserChatMessages
@@ -42,6 +43,7 @@ class ChatModule {
             getChatUsers = GetChatUsers(repository),
             getUserChatMessages = GetUserChatMessages(repository),
             createChatUser = CreateChatUser(repository),
+            createUserInReceiverChat = CreateUserInReceiverChat(repository),
             getChatProfileDataByPublicUID = GetChatProfileDataByPublicUID(repository)
         )
     }

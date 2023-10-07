@@ -5,5 +5,6 @@ data class ChatUseCases(
     val getChatUsers: GetChatUsers,
     val getUserChatMessages: GetUserChatMessages,
     val createChatUser: CreateChatUser,
+    val createUserInReceiverChat: CreateUserInReceiverChat,
     val getChatProfileDataByPublicUID: GetChatProfileDataByPublicUID
 )

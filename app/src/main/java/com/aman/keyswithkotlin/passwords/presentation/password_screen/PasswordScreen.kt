@@ -70,6 +70,7 @@ import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
 import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
 import com.aman.keyswithkotlin.core.Constants.ENTER_DURATION
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
+import com.aman.keyswithkotlin.core.components.ShimmerListItem
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
@@ -173,6 +174,15 @@ fun PasswordScreen(
         delay(ENTER_DURATION.toLong())  // This delay ensures that isVisible is set to true after the initial composition
         isVisible = true
     }
+
+    //for Shimmer effect
+//    var isLoading by remember {
+//        mutableStateOf(true)
+//    }
+//    LaunchedEffect(Unit) {
+//        delay(2000)  // This delay ensures that isVisible is set to true after the initial composition
+//        isLoading = false
+//    }
 
 
     // Define a separate lambda for handling back navigation
@@ -332,6 +342,11 @@ fun PasswordScreen(
                                                     onEvent(PasswordEvent.DeletePassword(password = password))
                                                 }
                                             )
+//                                            ShimmerListItem(
+//                                                isLoading = isLoading,
+//                                                contentAfterLoading = {
+//
+//                                                })
                                         }
                                         item {
                                             Column(
@@ -360,6 +375,11 @@ fun PasswordScreen(
                                                     )
                                                 }
                                             )
+//                                            ShimmerListItem(
+//                                                isLoading = isLoading,
+//                                                contentAfterLoading = {
+//
+//                                                })
                                         }
                                         item {
                                             Column(

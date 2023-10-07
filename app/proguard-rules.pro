@@ -19,3 +19,38 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+#for google sign in
+-keep class com.google.android.gms.auth.*{*;}
+#-keep class com.google.android.gms.common.api.*{*;}
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.internal.** { *; }
+-keep class com.google.android.gms.auth.api.signin.** { *; }
+-keep class com.google.android.gms.common.api.** { *; }
+
+-keep class com.google.firebase.database.*{*;}
+-keep class com.google.firebase.messaging.*{*;}
+#for model classses
+-keep class com.aman.keyswithkotlin.auth.domain.model.*{*;}
+-keep class com.aman.keyswithkotlin.chats.domain.model.*{*;}
+-keep class com.aman.keyswithkotlin.notes.domain.model.*{*;}
+-keep class com.aman.keyswithkotlin.passwords.domain.model.*{*;}
+
+#for services
+-keep class com.aman.keyswithkotlin.notification_service.NotificationReceiver
+
+-keep class com.google.gson.** { *; }
+-keep class com.shaded.fasterxml.jackson.** { *; }
+-keepnames class com.fasterxml.jackson.** { *; }
+-keepnames class javax.servlet.** { *; }
+-keepnames class org.ietf.jgss.** { *; }
+-dontwarn org.w3c.dom.**
+-dontwarn org.joda.time.**
+-dontwarn org.shaded.apache.**
+-dontwarn org.ietf.jgss.**
+-keepattributes Signature
+-keepattributes *Annotation*
+-keepattributes EnclosingMethod
+-keep class sun.misc.Unsafe.* { *; }
+-keep class com.google.gson.stream.** { *; }
+# Replace this with the actual package name of your model classes
+#-keep class com.example.myapp.model.** { *; }
