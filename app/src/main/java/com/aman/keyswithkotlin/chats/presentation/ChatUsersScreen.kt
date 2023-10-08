@@ -307,13 +307,13 @@ fun UserEachRow(
                     SpacerWidth()
                     Column {
                         Text(
-                            text = person.otherUserPublicUname!!, style = TextStyle(
+                            text = person.otherUserPublicUid!!, style = TextStyle(
                                 color = Color.Black, fontSize = 15.sp, fontWeight = FontWeight.Bold
                             )
                         )
                         SpacerHeight(5.dp)
                         Text(
-                            text = "Okay", style = TextStyle(
+                            text = person.otherUserPublicUname!!, style = TextStyle(
                                 color = Color.Gray, fontSize = 14.sp
                             )
                         )

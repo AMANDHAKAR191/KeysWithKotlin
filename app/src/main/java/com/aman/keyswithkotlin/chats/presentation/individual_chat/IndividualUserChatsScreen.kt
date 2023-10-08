@@ -109,6 +109,7 @@ fun IndividualChatScreen(
         eventFlowState.collectLatest { event ->
             when (event) {
                 is UIEvents.SendNotification->{
+                    println("otherUserPublicUid: ${data?.otherUserPublicUid} my public Id: ${event.publicUid}")
                     sendNotification(data?.otherUserPublicUid!!, event.publicUid, event.messageBody?:"test message")
                 }
 

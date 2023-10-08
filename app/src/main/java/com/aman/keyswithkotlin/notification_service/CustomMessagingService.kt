@@ -21,13 +21,13 @@ import com.aman.keyswithkotlin.presentation.MainActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import okhttp3.internal.notify
 import org.json.JSONArray
 
 class CustomMessagingService : FirebaseMessagingService() {
     private var notificationManager: NotificationManager? = null
     private var notification: Notification? = null
     private var defaultSoundUri: Uri? = null
+
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
@@ -93,7 +93,6 @@ class CustomMessagingService : FirebaseMessagingService() {
         notificationManager.notify(1, notificationBuilder.build())
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     private fun bigTextNotification(dataMap: Map<String?, String?>) {
         val from = dataMap["title"]
         val message = dataMap["message"]
@@ -102,7 +101,11 @@ class CustomMessagingService : FirebaseMessagingService() {
         val builder1: NotificationCompat.Builder = NotificationCompat.Builder(this, channelId)
 
         val chan =
-            NotificationChannel(NotificationChannel.EDIT_CONVERSATION, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
 //        chan.setConversationId(channelId,from!!)
         notificationManager!!.createNotificationChannel(chan)
         val style: NotificationCompat.BigTextStyle = NotificationCompat.BigTextStyle()
@@ -116,10 +119,11 @@ class CustomMessagingService : FirebaseMessagingService() {
             .setStyle(style)
         builder1.build()
         notification = builder1.getNotification()
-        //        if (Build.VERSION.SDK_INT >= 26) {
+//        if (Build.VERSION.SDK_INT >= 30) {
 //            startForeground(1, notification);
 //        } else {
-//            notificationManager.notify(1, notification);
+////            notificationManager.notify(1, notification);
+//            notificationManager!!.notify((10..99).random(), notification)
 //        }
         notificationManager!!.notify((10..99).random(), notification)
     }

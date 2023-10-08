@@ -75,7 +75,7 @@ class ChatRepositoryImpl(
         userPersonalChatList: UserPersonalChatList
     ): Flow<Response<Pair<String?, Boolean?>>> = callbackFlow {
         trySend(Response.Loading)
-        database.reference.child("messageUserList").child(userPersonalChatList.otherUserPublicUid!!)
+        database.reference.child("messageUserList").child(otherUserPublicUid)
             .child("UserPersonalChatList").child(publicUID)
             .setValue(userPersonalChatList).await()
         trySend(Response.Success(data = "Chat User Created"))

@@ -3,7 +3,9 @@ package com.aman.keyswithkotlin.chats.presentation.individual_chat
 import UIEvents
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
 import com.aman.keyswithkotlin.chats.domain.model.ChatModelClass
+import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.chats.domain.use_cases.ChatUseCases
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
@@ -26,11 +28,15 @@ import kotlin.random.Random
 
 @HiltViewModel
 class IndividualUserChatsViewModel @Inject constructor(
+    private val authUseCases: AuthUseCases,
     private val chatUseCases: ChatUseCases,
     private val myPreference: MyPreference,
     @PublicUID
     private val publicUID: String,
 ) : ViewModel() {
+
+    val displayName get() = authUseCases.displayName
+    val photoUrl get() = authUseCases.photoUrl
 
     private var _state = MutableStateFlow<ChatMessageState>(ChatMessageState())
     var state: StateFlow<ChatMessageState> = _state.asStateFlow()
@@ -88,7 +94,15 @@ class IndividualUserChatsViewModel @Inject constructor(
                                     )
                                 }
                                 event.person?.let {
-                                    chatUseCases.createUserInReceiverChat(publicUID, it).collectLatest{
+                                    val userPersonalChatList = UserPersonalChatList(
+                                        otherUserPublicUid = publicUID,
+                                        otherUserPublicUname = displayName.invoke(),
+                                        otherUserProfileUrl = photoUrl.invoke(),
+                                        commonChatRoomId = it.commonChatRoomId,
+                                        commonEncryptionKey = it.commonEncryptionKey,
+                                        commonEncryptionIv = it.commonEncryptionIv
+                                    )
+                                    chatUseCases.createUserInReceiverChat(it.otherUserPublicUid!!, userPersonalChatList).collectLatest{
                                     }
                                 }
                             }
