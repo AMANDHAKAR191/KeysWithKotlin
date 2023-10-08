@@ -99,10 +99,7 @@ fun ChatsScreen(
     }
     Scaffold(
         topBar = {
-            TopBar(
-                title = "Chats",
-                onClickActionButton = {}
-            )
+            TopBar(title = "Chats")
         },
         modifier = Modifier.background(Color.Black),
         floatingActionButton = {

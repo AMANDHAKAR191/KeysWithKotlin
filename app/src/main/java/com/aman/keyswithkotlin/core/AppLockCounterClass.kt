@@ -13,11 +13,12 @@ class AppLockCounterClass(
 ) {
     private lateinit var countDownTimer: CountDownTimer
     private val TAG = "AppLockCounterClass"
-    private var isCountDownTimeFinished = false
+    private var isCountDownTimeFinished = true
     private var biometricAuthentication: BiometricAuthentication =
         BiometricAuthentication(activity, context, finishActivity)
 
     fun initializeCounter() {
+        isCountDownTimeFinished = false
         countDownTimer = object : CountDownTimer(10000, 1000) {
             override fun onTick(milliSecondCount: Long) {
                 Log.d(TAG, "Counter Running:" + milliSecondCount / 1000);

@@ -24,8 +24,7 @@ enum class SearchBarState {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
-    title: String,
-    onClickActionButton: () -> Unit
+    title: String
 ) {
     TopAppBar(
         title = {
@@ -43,14 +42,6 @@ fun TopBar(
             actionIconContentColor = Color.White,
             navigationIconContentColor = Color.White
         ),
-        modifier = Modifier.fillMaxWidth(),
-        actions = {
-            IconButton(onClick = {
-                onClickActionButton()
-            }) {
-                Icon(Icons.Default.Person2, contentDescription = "Open Profile")
-            }
-
-        }
+        modifier = Modifier.fillMaxWidth()
     )
 }

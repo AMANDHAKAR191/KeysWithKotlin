@@ -63,10 +63,7 @@ fun AccessVerificationScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopBar(title = "Keys",
-                onClickActionButton = {
-
-                }
+            TopBar(title = "Keys"
             )
         },
         content = { innerPadding ->

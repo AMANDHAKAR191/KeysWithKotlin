@@ -67,23 +67,22 @@ class MainActivity : ComponentActivity() {
                     finish()
                 })
             appLockCounter.initializeCounter()
-//            checkAuthState()
+            appLockCounter.onStartOperation()
         }
     }
 
 
     override fun onRestart() {
         super.onRestart()
-        val notificationSender = FCMNotificationSender(
-            "/topics/" + "UserName",
-            "FCMessage test",
-            "this is a test notification, Please ignore this notification.\nthis is a test notification, Please ignore this notification",
-            this@MainActivity,
-            this@MainActivity
-        )
-        notificationSender.sendNotification()
-        Toast.makeText(this@MainActivity, "Notification Sent", Toast.LENGTH_SHORT).show()
-//        launchBiometric()
+//        val notificationSender = FCMNotificationSender(
+//            "/topics/" + "UserName",
+//            "FCMessage test",
+//            "this is a test notification, Please ignore this notification.\nthis is a test notification, Please ignore this notification",
+//            this@MainActivity,
+//            this@MainActivity
+//        )
+//        notificationSender.sendNotification()
+//        Toast.makeText(this@MainActivity, "Notification Sent", Toast.LENGTH_SHORT).show()
         appLockCounter.onStartOperation()
     }
 
@@ -94,7 +93,6 @@ class MainActivity : ComponentActivity() {
 
     private fun checkAuthState() {
         if (viewModel.isUserAuthenticated) {
-            biometricAuthentication.launchBiometric()
             navigateToProfileScreen()
         }
     }

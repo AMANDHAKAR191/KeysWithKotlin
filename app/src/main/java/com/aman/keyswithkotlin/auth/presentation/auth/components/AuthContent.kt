@@ -1,7 +1,9 @@
 package com.aman.keyswithkotlin.auth.presentation.auth.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -33,12 +35,30 @@ fun AuthContent(
     padding: PaddingValues,
     oneTapSignIn: () -> Unit
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding),
-        contentAlignment = Alignment.BottomCenter
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        val composition by rememberLottieComposition(
+            spec = LottieCompositionSpec.RawRes(
+                R.raw.keys_lock_logo_animation
+            )
+        )
+        val progress by animateLottieCompositionAsState(
+            composition,
+            iterations = 3
+        )
+        LottieAnimation(
+            composition = composition,
+            progress = { progress },
+            modifier = Modifier
+                .width(300.dp)
+                .height(300.dp)
+                .testTag("LottieAnimation")
+        )
         Button(
             modifier = Modifier.padding(bottom = 100.dp),
             shape = RoundedCornerShape(6.dp),
@@ -64,12 +84,6 @@ fun AuthContent(
                     .height(50.dp)
                     .testTag("LottieAnimation")
             )
-//            Image(
-//                painter = painterResource(
-//                    id = R.drawable.ic_google_logo
-//                ),
-//                contentDescription = null
-//            )
             Text(
                 text = Constants.SIGN_IN_WITH_GOOGLE,
                 modifier = Modifier.padding(6.dp),

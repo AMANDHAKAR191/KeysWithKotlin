@@ -139,6 +139,7 @@ fun PasswordScreen(
     var viewPassword by remember { mutableStateOf(false) }
     var isAlertDialogVisible by remember { mutableStateOf(false) }
 
+    //for UIEvents
     LaunchedEffect(key1 = true) {
         eventFlowState.collectLatest { event ->
             when (event) {
@@ -169,12 +170,6 @@ fun PasswordScreen(
 
     }
 
-    var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        delay(ENTER_DURATION.toLong())  // This delay ensures that isVisible is set to true after the initial composition
-        isVisible = true
-    }
-
     //for Shimmer effect
 //    var isLoading by remember {
 //        mutableStateOf(true)
@@ -187,7 +182,6 @@ fun PasswordScreen(
 
     // Define a separate lambda for handling back navigation
     val handleNavigation: (String) -> Unit = {identifier->
-        isVisible = false
         scope.launch {
             delay(ENTER_DURATION.toLong()) // Adjust this to match your animation duration
             when (identifier) {
@@ -215,11 +209,7 @@ fun PasswordScreen(
             snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                TopBar(title = "Keys",
-                    onClickActionButton = {
-                        handleNavigation(Identifier.Profile.toString())
-                    }
-                )
+                TopBar(title = "Home")
             },
             floatingActionButton = {
                 ExpendableFloatingButton(

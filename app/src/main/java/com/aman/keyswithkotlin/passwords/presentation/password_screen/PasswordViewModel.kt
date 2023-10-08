@@ -44,7 +44,6 @@ class PasswordViewModel @Inject constructor(
 
     private var recentlyDeletedPassword: Password? = null
 
-    //check this why this _passwords.value is empty
     private val _passwords = MutableStateFlow<List<Password>>(emptyList())
 
     val searchedPasswords = searchText

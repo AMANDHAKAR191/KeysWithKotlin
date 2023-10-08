@@ -27,14 +27,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -44,6 +49,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,20 +58,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat.startActivityForResult
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.Keys
 import com.aman.keyswithkotlin.auth.domain.model.DeviceData
 import com.aman.keyswithkotlin.chats.presentation.noRippleEffect
-import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
 import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.DeviceType
 import com.aman.keyswithkotlin.core.LockAppType
 import com.aman.keyswithkotlin.core.components.ShowInfoToUser
 import com.google.android.gms.common.api.ApiException
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +79,7 @@ fun SettingScreen(
     displayName: String,
     email: String,
     photoUrl: String,
-    packageName:String,
+    packageName: String,
     onEvent: (SettingEvent) -> Unit,
     eventFlowState: SharedFlow<UIEvents>,
     autofillManager: AutofillManager,
@@ -83,38 +87,36 @@ fun SettingScreen(
     navigateToProfileScreen: () -> Unit
 ) {
 
-//    var isDevicesVisible by remember { mutableStateOf(false) }
-
     val state = _state.collectAsState()
+    val scope = rememberCoroutineScope()
 
     var lockAppSelectedOption by remember {
         mutableStateOf("")
     }
+    var isAutofillServiceEnabled by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state.value.lockAppSelectedOption){
+    LaunchedEffect(state.value.lockAppSelectedOption) {
         lockAppSelectedOption = state.value.lockAppSelectedOption
     }
-
-    var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        delay(EXIT_DURATION.toLong())  // This delay ensures that isVisible is set to true after the initial composition
-        isVisible = true
+    LaunchedEffect(true) {
+        isAutofillServiceEnabled = autofillManager.hasEnabledAutofillServices()
     }
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            try {
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                try {
+                    isAutofillServiceEnabled = autofillManager.hasEnabledAutofillServices()
+                } catch (it: ApiException) {
 
-            } catch (it: ApiException) {
-                print(it)
+                }
             }
         }
-    }
     var showErrorDialog = remember {
         mutableStateOf(false)
     }
-    if (showErrorDialog.value){
-        ShowInfoToUser(showDialog = true, title = "Error", message = "Hello"){
+    if (showErrorDialog.value) {
+        ShowInfoToUser(showDialog = true, title = "Error", message = "Hello") {
             showErrorDialog.value = false
         }
     }
@@ -181,29 +183,44 @@ fun SettingScreen(
                                             onEvent(SettingEvent.UpdateLockAppSetting(it.toString()))
                                         }
                                     )
-//                                    Text(text = "After1 Minute", fontSize = 12.sp)
                                 }
                                 Spacer(modifier = Modifier.height(10.dp))
                                 SingleDeviceCard(loggedInDeviceList = state.value.loggedInDeviceList)
                                 Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = "Autofill Password",
-                                    fontSize = 20.sp,
-                                    modifier = Modifier.clickable {
-                                        if (autofillManager.isAutofillSupported && !autofillManager.hasEnabledAutofillServices()){
-                                            val intent = Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE)
-                                            intent.data = Uri.parse("package:" + packageName)
-                                            launcher.launch(intent)
-                                        }else{
-                                            autofillManager.disableAutofillServices()
-                                        }
-                                    })
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Autofill Password",
+                                        fontSize = 20.sp,
+                                    )
+                                    println("isAutofillServiceEnabled: $isAutofillServiceEnabled")
+                                    SwitchWithIcon(
+                                        checked = isAutofillServiceEnabled,
+                                        onCheckedChange = {
+                                            isAutofillServiceEnabled = it
+                                            if (it){
+                                                val intent =
+                                                    Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE)
+                                                intent.data = Uri.parse("package:" + packageName)
+                                                launcher.launch(intent)
+                                            }else{
+                                                autofillManager.disableAutofillServices()
+                                            }
+                                        })
+                                }
+
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(text = "User Guide", fontSize = 20.sp)
                                 Spacer(modifier = Modifier.height(10.dp))
-                                Text(text = "App Info", fontSize = 20.sp, modifier = Modifier.clickable {
-                                    showErrorDialog.value = true
-                                })
+                                Text(
+                                    text = "App Info",
+                                    fontSize = 20.sp,
+                                    modifier = Modifier.clickable {
+                                        showErrorDialog.value = true
+                                    })
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(text = "Contact Us", fontSize = 20.sp)
                                 Spacer(modifier = Modifier.height(10.dp))
@@ -381,5 +398,26 @@ fun SingleDeviceCard(loggedInDeviceList: List<DeviceData>) {
             }
         }
     }
+}
+
+@Composable
+fun SwitchWithIcon(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Switch(
+        checked = checked,
+        onCheckedChange = {
+            onCheckedChange(it)
+        },
+        thumbContent = if (checked) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
+                )
+            }
+        } else {
+            null
+        }
+    )
 }
 

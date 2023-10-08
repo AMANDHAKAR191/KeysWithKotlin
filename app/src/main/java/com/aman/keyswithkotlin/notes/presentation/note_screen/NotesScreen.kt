@@ -93,10 +93,7 @@ fun NotesScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
-            TopBar(
-                title = "Notes",
-                onClickActionButton = {}
-            )
+            TopBar(title = "Notes")
         },
         floatingActionButton = {
             FloatingActionButton(

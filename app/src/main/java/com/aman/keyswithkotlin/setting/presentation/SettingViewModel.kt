@@ -42,7 +42,6 @@ class SettingViewModel @Inject constructor(
             authUseCases.getLoggedInDevices().collect { response ->
                 when (response) {
                     is Response.Success -> {
-//                        println("response.data: ${response.data as List<DeviceData>}")
                         _state.update {
                             it.copy(
                                 loggedInDeviceList = response.data as List<DeviceData>
@@ -66,7 +65,6 @@ class SettingViewModel @Inject constructor(
     fun onEvent(event: SettingEvent){
         when(event){
             is SettingEvent.UpdateLockAppSetting -> {
-                println("check22")
                 myPreference.lockAppSelectedOption = event.value
                 _state.update { it.copy(lockAppSelectedOption = event.value) }
             }

@@ -35,7 +35,6 @@ fun OneTapSignIn(
         }
 
         is Failure -> {
-            println("check456456456")
             showErrorDialog.value = true
             if (showErrorDialog.value){
                 ShowInfoToUser(showDialog = true, title = "Error", message = oneTapSignInResponse.e.message){
