@@ -12,7 +12,6 @@ import com.aman.keyswithkotlin.chats.domain.model.MessageUserList
 import com.aman.keyswithkotlin.core.AES
 import com.aman.keyswithkotlin.core.Authentication
 import com.aman.keyswithkotlin.core.Authorization
-import com.aman.keyswithkotlin.core.Constants.AES_ALIES_NAME
 import com.aman.keyswithkotlin.core.Constants.SIGN_IN_REQUEST
 import com.aman.keyswithkotlin.core.Constants.SIGN_UP_REQUEST
 import com.aman.keyswithkotlin.core.Constants.USERS
@@ -38,7 +37,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import java.util.Random
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -86,7 +84,6 @@ class AuthRepositoryImpl @Inject constructor(
         try {
             val authResult = auth.signInWithCredential(googleAuthCredential).await()
             val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
-            val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
 
 
             coroutineScope {
@@ -103,12 +100,23 @@ class AuthRepositoryImpl @Inject constructor(
                         }.await()
                     } else { // old user
                         println("old user")
+                        var deviceType:String = ""
+                        async { checkPrimaryUser().collect{
+                            deviceType = it
+                        } }.await()
+                        println("deviceType: $deviceType")
                         val getUserDeferred = async { getUserFromFireBase(auth.currentUser) }
                         getUserDeferred.await()
                         async {
-                            addDeviceDataToFireBase(
-                                auth.currentUser, DeviceType.Secondary, Authorization.NotAuthorized
-                            )
+                            if (deviceType == DeviceType.Primary.toString()){
+                                addDeviceDataToFireBase(
+                                    auth.currentUser, DeviceType.Primary, Authorization.Authorized
+                                )
+                            }else{
+                                addDeviceDataToFireBase(
+                                    auth.currentUser, DeviceType.Secondary, Authorization.NotAuthorized
+                                )
+                            }
                         }.await()
                     }
                     status.let {
@@ -218,6 +226,7 @@ class AuthRepositoryImpl @Inject constructor(
             } ?: Response.Failure(Exception("AES initialization failed."))
         } ?: Response.Failure(Exception("Invalid FirebaseUser."))
     }
+
     private fun getDeviceData(
         deviceInfo: DeviceInfo,
         deviceType: DeviceType,
@@ -248,6 +257,38 @@ class AuthRepositoryImpl @Inject constructor(
                         trySend(true) // Emitting true if the item is found
                     } else {
                         trySend(false) // Emitting false if the item is not found
+                    }
+                    close()
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // You can handle the error here as you see fit
+                }
+            }
+            query.addValueEventListener(listener)
+
+            // Removing the listener when the flow is no longer collected
+            awaitClose {
+                query.removeEventListener(listener)
+            }
+        }
+    }
+
+    private suspend fun checkPrimaryUser(): Flow<String> = callbackFlow {
+        auth.currentUser?.let { user ->
+            val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+            val query = db.reference.child("users").child(user.uid).child("userDevicesList")
+                .child(deviceInfo.getDeviceId()).child(deviceInfo.getDeviceId())
+
+            val listener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        println("ds: $dataSnapshot")
+                        val authorization = dataSnapshot.child("authorization").getValue(String::class.java)
+                        val deviceType = dataSnapshot.child("deviceType").getValue(String::class.java)
+                        deviceType?.let {
+                            trySend(deviceType)
+                        }
                     }
                     close()
                 }
@@ -448,9 +489,6 @@ class AuthRepositoryImpl @Inject constructor(
     private fun createPublicUID(email: String?): String? {
         return email?.substringBeforeLast("@")
     }
-
-
-
 
 
 }

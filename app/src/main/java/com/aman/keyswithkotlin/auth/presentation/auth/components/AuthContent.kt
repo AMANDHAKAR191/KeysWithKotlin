@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieClipSpec
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -49,7 +50,7 @@ fun AuthContent(
         )
         val progress by animateLottieCompositionAsState(
             composition,
-            iterations = 3
+            iterations = 1
         )
         LottieAnimation(
             composition = composition,
@@ -67,18 +68,18 @@ fun AuthContent(
             ),
             onClick = oneTapSignIn
         ) {
-            val composition by rememberLottieComposition(
+            val composition1 by rememberLottieComposition(
                 spec = LottieCompositionSpec.RawRes(
                     R.raw.animation_sign_with_google
                 )
             )
-            val progress by animateLottieCompositionAsState(
-                composition,
+            val progress1 by animateLottieCompositionAsState(
+                composition1,
                 iterations = 3
             )
             LottieAnimation(
-                composition = composition,
-                progress = { progress },
+                composition = composition1,
+                progress = { progress1 },
                 modifier = Modifier
                     .width(50.dp)
                     .height(50.dp)
