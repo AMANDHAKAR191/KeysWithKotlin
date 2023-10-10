@@ -29,9 +29,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +43,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.aman.keyswithkotlin.core.BiometricStatus
 import com.aman.keyswithkotlin.passwords.domain.model.Password
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,11 +55,15 @@ fun ViewPasswordScreen(
     password: Password,
     modifier: Modifier = Modifier,
     onCloseButtonClick:()->Unit,
+    unHidePasswordChar:()-> Flow<BiometricStatus>,
     onEditButtonClick:()->Unit,
     onShareButtonClick:(Password)->Unit
 ) {
+    val scope = rememberCoroutineScope()
+    // Use this state variable to trigger the LaunchedEffect
     var passwordVisibility by remember { mutableStateOf(false) }
-    var icon = if (passwordVisibility) Icons.Default.Visibility else Icons.Default.VisibilityOff
+    val icon = if (passwordVisibility) Icons.Default.Visibility else Icons.Default.VisibilityOff
+
 
     Surface(
         shape = RoundedCornerShape(10f),
@@ -148,8 +158,27 @@ fun ViewPasswordScreen(
                 onValueChange = {},
                 trailingIcon = {
                     IconButton(onClick = {
-                        passwordVisibility = !passwordVisibility
-                    }) {
+                        if (passwordVisibility){
+                            passwordVisibility = false
+                        }else{
+                            scope.launch {
+                                unHidePasswordChar().collectLatest {
+                                    when(it){
+                                        BiometricStatus.SUCCEEDED -> {
+                                            passwordVisibility = true
+                                        }
+                                        BiometricStatus.FAILED ->{
+                                            passwordVisibility = false
+                                        }
+                                        BiometricStatus.ERROR -> {
+                                            passwordVisibility = false
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    ) {
                         Icon(
                             icon,
                             contentDescription = null,

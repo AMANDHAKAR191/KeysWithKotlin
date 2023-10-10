@@ -18,7 +18,7 @@ import com.aman.keyswithkotlin.navigation.BottomBarScreen
 @Composable
 fun BottomBar(
     navController: NavController,
-    navigateTo: (String,Int, Int) -> Unit
+    navigateTo: (String) -> Unit
 ) {
     val screens = listOf(
         BottomBarScreen.Password,
@@ -35,7 +35,7 @@ fun BottomBar(
                 screen = itemScreen,
                 currentDestination = currentDestination,
                 onClicked = {destIndex->
-                    navigateTo(itemScreen.route, index, destIndex)
+                    navigateTo(itemScreen.route)
                 }
             )
         }

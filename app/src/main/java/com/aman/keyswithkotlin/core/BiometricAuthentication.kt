@@ -10,13 +10,17 @@ import android.hardware.biometrics.BiometricPrompt
 import android.os.CancellationSignal
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 class BiometricAuthentication(
     private val activity: Activity,
     private val context: Context,
-    private val finishActivity:()->Unit
 ) {
-    fun launchBiometric() {
+
+    fun launchBiometric(): Flow<BiometricStatus> = callbackFlow{
+
         if (checkBiometricSupport()) {
             val biometricPrompt = BiometricPrompt.Builder(activity.applicationContext)
                 .setTitle("Keys want to verify your Biometric")
@@ -27,31 +31,32 @@ class BiometricAuthentication(
             biometricPrompt.authenticate(
                 getCancelletionSignal(),
                 activity.mainExecutor,
-                authenticationCallBack
-            )
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                        super.onAuthenticationSucceeded(result)
+                        trySend(BiometricStatus.SUCCEEDED)
+                        notifyUser("Success")
+                    }
 
+                    override fun onAuthenticationFailed() {
+                        super.onAuthenticationFailed()
+                        trySend(BiometricStatus.FAILED)
+                        notifyUser("Failed")
+                    }
+
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                        super.onAuthenticationError(errorCode, errString)
+                        trySend(BiometricStatus.ERROR)
+                        notifyUser("Error")
+                    }
+                }
+            )
+        }
+        awaitClose{
+            close()
         }
     }
 
-    private val authenticationCallBack: BiometricPrompt.AuthenticationCallback
-        get() =
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    notifyUser("Success")
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    notifyUser("Failure")
-                }
-
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    notifyUser("Error")
-                    finishActivity()
-                }
-            }
 
     private fun checkBiometricSupport(): Boolean {
         val keyguardManager = activity.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
@@ -84,4 +89,8 @@ class BiometricAuthentication(
     private fun notifyUser(message: String) {
         Log.d("BIOMETRIC", message)
     }
+}
+
+enum class BiometricStatus{
+    SUCCEEDED, FAILED, ERROR
 }

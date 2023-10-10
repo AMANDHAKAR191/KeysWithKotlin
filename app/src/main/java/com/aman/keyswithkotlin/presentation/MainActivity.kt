@@ -1,5 +1,6 @@
 package com.aman.keyswithkotlin.presentation
 
+import android.hardware.biometrics.BiometricPrompt
 import android.os.Bundle
 import android.view.WindowManager
 import android.view.autofill.AutofillManager
@@ -30,11 +31,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var appLockCounter: AppLockCounterClass
     private val viewModel by viewModels<AuthViewModel>()
     private var mAutofillManager: AutofillManager? = null
-    private var biometricAuthentication: BiometricAuthentication =
-        BiometricAuthentication(this@MainActivity, this@MainActivity, finishActivity = {
-            finish()
-        })
 
+    private var biometricAuthentication: BiometricAuthentication =
+        BiometricAuthentication(
+            this@MainActivity,
+            this@MainActivity)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
@@ -48,6 +49,7 @@ class MainActivity : ComponentActivity() {
             RootNavGraph(
                 navController = navController,
                 mAutofillManager!!,
+                biometricAuthentication,
                 this@MainActivity,
                 this@MainActivity
             )
@@ -64,6 +66,7 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity,
                 this@MainActivity,
                 finishActivity = {
+                    println("finishActivity()")
                     finish()
                 })
             appLockCounter.initializeCounter()

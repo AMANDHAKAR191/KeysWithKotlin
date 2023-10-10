@@ -7,6 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
+import com.aman.keyswithkotlin.core.BiometricAuthentication
 import com.aman.keyswithkotlin.core.components.BottomBar
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordScreen
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordViewModel
@@ -19,6 +20,7 @@ import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordVi
 
 fun NavGraphBuilder.passwordNavGraph(
     navController: NavController,
+    biometricAuthentication: BiometricAuthentication,
     sharedPasswordViewModel: SharePasswordViewModel,
     sharedChatViewModel: SharedChatViewModel
 ) {
@@ -48,7 +50,7 @@ fun NavGraphBuilder.passwordNavGraph(
                     navController.navigate(BottomBarScreen.Chats.route)
                 },
                 bottomBar = {
-                    BottomBar(navController, navigateTo = {destScreen, intialIndex, destIndex->
+                    BottomBar(navController, navigateTo = {destScreen->
                         navController.navigate(destScreen) {
                             launchSingleTop = true
                         }
@@ -61,10 +63,13 @@ fun NavGraphBuilder.passwordNavGraph(
                 closeApp = {
                     //todo re-check to close
                     navController.popBackStack()
+                },
+                unHidePasswordChar = {
+                    biometricAuthentication.launchBiometric()
                 }
             )
         }
-        composable(Screen.AddEditPasswordScreen.route) { entry ->
+        composable(Screen.AddEditPasswordScreen.route) {
             val viewModel: AddEditPasswordViewModel = hiltViewModel()
             AddEditPasswordScreen(
                 state = viewModel.state.value,

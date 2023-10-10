@@ -1,6 +1,8 @@
 package com.aman.keyswithkotlin.passwords.presentation.componants
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,17 +35,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PasswordItem(
     password: Password?,
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit,
+    onItemLongClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp, vertical = 10.dp)
+            .combinedClickable (
+                onClick = {
+                    onItemClick()
+                },
+                onClickLabel = "view password",
+                onLongClick = {
+                    onItemLongClick()
+                },
+                onLongClickLabel = "view password setting"
+            )
     ) {
         Surface(
             shape = RoundedCornerShape(10f),
@@ -51,9 +65,6 @@ fun PasswordItem(
             shadowElevation = 5.dp,
             modifier = Modifier
                 .size(width = 80.dp, height = 50.dp)
-                .clickable {
-                    onItemClick()
-                }
                 .align(CenterVertically),
             color = MaterialTheme.colorScheme.primary,
             content = {
@@ -96,10 +107,7 @@ fun PasswordItem(
             modifier = Modifier
                 .padding(16.dp)
                 .padding(start = 20.dp)
-                .weight(1f)
-                .clickable {
-                    onItemClick()
-                },
+                .weight(1f),
             horizontalAlignment = Alignment.Start
         ) {
             if (password != null) {
@@ -135,13 +143,4 @@ fun PasswordItem(
         }
     }
     Divider()
-}
-
-@Composable
-@Preview
-fun Preview() {
-    PasswordItem(
-        password = Password("AMAN", "DFSFS", "AMAN DHAKAR", "", "CDJSCJSOI"),
-        onItemClick = { /*TODO*/ },
-        onDeleteClick = {})
 }

@@ -27,7 +27,7 @@ fun NavGraphBuilder.noteNavGraph(
                 eventFlowState = viewModel.eventFlow,
                 onEvent = viewModel::onEvent,
                 bottomBar = {
-                    BottomBar(navController, navigateTo = {destScreen, intialIndex, destIndex->
+                    BottomBar(navController, navigateTo = {destScreen->
                         navController.popBackStack()
                         navController.navigate(destScreen) {
                             launchSingleTop = true

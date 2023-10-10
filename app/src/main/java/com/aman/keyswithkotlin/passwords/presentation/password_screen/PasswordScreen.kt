@@ -4,39 +4,37 @@ import UIEvents
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -54,7 +52,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
@@ -63,14 +60,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
 import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
+import com.aman.keyswithkotlin.core.BiometricStatus
 import com.aman.keyswithkotlin.core.Constants.ENTER_DURATION
-import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
-import com.aman.keyswithkotlin.core.components.ShimmerListItem
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
@@ -84,7 +83,7 @@ import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
 import com.aman.keyswithkotlin.presentation.CustomCircularProgressBar
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -105,6 +104,7 @@ fun PasswordScreen(
     navigateToChatUserListScreen: () -> Unit,
     navigateToAccessVerificationScreen: () -> Unit,
     closeApp: () -> Unit,
+    unHidePasswordChar:()-> Flow<BiometricStatus>,
     bottomBar: @Composable (() -> Unit)
 ) {
     val state = _state.collectAsState()
@@ -137,6 +137,7 @@ fun PasswordScreen(
     var searchtext = remember { mutableStateOf("") }
     var isSearchBarActive by remember { mutableStateOf(false) }
     var viewPassword by remember { mutableStateOf(false) }
+    var onLongClicked by remember { mutableStateOf(false) }
     var isAlertDialogVisible by remember { mutableStateOf(false) }
 
     //for UIEvents
@@ -181,7 +182,7 @@ fun PasswordScreen(
 
 
     // Define a separate lambda for handling back navigation
-    val handleNavigation: (String) -> Unit = {identifier->
+    val handleNavigation: (String) -> Unit = { identifier ->
         scope.launch {
             delay(ENTER_DURATION.toLong()) // Adjust this to match your animation duration
             when (identifier) {
@@ -201,9 +202,10 @@ fun PasswordScreen(
         }
     }
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .testTag("RootNode")
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("RootNode")
     ) {
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
@@ -249,7 +251,7 @@ fun PasswordScreen(
                                 ),
                                 placeholder = { Text(text = "Search") },
                                 active = isSearchBarActive,
-                                onActiveChange = {isSearchBarActive = it},
+                                onActiveChange = { isSearchBarActive = it },
                                 leadingIcon = {
                                     IconButton(onClick = {}) {
                                         Icon(Icons.Default.Search, contentDescription = "Search")
@@ -270,7 +272,7 @@ fun PasswordScreen(
                                 },
                                 content = {
                                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                                        searchedPasswords?.let {searchedPasswords->
+                                        searchedPasswords?.let { searchedPasswords ->
                                             items(searchedPasswords.take(3)) { password ->
                                                 SearchedPasswordItem(
                                                     password = password,
@@ -318,7 +320,10 @@ fun PasswordScreen(
                                                     .padding(start = 10.dp),
                                                 horizontalAlignment = Alignment.Start
                                             ) {
-                                                Text(text = "Recently used passwords", textAlign = TextAlign.Start)
+                                                Text(
+                                                    text = "Recently used passwords",
+                                                    textAlign = TextAlign.Start
+                                                )
                                             }
                                         }
                                         items(state.value.recentlyUsedPasswords.take(3)) { password ->
@@ -327,6 +332,10 @@ fun PasswordScreen(
                                                 onItemClick = {
                                                     itemToView.value = password
                                                     viewPassword = true
+                                                },
+                                                onItemLongClick = {
+                                                    itemToView.value = password
+                                                    onLongClicked = true
                                                 },
                                                 onDeleteClick = {
                                                     onEvent(PasswordEvent.DeletePassword(password = password))
@@ -356,6 +365,10 @@ fun PasswordScreen(
                                                 onItemClick = {
                                                     itemToView.value = password
                                                     viewPassword = true
+                                                },
+                                                onItemLongClick = {
+                                                    itemToView.value = password
+                                                    onLongClicked = true
                                                 },
                                                 onDeleteClick = {
                                                     onEvent(
@@ -472,8 +485,106 @@ fun PasswordScreen(
                     onShareButtonClick = { password ->
                         onSharedChatEvent(SharedChatEvent.SharePasswordItem(password))
                         navigateToChatUserListScreen()
-                    })
+                    },
+                    unHidePasswordChar = unHidePasswordChar)
+            }
+        }
+
+        if (onLongClicked) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    onLongClicked = false
+                },
+                sheetState = bottomSheetState,
+                containerColor = MaterialTheme.colorScheme.onTertiaryContainer
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(10f),
+                    tonalElevation = 5.dp,
+                    shadowElevation = 5.dp,
+                    modifier = Modifier
+                        .wrapContentHeight(),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 20.dp)
+                    ) {
+                        itemToView.value?.let {password->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp, vertical = 10.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(10f),
+                                    tonalElevation = 5.dp,
+                                    shadowElevation = 5.dp,
+                                    modifier = Modifier
+                                        .size(width = 80.dp, height = 50.dp)
+                                        .align(Alignment.CenterVertically),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    content = {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(vertical = 5.dp, horizontal = 10.dp),
+                                            contentAlignment = Center,
+                                        ) {
+                                            val temp = try {
+                                                password.websiteName.split('_')[2]
+                                            } catch (e: IndexOutOfBoundsException) {
+                                                password.websiteName
+                                            }
+
+                                            val scaleFactor =  80 / temp.length
+                                            val calculatedSize =  (temp.length).toInt()
+
+                                            val adjustedSize = when {
+                                                calculatedSize in 10..12 -> 10.sp
+                                                calculatedSize in 6..9 -> 12.sp // upper limit
+                                                calculatedSize in 3..5 -> 20.sp // lower limit
+                                                calculatedSize <= 2 -> 30.sp
+                                                else -> 10.sp
+                                            }
+                                            Text(
+                                                text = temp,
+                                                style = TextStyle(
+                                                    fontSize = adjustedSize,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            )
+                                        }
+                                    }
+                                )
+
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .padding(start = 20.dp)
+                                        .weight(1f),
+                                    horizontalAlignment = Alignment.Start
+                                ) {
+                                    Text(
+                                        text = password.websiteName,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+                            }
+                        }
+                        repeat(5) {
+                            Text(text = "option $it")
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
+                    }
+                }
             }
         }
     }
 }
+

@@ -37,7 +37,7 @@ fun NavGraphBuilder.settingNavGraph(
                 autofillManager = mAutofillManager,
                 packageName = packageName,
                 bottomBar = {
-                    BottomBar(navController, navigateTo = {destScreen, intialIndex, destIndex->
+                    BottomBar(navController, navigateTo = {destScreen->
                         navController.navigate(destScreen) {
                             launchSingleTop = true
                         }

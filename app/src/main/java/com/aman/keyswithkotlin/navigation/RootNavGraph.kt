@@ -27,6 +27,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
+import com.aman.keyswithkotlin.core.BiometricAuthentication
 import com.aman.keyswithkotlin.core.Constants.ENTER_DURATION
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePasswordViewModel
@@ -36,6 +37,7 @@ import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharePas
 fun RootNavGraph(
     navController: NavHostController,
     mAutofillManager: AutofillManager,
+    biometricAuthentication: BiometricAuthentication,
     activity: Activity,
     context: Context
 ) {
@@ -54,6 +56,7 @@ fun RootNavGraph(
         accessVerificationNavGraph(navController)
         passwordNavGraph(
             navController = navController,
+            biometricAuthentication = biometricAuthentication,
             sharedPasswordViewModel = sharedPasswordViewModel,
             sharedChatViewModel = sharedChatViewModel
         )

@@ -4,6 +4,11 @@ import android.app.Activity
 import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class AppLockCounterClass(
     private val myPreference: MyPreference,
@@ -15,7 +20,7 @@ class AppLockCounterClass(
     private val TAG = "AppLockCounterClass"
     private var isCountDownTimeFinished = true
     private var biometricAuthentication: BiometricAuthentication =
-        BiometricAuthentication(activity, context, finishActivity)
+        BiometricAuthentication(activity, context)
 
     fun initializeCounter() {
         isCountDownTimeFinished = false
@@ -27,21 +32,39 @@ class AppLockCounterClass(
             override fun onFinish() {
                 Log.d(TAG, "Counter Finished");
                 isCountDownTimeFinished = true
-//                launchBiometric()
             }
 
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun onStartOperation() {
         when (myPreference.lockAppSelectedOption) {
             LockAppType.IMMEDIATELY.toString() -> {
-                biometricAuthentication.launchBiometric()
+                GlobalScope.launch(Dispatchers.IO) {
+                    biometricAuthentication.launchBiometric().collectLatest {
+                        when(it){
+                            BiometricStatus.ERROR -> {
+                                finishActivity()
+                            }
+                            else -> {}
+                        }
+                    }
+                }
             }
 
             LockAppType.AFTER_1_MINUTE.toString() -> {
                 if (isCountDownTimeFinished) {
-                    biometricAuthentication.launchBiometric()
+                    GlobalScope.launch(Dispatchers.IO) {
+                        biometricAuthentication.launchBiometric().collectLatest {
+                            when(it){
+                                BiometricStatus.ERROR -> {
+                                    finishActivity()
+                                }
+                                else -> {}
+                            }
+                        }
+                    }
                 } else {
                     countDownTimer.cancel()
                 }
