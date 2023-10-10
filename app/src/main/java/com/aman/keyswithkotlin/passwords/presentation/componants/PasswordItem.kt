@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,7 +43,7 @@ fun PasswordItem(
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit,
     onItemLongClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onMoreClick: () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -132,12 +133,12 @@ fun PasswordItem(
         }
 
         IconButton(
-            onClick = { onDeleteClick() },
+            onClick = { onMoreClick() },
             modifier = Modifier.size(40.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete note",
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "Mmore",
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }

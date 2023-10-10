@@ -1,28 +1,24 @@
 package com.aman.keyswithkotlin.passwords.presentation.password_screen
 
 import UIEvents
+import android.os.CountDownTimer
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -59,13 +55,12 @@ import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
 import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
 import com.aman.keyswithkotlin.core.BiometricStatus
@@ -78,6 +73,7 @@ import com.aman.keyswithkotlin.passwords.presentation.componants.Identifier
 import com.aman.keyswithkotlin.passwords.presentation.componants.MinFabItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.MultiFloatingState
 import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordItem
+import com.aman.keyswithkotlin.passwords.presentation.componants.PasswordSettingsScreen
 import com.aman.keyswithkotlin.passwords.presentation.componants.SearchedPasswordItem
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
@@ -104,10 +100,11 @@ fun PasswordScreen(
     navigateToChatUserListScreen: () -> Unit,
     navigateToAccessVerificationScreen: () -> Unit,
     closeApp: () -> Unit,
-    unHidePasswordChar:()-> Flow<BiometricStatus>,
+    unHidePasswordChar: () -> Flow<BiometricStatus>,
     bottomBar: @Composable (() -> Unit)
 ) {
     val state = _state.collectAsState()
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
@@ -337,8 +334,9 @@ fun PasswordScreen(
                                                     itemToView.value = password
                                                     onLongClicked = true
                                                 },
-                                                onDeleteClick = {
-                                                    onEvent(PasswordEvent.DeletePassword(password = password))
+                                                onMoreClick = {
+                                                    itemToView.value = password
+                                                    onLongClicked = true
                                                 }
                                             )
 //                                            ShimmerListItem(
@@ -370,12 +368,10 @@ fun PasswordScreen(
                                                     itemToView.value = password
                                                     onLongClicked = true
                                                 },
-                                                onDeleteClick = {
-                                                    onEvent(
-                                                        PasswordEvent.UpdateLastUsedPasswordTimeStamp(
-                                                            password = password
-                                                        )
-                                                    )
+                                                onMoreClick = {
+                                                    itemToView.value = password
+                                                    onLongClicked = true
+//                                                    onEvent(PasswordEvent.UpdateLastUsedPasswordTimeStamp(password = password))
                                                 }
                                             )
 //                                            ShimmerListItem(
@@ -470,6 +466,7 @@ fun PasswordScreen(
                 onDismissRequest = {
                     viewPassword = false
                 },
+                dragHandle = null,
                 sheetState = bottomSheetState,
                 containerColor = MaterialTheme.colorScheme.onTertiaryContainer
             ) {
@@ -478,6 +475,7 @@ fun PasswordScreen(
                     onCloseButtonClick = {
                         viewPassword = false
                     },
+                    unHidePasswordChar = unHidePasswordChar,
                     onEditButtonClick = {
                         onSharedPasswordEvent(SharedPasswordEvent.onEditItem(itemToView.value!!))
                         navigateToAddEditPasswordScreen()
@@ -485,8 +483,8 @@ fun PasswordScreen(
                     onShareButtonClick = { password ->
                         onSharedChatEvent(SharedChatEvent.SharePasswordItem(password))
                         navigateToChatUserListScreen()
-                    },
-                    unHidePasswordChar = unHidePasswordChar)
+                    }
+                )
             }
         }
 
@@ -495,96 +493,77 @@ fun PasswordScreen(
                 onDismissRequest = {
                     onLongClicked = false
                 },
+                dragHandle = null,
                 sheetState = bottomSheetState,
                 containerColor = MaterialTheme.colorScheme.onTertiaryContainer
             ) {
-                Surface(
-                    shape = RoundedCornerShape(10f),
-                    tonalElevation = 5.dp,
-                    shadowElevation = 5.dp,
-                    modifier = Modifier
-                        .wrapContentHeight(),
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 20.dp)
-                    ) {
-                        itemToView.value?.let {password->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 10.dp)
-                            ) {
-                                Surface(
-                                    shape = RoundedCornerShape(10f),
-                                    tonalElevation = 5.dp,
-                                    shadowElevation = 5.dp,
-                                    modifier = Modifier
-                                        .size(width = 80.dp, height = 50.dp)
-                                        .align(Alignment.CenterVertically),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    content = {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(vertical = 5.dp, horizontal = 10.dp),
-                                            contentAlignment = Center,
-                                        ) {
-                                            val temp = try {
-                                                password.websiteName.split('_')[2]
-                                            } catch (e: IndexOutOfBoundsException) {
-                                                password.websiteName
-                                            }
-
-                                            val scaleFactor =  80 / temp.length
-                                            val calculatedSize =  (temp.length).toInt()
-
-                                            val adjustedSize = when {
-                                                calculatedSize in 10..12 -> 10.sp
-                                                calculatedSize in 6..9 -> 12.sp // upper limit
-                                                calculatedSize in 3..5 -> 20.sp // lower limit
-                                                calculatedSize <= 2 -> 30.sp
-                                                else -> 10.sp
-                                            }
-                                            Text(
-                                                text = temp,
-                                                style = TextStyle(
-                                                    fontSize = adjustedSize,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            )
-                                        }
-                                    }
-                                )
-
-                                Column(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .padding(start = 20.dp)
-                                        .weight(1f),
-                                    horizontalAlignment = Alignment.Start
-                                ) {
-                                    Text(
-                                        text = password.websiteName,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-
-                            }
-                        }
-                        repeat(5) {
-                            Text(text = "option $it")
-                            Spacer(modifier = Modifier.height(20.dp))
-                        }
+                PasswordSettingsScreen(
+                    password = itemToView.value!!,
+                    onCopyUsernameButtonClick = {
+                        copyToClipboardWithTimer(clipboardManager, it.userName)
+                        onLongClicked = false
+                    },
+                    onCopyPasswordButtonClick = {
+                        copyToClipboardWithTimer(clipboardManager, it.password)
+                        onLongClicked = false
+                    },
+                    onEditButtonClick = {
+                        onSharedPasswordEvent(SharedPasswordEvent.onEditItem(itemToView.value!!))
+                        navigateToAddEditPasswordScreen()
+                        onLongClicked = false
+                    },
+                    onDeleteButtonClick = { password ->
+                        onEvent(PasswordEvent.DeletePassword(password = password))
+                        onLongClicked = false
+                    },
+                    onShareButtonClick = { password ->
+                        onSharedChatEvent(SharedChatEvent.SharePasswordItem(password))
+                        navigateToChatUserListScreen()
+                        onLongClicked = false
                     }
-                }
+                )
             }
         }
     }
+}
+
+private fun copyToClipBoard(
+    clipboardManager: ClipboardManager,
+    text: String
+) {
+    clipboardManager.setText(
+        AnnotatedString(
+            text = text
+        )
+    )
+
+}
+private fun copyToClipboardWithTimer(
+    clipboardManager: ClipboardManager,
+    text: String
+) {
+    // Copy the text to the clipboard
+    clipboardManager.setText(
+        AnnotatedString(
+            text = text
+        )
+    )
+    // Start a 10-second countdown timer
+    val timer = object : CountDownTimer(10000, 1000) {
+        override fun onTick(milliSecondCount: Long) {
+            Log.d("TAG", "Counter Running:" + milliSecondCount / 1000);
+            // This method is called every second while the timer is running.
+            // You can update a UI element to show the remaining time if needed.
+        }
+
+        override fun onFinish() {
+            // This method is called when the timer finishes (after 10 seconds).
+            // Clear the clipboard contents here.
+            clipboardManager.setText(AnnotatedString(text = ""))
+        }
+    }
+
+    // Start the timer
+    timer.start()
 }
 

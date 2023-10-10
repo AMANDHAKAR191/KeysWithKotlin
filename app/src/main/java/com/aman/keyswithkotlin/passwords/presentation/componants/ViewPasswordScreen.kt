@@ -1,6 +1,5 @@
 package com.aman.keyswithkotlin.passwords.presentation.componants
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,17 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +25,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,10 +49,10 @@ import kotlinx.coroutines.launch
 fun ViewPasswordScreen(
     password: Password,
     modifier: Modifier = Modifier,
-    onCloseButtonClick:()->Unit,
-    unHidePasswordChar:()-> Flow<BiometricStatus>,
-    onEditButtonClick:()->Unit,
-    onShareButtonClick:(Password)->Unit
+    onCloseButtonClick: () -> Unit,
+    unHidePasswordChar: () -> Flow<BiometricStatus>,
+    onEditButtonClick: () -> Unit,
+    onShareButtonClick: (Password) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     // Use this state variable to trigger the LaunchedEffect
@@ -78,15 +73,16 @@ fun ViewPasswordScreen(
                 .padding(horizontal = 20.dp, vertical = 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = {
-                    onCloseButtonClick()
-                }) {
+                IconButton(
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    onClick = {
+                        onCloseButtonClick()
+                    }) {
                     Icon(Icons.Default.Close, contentDescription = "Close")
                 }
                 Surface(
@@ -94,7 +90,8 @@ fun ViewPasswordScreen(
                     tonalElevation = 5.dp,
                     shadowElevation = 5.dp,
                     modifier = Modifier
-                        .size(width = 80.dp, height = 50.dp),
+                        .size(width = 80.dp, height = 50.dp)
+                        .align(Alignment.Center),
                     color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Box(
@@ -110,8 +107,8 @@ fun ViewPasswordScreen(
                                 password.websiteName
                             }
 
-                            val scaleFactor =  80 / temp.length
-                            val calculatedSize =  (temp.length).toInt()
+                            val scaleFactor = 80 / temp.length
+                            val calculatedSize = (temp.length).toInt()
 
                             val adjustedSize = when {
                                 calculatedSize in 10..12 -> 10.sp
@@ -130,10 +127,17 @@ fun ViewPasswordScreen(
                         }
                     }
                 }
-                IconButton(onClick = {
-                    onShareButtonClick(password)
-                }) {
-                    Icon(Icons.Default.Share, contentDescription = "Edit password")
+                Row(modifier = Modifier.align(Alignment.CenterEnd)) {
+                    IconButton(onClick = {
+                            onShareButtonClick(password)
+                        }) {
+                        Icon(Icons.Default.Share, contentDescription = "Close")
+                    }
+                    IconButton(onClick = {
+                            onEditButtonClick()
+                        }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Close")
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -158,18 +162,20 @@ fun ViewPasswordScreen(
                 onValueChange = {},
                 trailingIcon = {
                     IconButton(onClick = {
-                        if (passwordVisibility){
+                        if (passwordVisibility) {
                             passwordVisibility = false
-                        }else{
+                        } else {
                             scope.launch {
                                 unHidePasswordChar().collectLatest {
-                                    when(it){
+                                    when (it) {
                                         BiometricStatus.SUCCEEDED -> {
                                             passwordVisibility = true
                                         }
-                                        BiometricStatus.FAILED ->{
+
+                                        BiometricStatus.FAILED -> {
                                             passwordVisibility = false
                                         }
+
                                         BiometricStatus.ERROR -> {
                                             passwordVisibility = false
                                         }
@@ -187,11 +193,6 @@ fun ViewPasswordScreen(
                 },
                 visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
             )
-            Button(onClick = {
-                onEditButtonClick()
-            }) {
-                Text(text = "Edit Password")
-            }
         }
     }
 }
