@@ -132,8 +132,6 @@ fun NotesScreen(
                         NoteItem(
                             note = note,
                             modifier = Modifier
-                                .width(170.dp)
-                                .padding(8.dp)
                                 .clickable {
                                     //todo code for viewing the note
                                 },
@@ -141,7 +139,6 @@ fun NotesScreen(
                                 onEvent(NotesEvent.DeleteNote(note))
                             }
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

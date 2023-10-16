@@ -45,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,6 +56,7 @@ import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
@@ -78,6 +80,8 @@ import com.aman.keyswithkotlin.passwords.presentation.componants.SearchedPasswor
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.passwords.presentation.componants.ViewPasswordScreen
 import com.aman.keyswithkotlin.presentation.CustomCircularProgressBar
+import com.aman.keyswithkotlin.presentation.ShowCaseProperty
+import com.aman.keyswithkotlin.presentation.ShowCaseView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -103,6 +107,9 @@ fun PasswordScreen(
     unHidePasswordChar: () -> Flow<BiometricStatus>,
     bottomBar: @Composable (() -> Unit)
 ) {
+
+    val targets = remember { mutableStateMapOf<String, ShowCaseProperty>() }
+
     val state = _state.collectAsState()
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
@@ -246,11 +253,25 @@ fun PasswordScreen(
                                 colors = SearchBarDefaults.colors(
                                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                                 ),
-                                placeholder = { Text(text = "Search") },
+                                placeholder = {
+                                    Text(
+                                        modifier = Modifier.onGloballyPositioned { coordinates ->
+                                            targets["Search"] = ShowCaseProperty(
+                                                index = 0,
+                                                coordinate = coordinates,
+                                                title = "Search passwords",
+                                                subTitle = "Click here, to search password"
+                                            )
+                                        },
+                                        text = "Search"
+                                    )
+                                },
                                 active = isSearchBarActive,
                                 onActiveChange = { isSearchBarActive = it },
                                 leadingIcon = {
-                                    IconButton(onClick = {}) {
+                                    IconButton(
+                                        onClick = {}
+                                    ) {
                                         Icon(Icons.Default.Search, contentDescription = "Search")
                                     }
                                 },
@@ -372,7 +393,29 @@ fun PasswordScreen(
                                                     itemToView.value = password
                                                     onLongClicked = true
 //                                                    onEvent(PasswordEvent.UpdateLastUsedPasswordTimeStamp(password = password))
-                                                }
+                                                },
+                                                onClickGloballyPositioned = if (password == state.value.passwords.first()){
+                                                    {coordinates->
+                                                        targets["ViewPssword"] =
+                                                            ShowCaseProperty(
+                                                                index = 1,
+                                                                coordinate = coordinates,
+                                                                title = "View password",
+                                                                subTitle = "Click here to view password"
+                                                            )
+                                                    }
+                                                } else{null},
+                                                onLongPressGloballyPositioned = if (password == state.value.passwords.first()){
+                                                    {coordinates->
+                                                        targets["PasswordOption"] =
+                                                            ShowCaseProperty(
+                                                                index = 2,
+                                                                coordinate = coordinates,
+                                                                title = "View password options",
+                                                                subTitle = "Click here or Long press on password item to view password options"
+                                                            )
+                                                    }
+                                                } else{null}
                                             )
 //                                            ShimmerListItem(
 //                                                isLoading = isLoading,
@@ -525,6 +568,10 @@ fun PasswordScreen(
             }
         }
     }
+
+    ShowCaseView(targets = targets) {
+
+    }
 }
 
 private fun copyToClipBoard(
@@ -538,6 +585,7 @@ private fun copyToClipBoard(
     )
 
 }
+
 private fun copyToClipboardWithTimer(
     clipboardManager: ClipboardManager,
     text: String

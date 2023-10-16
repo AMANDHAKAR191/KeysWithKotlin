@@ -36,6 +36,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -56,6 +58,8 @@ import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
+import com.aman.keyswithkotlin.presentation.ShowCaseProperty
+import com.aman.keyswithkotlin.presentation.ShowCaseView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -71,6 +75,7 @@ fun ChatsScreen(
     bottomBar: @Composable (() -> Unit),
     navigateToChatScreen: () -> Unit,
 ) {
+    val targets = remember { mutableStateMapOf<String, ShowCaseProperty>() }
 
     var isDialogVisible by remember { mutableStateOf(false) }
     var isLoadingBarVisible by remember { mutableStateOf(false) }
@@ -109,6 +114,14 @@ fun ChatsScreen(
                 },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
+                    .onGloballyPositioned { coordinates ->
+                        targets["FAB"] = ShowCaseProperty(
+                            index = 1,
+                            coordinate = coordinates,
+                            title = "Create Chat",
+                            subTitle = "Click here!! to create new chat"
+                        )
+                    }
                     .padding(all = 20.dp),
                 shape = FloatingActionButtonDefaults.shape
             ) {
@@ -216,6 +229,10 @@ fun ChatsScreen(
             }
         }
     )
+
+    ShowCaseView(targets = targets) {
+
+    }
 }
 
 

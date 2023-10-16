@@ -11,15 +11,18 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.printToString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
+import com.aman.keyswithkotlin.core.BiometricStatus
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +42,7 @@ class PasswordScreenTest {
     private val dummyOnSharedPasswordEvent: (SharedPasswordEvent) -> Unit = {}
     private val dummyOnChatPasswordEvent: (SharedChatEvent) -> Unit = {}
     private val dummyNavigateToNoteScreen: () -> Unit = {}
+    private val biometricResponse = flowOf(BiometricStatus.ERROR)
 
     @Test
     fun `if password list is not empty and passwords are displayed`() {
@@ -76,6 +80,7 @@ class PasswordScreenTest {
                 navigateToProfileScreen = { /*TODO*/ },
                 navigateToChatUserListScreen = { /*TODO*/ },
                 navigateToAccessVerificationScreen = { /*TODO*/ },
+                unHidePasswordChar = { biometricResponse},
                 closeApp = { /*TODO*/ }) {
             }
         }
@@ -104,6 +109,7 @@ class PasswordScreenTest {
                 navigateToProfileScreen = { /*TODO*/ },
                 navigateToChatUserListScreen = { /*TODO*/ },
                 navigateToAccessVerificationScreen = { /*TODO*/ },
+                unHidePasswordChar = { biometricResponse},
                 closeApp = { /*TODO*/ }) {
             }
         }
@@ -147,6 +153,7 @@ class PasswordScreenTest {
                 navigateToProfileScreen = { /*TODO*/ },
                 navigateToChatUserListScreen = { /*TODO*/ },
                 navigateToAccessVerificationScreen = { /*TODO*/ },
+                unHidePasswordChar = { biometricResponse},
                 closeApp = { /*TODO*/ }) {
             }
         }
@@ -171,6 +178,7 @@ class PasswordScreenTest {
                 navigateToProfileScreen = { /*TODO*/ },
                 navigateToChatUserListScreen = { /*TODO*/ },
                 navigateToAccessVerificationScreen = { /*TODO*/ },
+                unHidePasswordChar = { biometricResponse},
                 closeApp = { /*TODO*/ }) {
             }
         }
