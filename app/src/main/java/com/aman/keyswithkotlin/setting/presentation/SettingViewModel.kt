@@ -10,17 +10,21 @@ import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
 import com.aman.keyswithkotlin.auth.presentation.profile.ProfileState
 import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.core.util.TutorialType
+import com.aman.keyswithkotlin.setting.domain.use_cases.SettingUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor(
+    private val settingUseCases: SettingUseCases,
     private val authUseCases: AuthUseCases,
     private val myPreference: MyPreference
 ) : ViewModel() {
@@ -67,6 +71,18 @@ class SettingViewModel @Inject constructor(
             is SettingEvent.UpdateLockAppSetting -> {
                 myPreference.lockAppSelectedOption = event.value
                 _state.update { it.copy(lockAppSelectedOption = event.value) }
+            }
+
+            is SettingEvent.StoreImportedPasswords -> {
+                viewModelScope.launch {
+                    settingUseCases.storeImportedPasswords(event.passwordList).collectLatest {
+
+                    }
+                }
+            }
+
+            SettingEvent.EnableTutorial -> {
+                myPreference.isTutorialEnabled = TutorialType.ENABLED.toString()
             }
         }
     }

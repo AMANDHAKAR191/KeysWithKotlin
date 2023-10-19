@@ -35,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,18 +58,22 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
+import com.aman.keyswithkotlin.core.util.TutorialType
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
+import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordState
 import com.aman.keyswithkotlin.presentation.ShowCaseProperty
 import com.aman.keyswithkotlin.presentation.ShowCaseView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
 fun ChatsScreen(
-    title: String,
-    chatUsersList: List<UserPersonalChatList>? = emptyList(),
+    _state: StateFlow<ChatUserState>,
+    _isTutorialEnabled:StateFlow<String>,
     eventFlowState: SharedFlow<UIEvents>,
     onEvent: (ChatUserEvent) -> Unit,
     onSharedChatEvent: (SharedChatEvent) -> Unit,
@@ -76,7 +81,8 @@ fun ChatsScreen(
     navigateToChatScreen: () -> Unit,
 ) {
     val targets = remember { mutableStateMapOf<String, ShowCaseProperty>() }
-
+    val state = _state.collectAsState()
+    val isTutorialEnabled = _isTutorialEnabled.collectAsState()
     var isDialogVisible by remember { mutableStateOf(false) }
     var isLoadingBarVisible by remember { mutableStateOf(false) }
     var otherUserPublicUid by remember { mutableStateOf("") }
@@ -144,7 +150,7 @@ fun ChatsScreen(
                         .fillMaxSize()
                         .padding(top = 30.dp)
                 ) {
-                    Header(title)
+                    Header(state.value.username)
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -162,8 +168,8 @@ fun ChatsScreen(
                         LazyColumn(
                             modifier = Modifier.padding(bottom = 15.dp, top = 30.dp)
                         ) {
-                            if (!chatUsersList.isNullOrEmpty()) {
-                                items(items = chatUsersList) { person ->
+                            if (!state.value.chatUsersList.isNullOrEmpty()) {
+                                items(items = state.value.chatUsersList!!) { person ->
                                     UserEachRow(person = person, onClick = {
                                         onSharedChatEvent(
                                             SharedChatEvent.OpenSharedChat(
@@ -230,8 +236,11 @@ fun ChatsScreen(
         }
     )
 
-    ShowCaseView(targets = targets) {
-
+    if (isTutorialEnabled.value == TutorialType.ENABLED.toString()){
+        println("my check115")
+        ShowCaseView(targets = targets) {
+            onEvent(ChatUserEvent.DisableTutorial)
+        }
     }
 }
 
@@ -264,7 +273,7 @@ fun Header(userName:String) {
             }
         }
 
-        Text(text = annotatedString)
+        Text(text = annotatedString, modifier = Modifier.onGloballyPositioned {  })
     }
 }
 

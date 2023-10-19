@@ -3,6 +3,7 @@ package com.aman.keyswithkotlin.core
 import android.content.Context
 import android.content.SharedPreferences
 import com.aman.keyswithkotlin.Keys
+import com.aman.keyswithkotlin.core.util.TutorialType
 
 class MyPreference() {
 //    var context = _context!!
@@ -21,6 +22,7 @@ class MyPreference() {
     val USER_AUTHENTICATED = "userAuthenticated"
     val COMMON_CHAT_ROOM_ID = "commonChatRoomId"
     val PRIMARY_USER_DEVICE_ID = "primaryUserDeviceId"
+    val IS_TUTORIAL_ENABLED = "isTutorialEnabled"
 
     init {
 //        sharedPreferences =
@@ -88,11 +90,18 @@ class MyPreference() {
             sharedPreferences.edit().putBoolean(USER_TYPE, isUserRestricted).apply()
         }
 
+    var isTutorialEnabled: String
+        get() = sharedPreferences.getString(IS_TUTORIAL_ENABLED, TutorialType.ENABLED.toString())!!
+        set(isTutorialEnabled) {
+            sharedPreferences.edit().putString(IS_TUTORIAL_ENABLED, isTutorialEnabled).apply()
+        }
+
     var isUserAuthenticated: Boolean
         get() = sharedPreferences.getBoolean(USER_AUTHENTICATED, false)
         set(isUserRestricted) {
             sharedPreferences.edit().putBoolean(USER_AUTHENTICATED, isUserRestricted).apply()
         }
+
     var lockAppSelectedOption: String?
         get() = sharedPreferences.getString(LOCK_APP_OPTIONS, LockAppType.NEVER.toString())
         //integer getter/setter method

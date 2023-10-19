@@ -43,8 +43,8 @@ class SaveAutofillPasswordActivity : ComponentActivity() {
                                 Password(
                                     userName = passwordData.get(0),
                                     password = passwordData.get(1),
-                                    websiteName =passwordData.get(2).replace('.','_'),
-                                    websiteLink =passwordData.get(3)
+                                    websiteName =passwordData.get(2),
+                                    linkTo = listOf(passwordData.get(3))
                                 )
                             )
                         )

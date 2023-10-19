@@ -22,6 +22,7 @@ sealed class UIEvents {
     object ShowLoadingBar:UIEvents()
 
     object ShowAlertDialog:UIEvents()
+
     object HideAlertDialog:UIEvents()
     object ShowAuthorizationAlertDialog:UIEvents()
     object HideAuthorizationAlertDialog:UIEvents()

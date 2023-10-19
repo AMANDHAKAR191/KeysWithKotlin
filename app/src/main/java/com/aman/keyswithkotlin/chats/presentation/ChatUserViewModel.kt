@@ -7,13 +7,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.chats.domain.use_cases.ChatUseCases
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.core.util.TutorialType
 import com.aman.keyswithkotlin.di.PublicUID
+import com.aman.keyswithkotlin.passwords.presentation.password_screen.PasswordState
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -23,19 +29,26 @@ class ChatUserViewModel @Inject constructor(
     private val chatUseCases: ChatUseCases,
     @PublicUID
     private val publicUID: String,
-    private val userName:String
+    private val userName:String,
+    private  val myPreference: MyPreference
 ) : ViewModel() {
 
     private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    val _state = mutableStateOf(ChatUserState())
-    val state: State<ChatUserState> = _state
+    private val _state = MutableStateFlow(ChatUserState())
+    val state= _state.asStateFlow()
+
+    private val _isTutorialEnabled = MutableStateFlow(String())
+    val isTutorialEnabled = _isTutorialEnabled.asStateFlow()
+
+
 
     init {
-        _state.value = state.value.copy(
-            username = userName
-        )
+        _isTutorialEnabled.update { myPreference.isTutorialEnabled }
+//        _state.value = state.value.copy(
+//            username = userName
+//        )
         getChatUsers()
     }
 
@@ -61,26 +74,17 @@ class ChatUserViewModel @Inject constructor(
                                     }
 
                                     is Response.Success -> {
-                                        println("response.data: ${response.data}")
                                         _eventFlow.emit(UIEvents.ChatUsrCreatedSuccessFully)
                                         response.data?.let { messageUserList ->
                                             messageUserList.UserPersonalChatList?.let {
                                                 it.keys.forEach{key->
-                                                    println("key: $key")
-                                                    println("value: ${it[key]}")
-                                                    println("otherUserPublicUid: ${it[key]?.otherUserPublicUid}")
                                                     if (it[key]?.otherUserPublicUid.equals(publicUID)){
-                                                        println("Check: Matched")
-                                                        println("same UID found")
                                                     }
                                                 }
                                             }
-                                            println("check point1")
-//                                            val map = messageUserList.UserPersonalChatList
                                             val userPersonalChatList: UserPersonalChatList? = messageUserList.UserPersonalChatList.let { map ->
                                                 map?.entries?.map { entry ->
                                                     if (entry.value.otherUserPublicUid.equals(publicUID)) {
-                                                        println("check point2")
                                                         UserPersonalChatList(
                                                             otherUserPublicUid = messageUserList.publicUid,
                                                             otherUserPublicUname = messageUserList.publicUname,
@@ -90,7 +94,6 @@ class ChatUserViewModel @Inject constructor(
                                                             commonEncryptionIv = entry.value.commonEncryptionIv
                                                         )
                                                     } else {
-                                                        println("check point3")
                                                         UserPersonalChatList(
                                                             otherUserPublicUid = messageUserList.publicUid,
                                                             otherUserPublicUname = messageUserList.publicUname,
@@ -105,29 +108,6 @@ class ChatUserViewModel @Inject constructor(
                                                     commonChatRoomId = generateChatRoomId(messageUserList.publicUid)
                                                 )
                                             }
-
-
-//                                            val userPersonalChatList =
-//                                                if (map?.get(publicUID)?.otherUserPublicUid == publicUID) {
-//                                                    UserPersonalChatList(
-//                                                        otherUserPublicUid = messageUserList.publicUid,
-//                                                        otherUserPublicUname = messageUserList.publicUname,
-//                                                        otherUserProfileUrl = messageUserList.profileUrl,
-//                                                        commonChatRoomId = map.get(publicUID)?.commonChatRoomId,
-//                                                        commonEncryptionKey = map.get(publicUID)?.commonEncryptionKey,
-//                                                        commonEncryptionIv = map.get(publicUID)?.commonEncryptionIv
-//                                                    )
-//                                                } else {
-//                                                    UserPersonalChatList(
-//                                                        otherUserPublicUid = messageUserList.publicUid,
-//                                                        otherUserPublicUname = messageUserList.publicUname,
-//                                                        otherUserProfileUrl = messageUserList.profileUrl,
-//                                                        commonChatRoomId = generateChatRoomId(
-//                                                            messageUserList.publicUid
-//                                                        )
-//                                                    )
-//                                                }
-                                            println("userPersonalChatList: $userPersonalChatList")
                                             chatUseCases.createChatUser(
                                                 event.value,
                                                 userPersonalChatList!!
@@ -158,6 +138,11 @@ class ChatUserViewModel @Inject constructor(
 
                 }
             }
+
+            ChatUserEvent.DisableTutorial -> {
+                _isTutorialEnabled.update { myPreference.isTutorialEnabled }
+                myPreference.isTutorialEnabled = TutorialType.DISABLED.toString()
+            }
         }
     }
 
@@ -179,7 +164,6 @@ class ChatUserViewModel @Inject constructor(
                             _state.value = state.value.copy(
                                 chatUsersList = response.data as List<UserPersonalChatList>
                             )
-                            println("Chat Users: ${response.data}")
                         }
 
                         is Response.Failure -> {

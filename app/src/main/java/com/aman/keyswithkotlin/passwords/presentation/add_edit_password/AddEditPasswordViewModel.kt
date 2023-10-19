@@ -53,7 +53,7 @@ class AddEditPasswordViewModel @Inject constructor(
                                 userName = state.value.username,
                                 password = state.value.password,
                                 websiteName = state.value.websiteName,
-                                websiteLink = ""
+                                linkTo = emptyList()
                             )
                         ).collect { response ->
                             when (response) {

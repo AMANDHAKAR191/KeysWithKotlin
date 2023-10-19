@@ -7,21 +7,11 @@ data class Password constructor(
     var userName: String = "",
     var password: String = "",
     var websiteName: String = "",
-    var websiteLink: String = "",
+    var linkTo: List<String> = emptyList(),
     var timestamp: String = "",
     var lastUsedTimeStamp: String = "",
 //    var encryptionIV:String = ""
-):Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!
-    ) {
-    }
-
+){
     fun doesMatchSearchQuery(query: String): Boolean {
         val matchingCombination = listOf(
             "$websiteName",
@@ -34,28 +24,6 @@ data class Password constructor(
         }
     }
 
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(userName)
-        parcel.writeString(password)
-        parcel.writeString(websiteName)
-        parcel.writeString(websiteLink)
-        parcel.writeString(timestamp)
-        parcel.writeString(lastUsedTimeStamp)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<Password> {
-        override fun createFromParcel(parcel: Parcel): Password {
-            return Password(parcel)
-        }
-
-        override fun newArray(size: Int): Array<Password?> {
-            return arrayOfNulls(size)
-        }
-    }
 }
 
 class InvalidPasswordException(message: String) : Exception(message)

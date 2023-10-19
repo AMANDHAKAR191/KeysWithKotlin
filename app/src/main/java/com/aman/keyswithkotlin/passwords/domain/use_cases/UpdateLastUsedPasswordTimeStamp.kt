@@ -15,7 +15,7 @@ class UpdateLastUsedPasswordTimeStamp(
             userName = password.userName,
             password = password.password,
             websiteName = password.websiteName,
-            websiteLink = password.websiteLink,
+            linkTo = password.linkTo,
             timestamp = password.timestamp,
             lastUsedTimeStamp = timeStampUtil.generateTimestamp()
         )

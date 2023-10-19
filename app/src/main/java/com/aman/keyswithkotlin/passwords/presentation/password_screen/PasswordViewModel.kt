@@ -1,16 +1,15 @@
 package com.aman.keyswithkotlin.passwords.presentation.password_screen
 
 import UIEvents
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.Keys
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.AccessVerificationUseCases
-import com.aman.keyswithkotlin.auth.domain.model.RequestAuthorizationAccess
 import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.DeviceInfo
+import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.core.util.Response
+import com.aman.keyswithkotlin.core.util.TutorialType
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.domain.use_cases.PasswordUseCases
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
@@ -23,6 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -30,17 +30,21 @@ import javax.inject.Inject
 @HiltViewModel
 class PasswordViewModel @Inject constructor(
     private val passwordUseCases: PasswordUseCases,
-    private val accessVerificationUseCases: AccessVerificationUseCases
+    private val accessVerificationUseCases: AccessVerificationUseCases,
+    private val myPreference: MyPreference
 ) : ViewModel() {
 
     private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    val _state = MutableStateFlow(PasswordState())
-    val state= _state.asStateFlow()
+    private val _state = MutableStateFlow(PasswordState())
+    val state = _state.asStateFlow()
+
+    private val _isTutorialEnabled = MutableStateFlow(String())
+    val isTutorialEnabled = _isTutorialEnabled.asStateFlow()
 
     private val _searchText = MutableStateFlow("")
-    val searchText = _searchText.asSharedFlow()
+    private val searchText = _searchText.asSharedFlow()
 
     private var recentlyDeletedPassword: Password? = null
 
@@ -51,7 +55,12 @@ class PasswordViewModel @Inject constructor(
             if (text.isBlank()) {
                 null
             } else {
-                passwords.filter { it.doesMatchSearchQuery(text) }
+               try {
+                   passwords.filter { it.doesMatchSearchQuery(text) }
+               }catch (e:Exception){
+                   println("check1")
+                   null
+               }
             }
         }.stateIn(
             viewModelScope,
@@ -60,9 +69,9 @@ class PasswordViewModel @Inject constructor(
         )
 
     init {
+        _isTutorialEnabled.update { myPreference.isTutorialEnabled }
         checkAuthorizationOfDevice()
         getPasswords()
-        getRecentlyUsedPasswords()
     }
 
     private fun checkAuthorizationOfDevice() {
@@ -74,9 +83,9 @@ class PasswordViewModel @Inject constructor(
                         when (response) {
                             is Response.Success<*, *> -> {
                                 println("isAuthorize: ${response.data as String}")
-                                if ((response.data).equals(Authorization.NotAuthorized.toString())){
+                                if ((response.data).equals(Authorization.NotAuthorized.toString())) {
                                     _eventFlow.emit(UIEvents.ShowAlertDialog)
-                                }else{
+                                } else {
                                     _eventFlow.emit(UIEvents.HideAlertDialog)
                                 }
                             }
@@ -127,6 +136,7 @@ class PasswordViewModel @Inject constructor(
             }
 
             is PasswordEvent.OnSearchTextChange -> {
+                println("search text: ${event.value}")
                 _searchText.value = event.value
             }
 
@@ -151,6 +161,11 @@ class PasswordViewModel @Inject constructor(
                 }
             }
 
+            PasswordEvent.DisableTutorial -> {
+                _isTutorialEnabled.update { myPreference.isTutorialEnabled }
+                myPreference.isTutorialEnabled = TutorialType.DISABLED.toString()
+            }
+
             else -> {}
         }
     }
@@ -166,6 +181,7 @@ class PasswordViewModel @Inject constructor(
                                 isLoading = false
                             )
                             _passwords.value = response.data
+                            getRecentlyUsedPasswords()
                         }
 
                         is Response.Failure -> {
@@ -187,35 +203,10 @@ class PasswordViewModel @Inject constructor(
     }
 
     private fun getRecentlyUsedPasswords() {
-        /*       this Unconfined Dispatchers added because
-                 if i use same io Dispatchers then either
-                 one of the data is loading other data couldn't loaded */
-        viewModelScope.launch(Dispatchers.Unconfined) {
-            passwordUseCases.getRecentlyUsedPasswords().collect { response ->
-                withContext(Dispatchers.Main) {
-                    when (response) {
-                        is Response.Success<*, *> -> {
-                            _state.value = state.value.copy(
-                                recentlyUsedPasswords = response.data as List<Password>,
-                                isLoading = false
-                            )
-                        }
-
-                        is Response.Failure -> {
-                            _state.value = state.value.copy(
-                                error = response.e.message ?: "Unexpected error occurred",
-                                isLoading = false
-                            )
-                        }
-
-                        is Response.Loading -> {
-                            _state.value = PasswordState(
-                                isLoading = true
-                            )
-                        }
-                    }
-                }
-            }
+        _state.update {
+            it.copy(
+                recentlyUsedPasswords = state.value.passwords.sortedByDescending { it.timestamp }
+            )
         }
     }
 }

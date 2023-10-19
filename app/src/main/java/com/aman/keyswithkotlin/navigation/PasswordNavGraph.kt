@@ -32,6 +32,7 @@ fun NavGraphBuilder.passwordNavGraph(
             val viewModel: PasswordViewModel = hiltViewModel()
             PasswordScreen(
                 _state = viewModel.state,
+                _isTutorialEnabled = viewModel.isTutorialEnabled,
                 eventFlowState = viewModel.eventFlow,
                 searchedPasswordState = viewModel.searchedPasswords.collectAsState(),
                 onEvent = viewModel::onEvent,

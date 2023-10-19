@@ -11,6 +11,8 @@ sealed class PasswordEvent {
 
     object SavePassword: PasswordEvent()
 
+    object DisableTutorial:PasswordEvent()
+
     data class UpdateLastUsedPasswordTimeStamp(val password: Password):PasswordEvent()
     object RestorePassword : PasswordEvent()
     data class DeletePassword(val password: Password) : PasswordEvent()

@@ -54,6 +54,6 @@ fun SearchedPasswordItem(
 @Preview
 fun Preview1() {
     SearchedPasswordItem(
-        password = Password("AMAN", "DFSFS", "AMAN", "", "CDJSCJSOI"),
+        password = Password("AMAN", "DFSFS", "AMAN", emptyList(), "CDJSCJSOI"),
         onItemClick = { /*TODO*/ })
 }

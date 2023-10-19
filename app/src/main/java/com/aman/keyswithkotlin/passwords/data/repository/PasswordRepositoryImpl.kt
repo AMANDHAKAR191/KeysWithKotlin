@@ -33,11 +33,9 @@ class PasswordRepositoryImpl(
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     _passwordsItems.clear()
                     for (ds in dataSnapshot.children) {
-                        for (ds1 in ds.children) {
-                            val items = ds1.getValue(Password::class.java)
-                            if (items != null) {
-                                _passwordsItems.add(items)
-                            }
+                        val items = ds.getValue(Password::class.java)
+                        if (items != null) {
+                            _passwordsItems.add(items)
                         }
                     }
                     trySend(Response.Success(data = _passwordsItems))
@@ -65,11 +63,9 @@ class PasswordRepositoryImpl(
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     _passwordsItems.clear()
                     for (ds in dataSnapshot.children) {
-                        for (ds1 in ds.children) {
-                            val items = ds1.getValue(Password::class.java)
-                            if (items != null) {
-                                _passwordsItems.add(items)
-                            }
+                        val items = ds.getValue(Password::class.java)
+                        if (items != null) {
+                            _passwordsItems.add(items)
                         }
                     }
                     trySend(Response.Success(data = _passwordsItems))
@@ -103,11 +99,11 @@ class PasswordRepositoryImpl(
             userName = password.userName,
             password = password.password,
             websiteName = password.websiteName,
-            websiteLink = password.websiteLink,
+            linkTo = password.linkTo,
             timestamp = timeStampUtil.generateTimestamp()
         )
         try {
-            reference.child(password.websiteName).child(_password.timestamp).setValue(_password)
+            reference.push().setValue(_password)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
                         trySend(Response.Success("Password is successfully saved"))
@@ -127,14 +123,14 @@ class PasswordRepositoryImpl(
         callbackFlow {
             val reference = database.reference.child("Passwords").child(UID)
             trySend(Response.Loading)
-            reference.child(password.websiteName).orderByChild("timestamp")
-                .equalTo(password.timestamp)
+            reference.orderByChild("websiteName")
+                .equalTo(password.websiteName)
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         for (childSnapshot in dataSnapshot.children) {
                             val noteKey = childSnapshot.key
                             println("noteKey: $noteKey")
-                            reference.child(password.websiteName).child(noteKey!!).removeValue()
+                            reference.child(noteKey!!).removeValue()
                                 .addOnCompleteListener {
                                     println("password is successfully deleted")
                                     if (it.isSuccessful) {

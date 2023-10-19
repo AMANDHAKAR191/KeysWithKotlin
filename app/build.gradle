@@ -106,13 +106,13 @@ dependencies {
     implementation "androidx.hilt:hilt-navigation-compose:1.1.0-alpha01"
     // Hilt Navigation Compose integration
 
-// Coroutines
+    // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1'
     // Kotlin Coroutines core library
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
     // Kotlin Coroutines Android extensions
 
-// Dagger - Hilt
+    // Dagger - Hilt
     implementation "com.google.dagger:hilt-android:2.46.1" // Dagger Hilt Android library
     kapt "com.google.dagger:hilt-android-compiler:2.46.1" // Dagger Hilt Android compiler
     kapt "androidx.hilt:hilt-compiler:1.0.0" // Hilt annotation processor
@@ -133,5 +133,7 @@ dependencies {
 
 //    implementation 'com.github.bumptech.glide:glide:4.13.0'
 //    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
+
+    implementation 'com.opencsv:opencsv:5.6'
 
 }

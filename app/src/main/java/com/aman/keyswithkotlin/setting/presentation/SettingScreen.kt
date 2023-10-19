@@ -29,14 +29,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -47,14 +51,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,10 +73,15 @@ import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.DeviceType
 import com.aman.keyswithkotlin.core.LockAppType
 import com.aman.keyswithkotlin.core.components.ShowInfoToUser
+import com.aman.keyswithkotlin.core.util.TimeStampUtil
+import com.aman.keyswithkotlin.passwords.domain.model.Password
+import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.google.android.gms.common.api.ApiException
+import com.opencsv.CSVReader
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
+import java.io.InputStreamReader
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,6 +106,7 @@ fun SettingScreen(
         mutableStateOf("")
     }
     var isAutofillServiceEnabled by remember { mutableStateOf(false) }
+    var isReadCSV by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.value.lockAppSelectedOption) {
         lockAppSelectedOption = state.value.lockAppSelectedOption
@@ -101,6 +114,8 @@ fun SettingScreen(
     LaunchedEffect(true) {
         isAutofillServiceEnabled = autofillManager.hasEnabledAutofillServices()
     }
+
+    //todo for UIEvents
 
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -201,19 +216,38 @@ fun SettingScreen(
                                         checked = isAutofillServiceEnabled,
                                         onCheckedChange = {
                                             isAutofillServiceEnabled = it
-                                            if (it){
+                                            if (it) {
                                                 val intent =
                                                     Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE)
                                                 intent.data = Uri.parse("package:" + packageName)
                                                 launcher.launch(intent)
-                                            }else{
+                                            } else {
                                                 autofillManager.disableAutofillServices()
                                             }
                                         })
                                 }
-
                                 Spacer(modifier = Modifier.height(10.dp))
-                                Text(text = "User Guide", fontSize = 20.sp)
+                                Text(
+                                    text = "Import Passwords", fontSize = 20.sp,
+                                    modifier = Modifier.clickable {
+                                        isReadCSV = true
+                                    }
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
+                                if (isReadCSV) {
+                                    CsvReaderScreen(
+                                        passwordImported = {
+                                            onEvent(SettingEvent.StoreImportedPasswords(it))
+                                        }
+                                    )
+                                }
+                                Text(
+                                    text = "User Guide", fontSize = 20.sp,
+                                    modifier = Modifier.clickable {
+                                        onEvent(SettingEvent.EnableTutorial)
+                                    }
+                                )
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(
                                     text = "App Info",
@@ -421,3 +455,87 @@ fun SwitchWithIcon(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     )
 }
 
+
+@Composable
+fun CsvReaderScreen(
+    passwordImported:(List<Password>)->Unit
+) {
+    var passwordList = remember { mutableStateListOf<Password>() }
+    var csvData by remember { mutableStateOf<List<List<String>>?>(null) }
+    var contentResolver = LocalContext.current.contentResolver
+    val openCsvFile =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) {
+                try {
+                    val timeStampUtil = TimeStampUtil()
+                    val tempPasswordList = mutableListOf<Password>()
+                    val inputStream = contentResolver.openInputStream(uri)
+                    val csvReader = CSVReader(InputStreamReader(inputStream))
+                    var recordList: Array<String>?
+                    while (csvReader.readNext().also { recordList = it } != null) {
+                        recordList?.let { record ->
+                            val name = record[0]
+                            val link = record[1]
+                            val username = record[2]
+                            val password = record[3]
+
+                            // "note" is present in the CSV but not required
+                            val note = if (record.size > 4) record[4] else ""
+
+                            val passwordModel = Password(
+                                userName = username,
+                                password = password,
+                                websiteName = name,
+                                listOf(link),
+                                timestamp = timeStampUtil.generateTimestamp()
+                            )
+                            tempPasswordList.add(passwordModel)
+                        }
+                    }
+
+                    println("tempPasswordList: $tempPasswordList")
+                    tempPasswordList.removeFirst()
+                    passwordList.swapList(tempPasswordList)
+                    println("passwordList: $passwordList")
+
+                    passwordImported(passwordList)
+
+                    csvReader.close()
+                } catch (e: Exception) {
+                    // Handle exceptions (e.g., file not found, parsing errors)
+                }
+
+            }
+        }
+
+    println("passwordList1: $passwordList")
+
+
+    Column {
+        LazyColumn(modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)) {
+            items(passwordList) {
+                PasswordItem(password = it)
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+        }
+
+        Button(onClick = { openCsvFile.launch(arrayOf("*/*")) }) {
+            Text("Select CSV File")
+        }
+    }
+}
+
+@Composable
+fun PasswordItem(password: Password) {
+    // Customize the appearance of a single password item here
+    Text(text = "Website: ${password.websiteName}")
+    Text(text = "Username: ${password.password}")
+    Divider() // Optional divider between items
+}
+
+fun <T> SnapshotStateList<T>.swapList(newList: List<T>) {
+    clear()
+    addAll(newList)
+}

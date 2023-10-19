@@ -36,7 +36,6 @@ fun ShowCaseView(
     var currentTargetIndex by remember { mutableStateOf(0) }
     val currentTarget = if (uniqueTargets.isNotEmpty() && currentTargetIndex < uniqueTargets.size)
         uniqueTargets[currentTargetIndex] else null
-
     currentTarget?.let {
         TargetContent(target = it, backgroundColor = backgroundColor) {isShowCaseCompleted->
             if (isShowCaseCompleted){

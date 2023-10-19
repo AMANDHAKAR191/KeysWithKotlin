@@ -67,6 +67,7 @@ import com.aman.keyswithkotlin.chats.presentation.BottomSheetSwipeUp
 import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
 import com.aman.keyswithkotlin.core.BiometricStatus
 import com.aman.keyswithkotlin.core.Constants.ENTER_DURATION
+import com.aman.keyswithkotlin.core.util.TutorialType
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.SharedPasswordEvent
@@ -93,6 +94,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PasswordScreen(
     _state: StateFlow<PasswordState>,
+    _isTutorialEnabled:StateFlow<String>,
     eventFlowState: SharedFlow<UIEvents>,
     searchedPasswordState: State<List<Password>?>,
     onEvent: (PasswordEvent) -> Unit,
@@ -111,6 +113,7 @@ fun PasswordScreen(
     val targets = remember { mutableStateMapOf<String, ShowCaseProperty>() }
 
     val state = _state.collectAsState()
+    val isTutorialEnabled = _isTutorialEnabled.collectAsState()
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
@@ -161,7 +164,6 @@ fun PasswordScreen(
                 }
 
                 is UIEvents.ShowAlertDialog -> {
-                    println("test: check")
                     isAlertDialogVisible = true
                 }
 
@@ -569,8 +571,14 @@ fun PasswordScreen(
         }
     }
 
-    ShowCaseView(targets = targets) {
-
+    if (isTutorialEnabled.value == TutorialType.ENABLED.toString()){
+        ShowCaseView(targets = targets) {
+            onEvent(PasswordEvent.DisableTutorial)
+        }
+    }
+    LaunchedEffect(key1 = isTutorialEnabled.value){
+        if (isTutorialEnabled.value == TutorialType.ENABLED.toString()){
+        }
     }
 }
 
