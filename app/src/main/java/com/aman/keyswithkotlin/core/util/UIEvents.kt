@@ -24,7 +24,7 @@ sealed class UIEvents {
     object ShowAlertDialog:UIEvents()
 
     object HideAlertDialog:UIEvents()
-    object ShowAuthorizationAlertDialog:UIEvents()
+    data class ShowAuthorizationAlertDialog(val requesterID:String,val authorizationCode:Int):UIEvents()
     object HideAuthorizationAlertDialog:UIEvents()
 
     data class ShowError(val errorMessage:String):UIEvents()

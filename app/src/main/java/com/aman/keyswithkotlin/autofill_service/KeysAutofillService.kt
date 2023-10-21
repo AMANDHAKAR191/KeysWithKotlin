@@ -27,6 +27,12 @@ import java.util.Arrays
 
 class KeysAutofillService : AutofillService() {
 
+    private final val LINKEDIN_LOGIN_EMAIL_INPUT_TEXTVIEW_ID = 65569
+    private final val NETFLIX_LOGIN_EMAIL_INPUT_TEXTVIEW_ID = 33
+    private final val INSTAGRAM_LOGIN_USERNAME_INPUT_TEXTVIEW_ID = 1
+    private final val LINKEDIN_LOGIN_PSSWORD_INPUT_TEXTVIEW_ID = 129
+    private final val NETFLIX_LOGIN_PSSWORD_INPUT_TEXTVIEW_ID = 129
+
     //    @Inject
 //    lateinit var passwordUseCases: PasswordUseCases
     override fun onConnected() {
@@ -50,6 +56,8 @@ class KeysAutofillService : AutofillService() {
         val packageName = structure.activityComponent.packageName
         println("$TAG onFillRequest")
         Log.d(TAG, " packageName: $packageName")
+        Log.d(TAG, " className: ${structure.activityComponent.className}")
+        Log.d(TAG, " className: ${structure.activityComponent.shortClassName}")
 //        getPasswords()
 
         var userNameId: AutofillId? = null
@@ -133,20 +141,36 @@ class KeysAutofillService : AutofillService() {
         setUsernameValue: ((String) -> Unit)? = null,
         setPasswordValue: ((String) -> Unit)? = null
     ) {
+        val loginClassName = structure.activityComponent.shortClassName
         for (i in 0 until structure.windowNodeCount) {
             val windowNode = structure.getWindowNodeAt(i)
             val viewNode = windowNode.rootViewNode
 
             var foundUsernameLabel = false
             var foundPasswordLabel = false
+
             traverseViewStructure(viewNode) { node ->
                 node.idEntry?.let { nodeIdEntry ->
                     //this is used previous view of textField is contains the hints or not
-                    if (nodeIdEntry.contains("user") || nodeIdEntry.contains("email")) {
+                    if (nodeIdEntry.contains("user") || nodeIdEntry.contains("email") && node.inputType == 0) {
                         foundUsernameLabel = true
+                        println("username or email found")
+                    }else if (nodeIdEntry.contains("user") || nodeIdEntry.contains("email") && node.inputType == INSTAGRAM_LOGIN_USERNAME_INPUT_TEXTVIEW_ID) {
+                        foundUsernameLabel = true
+                        println("username or email found")
+                    }else if (node.inputType == NETFLIX_LOGIN_EMAIL_INPUT_TEXTVIEW_ID){
+                        foundUsernameLabel = true
+                        println("netflix username or email found")
                     }
-                    if (nodeIdEntry.contains("pass")) {
+                    if (nodeIdEntry.contains("pass") && node.inputType == 0) {
                         foundPasswordLabel = true
+                        println("password found")
+                    }else if (nodeIdEntry.contains("pass") && node.inputType == NETFLIX_LOGIN_PSSWORD_INPUT_TEXTVIEW_ID) {
+                        foundPasswordLabel = true
+                        println("password found")
+                    }else if (node.inputType == NETFLIX_LOGIN_PSSWORD_INPUT_TEXTVIEW_ID){
+                        foundUsernameLabel = true
+                        println("netflix password found")
                     }
                 }
                 node.htmlInfo?.attributes?.forEach { pair ->
@@ -181,7 +205,7 @@ class KeysAutofillService : AutofillService() {
                 }
 
                 println("11: ${Arrays.toString(node.autofillHints)}")
-                println("1: ${node.autofillId}, 2: ${node.autofillHints} 3: ${node.idEntry} 4: ${node.htmlInfo?.tag} 5: ${node.htmlInfo?.attributes}")
+                println("1: ${node.autofillId}, 2: ${node.autofillHints} 3: ${node.idEntry} 4: ${node.htmlInfo?.tag} 5: ${node.htmlInfo?.attributes} 6: ${node.inputType}")
 
                 //this check if autofill is then go with 1st block otherwise go with second block
                 if (node.autofillHints?.contains(View.AUTOFILL_HINT_USERNAME) == true) {
@@ -194,7 +218,7 @@ class KeysAutofillService : AutofillService() {
                             setUsernameValue(value.textValue.toString())
                         }
                     }
-                } else if (foundUsernameLabel && node.inputType == InputType.TYPE_CLASS_TEXT) {
+                } else if (foundUsernameLabel && (node.inputType == InputType.TYPE_CLASS_TEXT || node.inputType == LINKEDIN_LOGIN_EMAIL_INPUT_TEXTVIEW_ID)) {
                     if (setUsernameId != null && requestType == RequestType.OnFillRequest) {
                         setUsernameId(node.autofillId!!)
                     }
@@ -205,6 +229,16 @@ class KeysAutofillService : AutofillService() {
                         }
                     }
                     foundUsernameLabel = false
+                }else if (foundUsernameLabel && node.inputType == NETFLIX_LOGIN_EMAIL_INPUT_TEXTVIEW_ID){ //for netflix like app with not autofill hints provided
+                    if (setUsernameId != null && requestType == RequestType.OnFillRequest) {
+                        setUsernameId(node.autofillId!!)
+                    }
+                    if (setUsernameValue != null && requestType == RequestType.OnSaveRequest) {
+                        val value = node.autofillValue
+                        if (value?.isText!! && value?.textValue != null) {
+                            setUsernameValue(value.textValue.toString())
+                        }
+                    }
                 }
 
                 if (node.autofillHints?.any {
@@ -222,7 +256,7 @@ class KeysAutofillService : AutofillService() {
                             setPasswordValue(value.textValue.toString())
                         }
                     }
-                } else if (foundPasswordLabel && node.inputType == InputType.TYPE_CLASS_TEXT) {
+                } else if (foundPasswordLabel && (node.inputType == InputType.TYPE_CLASS_TEXT || node.inputType == LINKEDIN_LOGIN_PSSWORD_INPUT_TEXTVIEW_ID)) {
                     if (setPasswordId != null && requestType == RequestType.OnFillRequest) {
                         setPasswordId(node.autofillId!!)
                     }
@@ -233,6 +267,16 @@ class KeysAutofillService : AutofillService() {
                         }
                     }
                     foundPasswordLabel = false
+                }else if (foundPasswordLabel && node.inputType == NETFLIX_LOGIN_PSSWORD_INPUT_TEXTVIEW_ID){ //for netflix like app with not autofill hints provided
+                    if (setUsernameId != null && requestType == RequestType.OnFillRequest) {
+                        setUsernameId(node.autofillId!!)
+                    }
+                    if (setUsernameValue != null && requestType == RequestType.OnSaveRequest) {
+                        val value = node.autofillValue
+                        if (value?.isText!! && value?.textValue != null) {
+                            setUsernameValue(value.textValue.toString())
+                        }
+                    }
                 }
             }
         }

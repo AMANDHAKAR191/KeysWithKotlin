@@ -27,10 +27,10 @@ class AccessVerificationRepositoryImpl(
 
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if (dataSnapshot.exists()){
+                    if (dataSnapshot.exists()) {
                         println("dataSnapshot: ${dataSnapshot}")
-                        for (ds in dataSnapshot.children){
-                            for (ds1 in ds.children){
+                        for (ds in dataSnapshot.children) {
+                            for (ds1 in ds.children) {
                                 println("ds: ${ds1}")
                                 val item = convertDataSnapshotToDeviceData(ds1)
                                 item?.let {
@@ -87,13 +87,22 @@ class AccessVerificationRepositoryImpl(
             }
         }
 
-    override fun requestAuthorizationAccess(primaryDeviceId:String, requestingDeviceId:String): Flow<Response<Pair<String?, Boolean?>>> =
+    override fun requestAuthorizationAccess(
+        primaryDeviceId: String,
+        authorizationCode:Int,
+        requestingDeviceId: String
+    ): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
             val _requestAuthorizationAccess =
-                RequestAuthorizationAccess(requesterID = requestingDeviceId, requestingAccess = true)
+                RequestAuthorizationAccess(
+                    requesterID = requestingDeviceId,
+                    authorizationCode = authorizationCode,
+                    requestingAccess = true
+                )
             try {
                 db.reference.child("users")
-                    .child(UID).child("userDevicesList").child(primaryDeviceId).child(primaryDeviceId)
+                    .child(UID).child("userDevicesList").child(primaryDeviceId)
+                    .child(primaryDeviceId)
                     .child("requestAuthorizationAccess").setValue(_requestAuthorizationAccess)
                     .addOnCompleteListener {
                         trySend(Response.Success(status = true))
@@ -106,15 +115,20 @@ class AccessVerificationRepositoryImpl(
             }
         }
 
-    override fun completeAuthorizationAccessProcess(primaryDeviceId:String): Flow<Response<Pair<String?, Boolean?>>> =
+    override fun completeAuthorizationAccessProcess(primaryDeviceId: String): Flow<Response<Pair<String?, Boolean?>>> =
         callbackFlow {
 
             println("primaryDeviceId: $primaryDeviceId")
             val _requestAuthorizationAccess =
-                RequestAuthorizationAccess(requesterID = "", requestingAccess = false)
+                RequestAuthorizationAccess(
+                    requesterID = "",
+                    authorizationCode = 0,
+                    requestingAccess = false
+                )
             try {
                 db.reference.child("users")
-                    .child(UID).child("userDevicesList").child(primaryDeviceId).child(primaryDeviceId)
+                    .child(UID).child("userDevicesList").child(primaryDeviceId)
+                    .child(primaryDeviceId)
                     .child("requestAuthorizationAccess").setValue(_requestAuthorizationAccess)
                     .addOnCompleteListener {
                         trySend(Response.Success(status = true))

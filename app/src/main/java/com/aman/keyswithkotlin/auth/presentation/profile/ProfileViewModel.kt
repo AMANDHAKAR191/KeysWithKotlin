@@ -3,6 +3,7 @@ package com.aman.keyswithkotlin.auth.presentation.profile
 import UIEvents
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -52,6 +53,7 @@ class ProfileViewModel @Inject constructor(
         private set
 
     val _accessRequestingDeviceId = mutableStateOf("")
+    val _authorizationCode = mutableIntStateOf(0)
 
     init {
         getAccessRequesterClient()
@@ -170,7 +172,8 @@ class ProfileViewModel @Inject constructor(
                                 println("response.data: ${response.data as RequestAuthorizationAccess}")
                                 if (response.data.requestingAccess) {
                                     _accessRequestingDeviceId.value = response.data.requesterID!!
-                                    _eventFlow.emit(UIEvents.ShowAuthorizationAlertDialog)
+                                    _authorizationCode.value = response.data.authorizationCode
+                                    _eventFlow.emit(UIEvents.ShowAuthorizationAlertDialog(_accessRequestingDeviceId.toString(), _authorizationCode.value))
                                 } else {
                                     _eventFlow.emit(UIEvents.HideAuthorizationAlertDialog)
                                     _eventFlow.emit(UIEvents.NavigateToNextScreen)

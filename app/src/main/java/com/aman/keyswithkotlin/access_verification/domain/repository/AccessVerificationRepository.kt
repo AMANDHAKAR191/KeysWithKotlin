@@ -13,7 +13,7 @@ interface  AccessVerificationRepository{
     fun removeAuthorizationAccessOfSecondaryDevice(deviceId: String): Flow<Response<Pair<String?, Boolean?>>>
     fun getAccessRequesterClient(deviceId: String): Flow<Response<Pair<RequestAuthorizationAccess?, Boolean?>>>
 
-    fun requestAuthorizationAccess(primaryDeviceId:String, requestingDeviceId:String): Flow<Response<Pair<String?, Boolean?>>>
+    fun requestAuthorizationAccess(primaryDeviceId:String,authorizationCode:Int, requestingDeviceId:String): Flow<Response<Pair<String?, Boolean?>>>
 
     fun completeAuthorizationAccessProcess(primaryDeviceId:String): Flow<Response<Pair<String?, Boolean?>>>
 }

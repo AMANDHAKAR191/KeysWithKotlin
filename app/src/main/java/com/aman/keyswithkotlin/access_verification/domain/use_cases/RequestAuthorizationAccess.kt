@@ -9,10 +9,12 @@ class RequestAuthorizationAccess(
 ) {
     operator fun invoke(
         primaryDeviceId: String,
+        authorizationCode:Int,
         requestingDeviceId: String
     ): Flow<Response<Pair<String?, Boolean?>>> {
         return accessVerificationRepository.requestAuthorizationAccess(
             primaryDeviceId = primaryDeviceId,
+            authorizationCode = authorizationCode,
             requestingDeviceId = requestingDeviceId
         )
     }

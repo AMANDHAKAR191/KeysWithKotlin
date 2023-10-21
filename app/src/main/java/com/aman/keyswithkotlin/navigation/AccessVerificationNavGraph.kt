@@ -18,6 +18,7 @@ fun NavGraphBuilder.accessVerificationNavGraph(
         composable(route = Screen.AccessVerificationScreen.route) {
             val viewModel: AccessVerificationViewModel = hiltViewModel()
             AccessVerificationScreen(
+                _authorizationCode = viewModel.authorizationCode,
                 eventFlowState = viewModel.eventFlow,
                 onEvent = viewModel::onEvent,
                 navigateToProfileScreen = {

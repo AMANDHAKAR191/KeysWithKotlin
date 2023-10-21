@@ -1,6 +1,5 @@
 package com.aman.keyswithkotlin.auth.domain.model
 
-import com.aman.keyswithkotlin.core.AES
 import com.aman.keyswithkotlin.core.Authentication
 import com.aman.keyswithkotlin.core.Authorization
 import com.aman.keyswithkotlin.core.DeviceType
@@ -32,6 +31,7 @@ data class DeviceData(
 
 data class RequestAuthorizationAccess(
     val requesterID:String? = "",
+    val authorizationCode:Int = 0,
     val requestingAccess:Boolean = false
 )
 

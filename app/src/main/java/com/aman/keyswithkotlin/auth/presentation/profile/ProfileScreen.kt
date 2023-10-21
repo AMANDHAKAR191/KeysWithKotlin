@@ -1,11 +1,17 @@
 package com.aman.keyswithkotlin.auth.presentation.profile
 
 import UIEvents
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -23,6 +30,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -74,7 +84,28 @@ fun ProfileScreen(
     }
     val coroutineScope = rememberCoroutineScope()
     var isAuthorizationAlertDialogVisible by remember { mutableStateOf(false) }
+    var codes = remember {
+        mutableStateListOf<Int>()
+    }
+    var receivedCode = remember {
+        mutableIntStateOf(0)
+    }
+    var isAuthorizationCodeMatched = remember {
+        mutableStateOf(false)
+    }
+    var isCodeSelected = remember {
+        mutableStateOf(false)
+    }
+    var isCodeInvaildError = remember {
+        mutableStateOf(false)
+    }
+    var showError = remember {
+        mutableStateOf(false)
+    }
 
+    LaunchedEffect(key1 = isCodeInvaildError.value){
+        showError != showError
+    }
     LaunchedEffect(key1 = true) {
         eventFlowState.collectLatest { event ->
             when (event) {
@@ -84,7 +115,13 @@ fun ProfileScreen(
                 }
 
                 is UIEvents.ShowAuthorizationAlertDialog -> {
+                    println("codes1: $codes")
+                    //initialize here
+                    receivedCode.value = event.authorizationCode
+                    codes.addAll(createShuffledList(event.authorizationCode))
+                    println("codes2: $codes")
                     isAuthorizationAlertDialogVisible = true
+                    println("codes3: $codes")
                 }
 
                 is UIEvents.HideAuthorizationAlertDialog -> {
@@ -205,7 +242,6 @@ fun ProfileScreen(
             }
 
             if (isAuthorizationAlertDialogVisible) {
-                println("check2::")
                 AlertDialog(
                     onDismissRequest = {
                         // Dismiss the dialog when the user clicks outside the dialog or on the back
@@ -213,27 +249,50 @@ fun ProfileScreen(
                         // onDismissRequest.
                     },
                     title = {
-                        Text(text = "Grant Permission!", color = MaterialTheme.colorScheme.error)
+                        Column {
+                            Text(
+                                text = "Grant Permission!",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
                     },
                     text = {
-                        Text(
-                            text = "Device is requesting for Login permission",
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            InputChipsRow(values = codes, onChipClick = {
+                                isCodeSelected.value = it != 0
+                                isAuthorizationCodeMatched.value = it == receivedCode.value
+                            })
+
+                            if (showError.value){
+                                Text(text = "Invalid code", color = MaterialTheme.colorScheme.error)
+                                println("code is invalid")
+                            }
+                        }
+//                        Row {
+//                            codes.forEach {code->
+//                                Box(
+//                                    modifier = Modifier
+//                                        .size(45.dp)
+//                                        .clip(CircleShape)
+//                                        .background(Color.Green),
+//                                    contentAlignment = Alignment.Center
+//                                ) {
+//                                    Text(text = "$code")
+//                                }
+//                                Spacer(modifier = Modifier.width(10.dp))
+//                            }
+//                        }
                     },
                     confirmButton = {
                         Button(onClick = {
-                            onEvent(AuthEvent.GrantAccessPermission)
-                        }) {
-                            Text("Grant Permission")
+                            if (isAuthorizationCodeMatched.value){
+                                onEvent(AuthEvent.GrantAccessPermission)
+                            }else{
+                                isCodeInvaildError.value = true
+                            }
+                        }, enabled = isCodeSelected.value) {
+                            Text("Approve")
                         }
-//                        TextButton(
-//                            onClick = {
-//
-//                            }
-//                        ) {
-//                            Text("Ask Permission")
-//                        }
                     },
                     dismissButton = {
                         TextButton(
@@ -280,21 +339,106 @@ fun ProfileScreen(
         }
     )
 }
-
-//@Preview
+//@OptIn(ExperimentalMaterial3Api::class)
 //@Composable
-//fun preview(){
-//    ProfileScreen(
-//        state = ProfileState(),
-//        displayName = "Aman dhaker",
-//        photoUrl = "",
-//        onEvent = {},
-//        signOutResponse = Response.Success(false),
-//        revokeAccessResponse = Response.Success(false),
-//        onSignOut = { /*TODO*/ },
-//        onRevokeAccess = { /*TODO*/ },
-//        navigateToAuthScreen = { /*TODO*/ },
-//        navigateToPasswordScreen = { /*TODO*/ }) {
-//
+//fun InputChipsRow(
+//    values: List<Int>,
+//    onChipClick: (Int) -> Unit
+//) {
+//    var chip1ValueSelected by remember {
+//        mutableStateOf(true)
+//    }
+//    var chip2ValueSelected by remember {
+//        mutableStateOf(false)
+//    }
+//    var chip3ValueSelected by remember {
+//        mutableStateOf(false)
+//    }
+//    Row(
+//        modifier = Modifier.fillMaxWidth(),
+//        horizontalArrangement = Arrangement.SpaceEvenly
+//    ) {
+//        InputChip(selected = chip1ValueSelected, onClick = {
+////            viewModel.onEvent(AddEditExpenseEvent.ChangeExpenseType("Income"))
+//            chip1ValueSelected = !chip1ValueSelected
+//            if (chip2ValueSelected) {
+//                chip2ValueSelected = !chip2ValueSelected
+//            }else if (chip3ValueSelected){
+//                chip3ValueSelected = !chip3ValueSelected
+//            }
+//        }, label = { Text(text = values.get(0).toString()) },
+//            modifier = Modifier
+//                .padding(all = 10.dp)
+//        )
+//        InputChip(selected = chip2ValueSelected, onClick = {
+////            viewModel.onEvent(AddEditExpenseEvent.ChangeExpenseType("Income"))
+//            chip2ValueSelected = !chip2ValueSelected
+//            if (chip1ValueSelected) {
+//                chip1ValueSelected = !chip1ValueSelected
+//            }else if (chip3ValueSelected){
+//                chip3ValueSelected = !chip3ValueSelected
+//            }
+//        }, label = { Text(text = values.get(0).toString()) },
+//            modifier = Modifier
+//                .padding(all = 10.dp)
+//        )
+//        InputChip(selected = chip3ValueSelected, onClick = {
+////            viewModel.onEvent(AddEditExpenseEvent.ChangeExpenseType("Income"))
+//            chip3ValueSelected = !chip3ValueSelected
+//            if (chip1ValueSelected) {
+//                chip1ValueSelected = !chip1ValueSelected
+//            }else if (chip2ValueSelected){
+//                chip2ValueSelected = !chip2ValueSelected
+//            }
+//        }, label = { Text(text = values.get(0).toString()) },
+//            modifier = Modifier
+//                .padding(all = 10.dp)
+//        )
 //    }
 //}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InputChipsRow(
+    values: List<Int>,
+    onChipClick: (Int) -> Unit
+) {
+    val selectedChips = remember { mutableStateListOf<Int>() }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        values.forEach { value ->
+            val isSelected = value in selectedChips
+
+            InputChip(
+                selected = isSelected,
+                onClick = {
+                    if (isSelected) {
+                        selectedChips.remove(value)
+                        onChipClick(0)
+                    } else {
+                        selectedChips.clear()
+                        selectedChips.add(value)
+                        onChipClick(value)
+                    }
+                },
+                label = { Text(text = value.toString()) },
+                modifier = Modifier.padding(all = 10.dp)
+            )
+        }
+    }
+}
+
+
+fun createShuffledList(parameter: Int): List<Int> {
+    val random1 = (10..99).random()
+    val random2 = (10..99).random()
+
+    val numbers = listOf(random1, random2, parameter)
+
+    // Now, you can use the 'shuffledList' in your Composable view.
+    // For example, you can create a LazyColumn to display the numbers.
+    return numbers.shuffled()
+}
