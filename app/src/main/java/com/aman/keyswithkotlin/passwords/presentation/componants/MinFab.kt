@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -23,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -35,7 +39,7 @@ fun MinFab(
     item: MinFabItem,
     alpha: Float,
     translateY: Dp,
-    onMinFabItemClick: (MinFabItem) -> Unit
+    onMinFabItemClick: (MinFabItem) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -43,7 +47,13 @@ fun MinFab(
             .wrapContentWidth()
             .offset(y = -translateY)
             .alpha(alpha)
-            .clickable { onMinFabItemClick(item) },
+            .clickable(
+                enabled = alpha > 0.6,
+                onClick = {
+                    onMinFabItemClick(item)
+                }
+            )
+            .then(if (alpha > 0.0f) Modifier else Modifier.alpha(0f).requiredWidth(0.dp).requiredHeight(0.dp)),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {

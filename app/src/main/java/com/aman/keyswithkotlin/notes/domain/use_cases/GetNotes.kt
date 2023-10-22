@@ -24,7 +24,7 @@ class GetNotes(
                     is Response.Success -> {
                         println("response: ${response.data}")
                         val decryptedPasswords = response.data?.map { encryptedPassword ->
-                            if (encryptedPassword.noteTitle.isBlank()) {
+                            if (encryptedPassword.noteBody.isBlank()) {
                                 encryptedPassword
                             } else {
                                 decryptNote(encryptedPassword, aes)
@@ -40,7 +40,6 @@ class GetNotes(
 
     private fun decryptNote(encryptedNote: Note, aes: AES): Note {
         val note = encryptedNote.copy()
-        note.noteTitle = aes.singleDecryption(encryptedNote.noteTitle)
         note.noteBody = aes.singleDecryption(encryptedNote.noteBody)
         // Decrypt any other user properties as needed
 

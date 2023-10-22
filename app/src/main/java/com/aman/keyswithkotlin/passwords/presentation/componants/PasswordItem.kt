@@ -80,14 +80,8 @@ fun PasswordItem(
                     contentAlignment = Alignment.Center,
                 ) {
                     if (password != null) {
-//                        val temp = try {
-//                            password.websiteName.split("[\\s\\W]+")[0]
-//                        } catch (e: IndexOutOfBoundsException) {
-//                            password.websiteName
-//                        }
                         val temp = getOneWordName(password.websiteName)
 
-//                        val scaleFactor = 80 / temp.length
                         val calculatedSize = (temp.length).toInt()
 
                         val adjustedSize = when {
@@ -102,7 +96,8 @@ fun PasswordItem(
                             style = TextStyle(
                                 fontSize = adjustedSize,
                                 fontWeight = FontWeight.Bold
-                            )
+                            ),
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -161,41 +156,8 @@ fun PasswordItem(
             )
         }
     }
-    Divider()
+    Divider(color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
-//fun getOneWordName(input: String): String {
-//    // Check if the input is a valid URL or app name
-//    val urlPattern = Regex("""^(https?://)?(www\.)?([a-zA-Z0-9-]+)\.([a-z]+)(/.*)?$""")
-//    val appPattern = Regex("""^[a-zA-Z0-9 -:\u2013&.]+$""") // Added \u2013 and \u003A to allow – and : and .
-//    if (
-//        !urlPattern.matches(input) &&
-//        !appPattern.matches(input)) {
-//        return input
-//    }
-//
-//    // Extract the one word name from the input
-//    val urlMatch = urlPattern.find(input)
-//    val appMatch1 = appPattern.find(input)
-//    return when {
-//        urlMatch != null -> {
-//            // Get the second group of the URL pattern, which is the subdomain name
-//            urlMatch.groupValues[3] // Added groupValues[2] to include www. if present
-//        }
-//
-//        appMatch1 != null -> {
-//
-//            // Preprocess the input to replace or remove special characters
-//            val cleanedInput = input.replace(Regex("[^a-zA-Z0-9 ]"), " ")
-//
-//            // Get the first word of the app name
-//            val firstWord = cleanedInput.trim().split(" ")[0]
-//            firstWord
-//        }
-//        else -> {
-//            "Unknown error"
-//        }
-//    }
-//}
 
 fun getOneWordName(input: String): String {
     // Check if the input is a valid URL or app name

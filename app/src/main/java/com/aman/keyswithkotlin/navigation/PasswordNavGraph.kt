@@ -79,10 +79,11 @@ fun NavGraphBuilder.passwordNavGraph(
                 onSharedPasswordEvent = sharedPasswordViewModel::onEvent,
                 passwordItem = sharedPasswordViewModel.itemToEdit.value.passwordItem,
                 generatedPassword = sharedPasswordViewModel.generatedPassword.value.generatedPassword,
-                navigateToPasswordScreen = {
-                    navController.navigate(BottomBarScreen.Password.route) {
-                        popUpTo(BottomBarScreen.Password.route)
-                    }
+                navigateBack = {
+                    navController.popBackStack()
+//                    navController.navigate(BottomBarScreen.Password.route) {
+//                        popUpTo(BottomBarScreen.Password.route)
+//                    }
                 },
                 navigateToGeneratePasswordScreen = {
                     navController.navigate(Screen.GeneratePasswordScreen.route)
@@ -95,7 +96,7 @@ fun NavGraphBuilder.passwordNavGraph(
                 state = viewModel.state.value,
                 onEvent = viewModel::onEvent,
                 onSharedPasswordEvent = sharedPasswordViewModel::onEvent,
-                navigateToPasswordScreen = {
+                navigateBack = {
                     navController.popBackStack()
                 },
                 navigateToAddEditPasswordScreen = {
@@ -110,7 +111,7 @@ fun NavGraphBuilder.passwordNavGraph(
             val viewModel: GeneratePasswordViewModel = hiltViewModel()
             RecentGeneratePasswordScreen(
                 recentGeneratedPasswordList = viewModel.state.value.recentGeneratedPasswordList,
-                navigateToGeneratePasswordScreen = {
+                navigateBack = {
                     navController.popBackStack()
                 })
         }

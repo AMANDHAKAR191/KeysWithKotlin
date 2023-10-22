@@ -28,12 +28,6 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun onEvent(event: AddEditNoteEvent) {
         when (event) {
-            is AddEditNoteEvent.EnteredTitle -> {
-                _state.value = state.value.copy(
-                    noteTitle = event.value
-                )
-            }
-
             is AddEditNoteEvent.EnteredContent -> {
                 _state.value = state.value.copy(
                     noteBody = event.value
@@ -51,7 +45,6 @@ class AddEditNoteViewModel @Inject constructor(
                     try {
                         noteUseCases.addNote(
                             Note(
-                                noteTitle = state.value.noteTitle,
                                 noteBody = state.value.noteBody,
                                 timestamp = state.value.timestamp,
                                 color = state.value.color,

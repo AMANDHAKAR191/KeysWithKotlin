@@ -80,17 +80,9 @@ fun NoteItem(
                 .padding(top = 16.dp, start = 16.dp, bottom = 8.dp, end = 8.dp)
         ) {
             Text(
-                text = note.noteTitle,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
                 text = note.noteBody,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = Color.Black,
                 maxLines = 10,
                 overflow = TextOverflow.Ellipsis
             )
@@ -103,7 +95,7 @@ fun NoteItem(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete note",
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = Color.Black
                 )
             }
         }

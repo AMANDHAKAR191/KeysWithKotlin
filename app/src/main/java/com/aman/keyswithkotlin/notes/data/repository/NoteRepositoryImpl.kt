@@ -90,7 +90,6 @@ class NoteRepositoryImpl(
                 if (isActive) trySend(Response.Failure(Exception("timestamp is empty")))
             }
             val _note = Note(
-                noteTitle = note.noteTitle,
                 noteBody = note.noteBody,
                 timestamp = formatted,
                 color = note.color
@@ -115,7 +114,6 @@ class NoteRepositoryImpl(
 
     private fun encryptPassword(note: Note, aes: AES): Note {
         val encryptedNote = note.copy()
-        encryptedNote.noteTitle = aes.singleEncryption(note.noteTitle)
         encryptedNote.noteBody = aes.singleEncryption(note.noteBody)
         // Encrypt any other user properties as needed
 
@@ -124,7 +122,6 @@ class NoteRepositoryImpl(
 
     private fun decryptPassword(encryptedNote: Note, aes: AES): Note {
         val note = encryptedNote.copy()
-        note.noteTitle = aes.singleDecryption(encryptedNote.noteTitle)
         note.noteBody = aes.singleDecryption(encryptedNote.noteBody)
         // Encrypt any other user properties as needed
 

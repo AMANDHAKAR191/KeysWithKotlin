@@ -230,6 +230,15 @@ fun PasswordScreen(
                 item = items,
                 onMinFabItemClick = { minFabItem ->
                     handleNavigation(minFabItem.identifier)
+                },
+                onFABClickGloballyPositioned = { coordinates ->
+                    targets["AddItem"] =
+                        ShowCaseProperty(
+                            index = 1,
+                            coordinate = coordinates,
+                            title = "Add Item",
+                            subTitle = "Click here to add password \nor \ngenerate a new password"
+                        )
                 }
             )
         },
@@ -237,225 +246,232 @@ fun PasswordScreen(
             bottomBar()
         },
         content = { innerPadding ->
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                DockedSearchBar(
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 7.dp, vertical = 10.dp),
-                    query = searchtext.value,
-                    onQueryChange = {
-                        onEvent(PasswordEvent.OnSearchTextChange(it))
-                        searchtext.value = it
-                    },
-                    onSearch = {},
-                    colors = SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
-                    placeholder = {
-                        Text(
-                            modifier = Modifier.onGloballyPositioned { coordinates ->
-                                targets["Search"] = ShowCaseProperty(
-                                    index = 0,
-                                    coordinate = coordinates,
-                                    title = "Search passwords",
-                                    subTitle = "Click here, to search password"
-                                )
-                            },
-                            text = "Search"
-                        )
-                    },
-                    active = isSearchBarActive,
-                    onActiveChange = { isSearchBarActive = it },
-                    leadingIcon = {
-                        IconButton(
-                            onClick = {}
-                        ) {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
-                        }
-                    },
-                    trailingIcon = {
-                        if (isSearchBarActive) {
-                            IconButton(onClick = {
-                                if (searchtext.value != "") {
-                                    searchtext.value = ""
-                                } else {
-                                    isSearchBarActive = false
-                                }
-                            }) {
-                                Icon(Icons.Default.Close, contentDescription = "Close")
-                            }
-                        }
-                    },
-                    content = {
-                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                            searchedPasswords?.let { searchedPasswords ->
-                                items(searchedPasswords.take(3)) { password ->
-                                    SearchedPasswordItem(
-                                        password = password,
-                                        onItemClick = {
-                                            isSearchBarActive = false
-                                            itemToView.value = password
-                                            viewPassword = true
-                                        }
+                        .fillMaxSize()
+                ) {
+                    DockedSearchBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 7.dp, vertical = 10.dp),
+                        query = searchtext.value,
+                        onQueryChange = {
+                            onEvent(PasswordEvent.OnSearchTextChange(it))
+                            searchtext.value = it
+                        },
+                        onSearch = {},
+                        colors = SearchBarDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        placeholder = {
+                            Text(
+                                modifier = Modifier.onGloballyPositioned { coordinates ->
+                                    targets["Search"] = ShowCaseProperty(
+                                        index = 0,
+                                        coordinate = coordinates,
+                                        title = "Search passwords",
+                                        subTitle = "Click here, to search password"
                                     )
+                                },
+                                text = "Search"
+                            )
+                        },
+                        active = isSearchBarActive,
+                        onActiveChange = { isSearchBarActive = it },
+                        leadingIcon = {
+                            IconButton(
+                                onClick = {}
+                            ) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
+                        },
+                        trailingIcon = {
+                            if (isSearchBarActive) {
+                                IconButton(onClick = {
+                                    if (searchtext.value != "") {
+                                        searchtext.value = ""
+                                    } else {
+                                        isSearchBarActive = false
+                                    }
+                                }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Close")
+                                }
+                            }
+                        },
+                        content = {
+                            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                                searchedPasswords?.let { searchedPasswords ->
+                                    items(searchedPasswords.take(3)) { password ->
+                                        SearchedPasswordItem(
+                                            password = password,
+                                            onItemClick = {
+                                                isSearchBarActive = false
+                                                itemToView.value = password
+                                                viewPassword = true
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
-                )
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    content = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
-                                )
-                                .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-                                .padding(top = 30.dp, start = 20.dp, end = 20.dp)
-                        ) {
-                            if (state.value.passwords.isEmpty()) {
-                                Text(
-                                    text = "No Password  Saved",
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .testTag("NoPasswordHelperText")
-                                )
-                            } else {
-                                LazyColumn {
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .width(50.dp)
-                                                .padding(start = 10.dp),
-                                            horizontalAlignment = Alignment.Start
-                                        ) {
-                                            Text(
-                                                text = "Recently used passwords",
-                                                textAlign = TextAlign.Start
+                    )
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize().padding(top = 80.dp),
+                        content = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
+                                    )
+                                    .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                                    .padding(top = 30.dp, start = 20.dp, end = 20.dp),
+                                contentAlignment = Center
+                            ) {
+                                if (state.value.passwords.isEmpty()) {
+                                    Text(
+                                        text = "No Password  Saved",
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .testTag("NoPasswordHelperText")
+                                    )
+                                } else {
+                                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                        item {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .width(50.dp)
+                                                    .padding(start = 10.dp),
+                                                horizontalAlignment = Alignment.Start
+                                            ) {
+                                                Text(
+                                                    text = "Recently used passwords",
+                                                    textAlign = TextAlign.Start
+                                                )
+                                            }
+                                        }
+                                        items(state.value.recentlyUsedPasswords.take(3)) { password ->
+                                            PasswordItem(
+                                                password = password,
+                                                onItemClick = {
+                                                    itemToView.value = password
+                                                    viewPassword = true
+                                                },
+                                                onItemLongClick = {
+                                                    itemToView.value = password
+                                                    onLongClicked = true
+                                                },
+                                                onMoreClick = {
+                                                    itemToView.value = password
+                                                    onLongClicked = true
+                                                }
                                             )
-                                        }
-                                    }
-                                    items(state.value.recentlyUsedPasswords.take(3)) { password ->
-                                        PasswordItem(
-                                            password = password,
-                                            onItemClick = {
-                                                itemToView.value = password
-                                                viewPassword = true
-                                            },
-                                            onItemLongClick = {
-                                                itemToView.value = password
-                                                onLongClicked = true
-                                            },
-                                            onMoreClick = {
-                                                itemToView.value = password
-                                                onLongClicked = true
-                                            }
-                                        )
 //                                            ShimmerListItem(
 //                                                isLoading = isLoading,
 //                                                contentAfterLoading = {
 //
 //                                                })
-                                    }
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .width(50.dp)
-                                                .padding(start = 10.dp),
-                                            horizontalAlignment = Alignment.Start
-                                        ) {
-                                            Text(text = "All passwords")
                                         }
-                                    }
+                                        item {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .width(50.dp)
+                                                    .padding(start = 10.dp),
+                                                horizontalAlignment = Alignment.Start
+                                            ) {
+                                                Text(text = "All passwords")
+                                            }
+                                        }
 
-                                    items(state.value.passwords) { password ->
-                                        PasswordItem(
-                                            password = password,
-                                            onItemClick = {
-                                                itemToView.value = password
-                                                viewPassword = true
-                                            },
-                                            onItemLongClick = {
-                                                itemToView.value = password
-                                                onLongClicked = true
-                                            },
-                                            onMoreClick = {
-                                                itemToView.value = password
-                                                onLongClicked = true
+                                        items(state.value.passwords) { password ->
+                                            PasswordItem(
+                                                password = password,
+                                                onItemClick = {
+                                                    itemToView.value = password
+                                                    viewPassword = true
+                                                },
+                                                onItemLongClick = {
+                                                    itemToView.value = password
+                                                    onLongClicked = true
+                                                },
+                                                onMoreClick = {
+                                                    itemToView.value = password
+                                                    onLongClicked = true
 //                                                    onEvent(PasswordEvent.UpdateLastUsedPasswordTimeStamp(password = password))
-                                            },
-                                            onClickGloballyPositioned = if (password == state.value.passwords.first()) {
-                                                { coordinates ->
-                                                    targets["ViewPssword"] =
-                                                        ShowCaseProperty(
-                                                            index = 1,
-                                                            coordinate = coordinates,
-                                                            title = "View password",
-                                                            subTitle = "Click here to view password"
-                                                        )
+                                                },
+                                                onClickGloballyPositioned = if (password == state.value.passwords.first()) {
+                                                    { coordinates ->
+                                                        targets["ViewPssword"] =
+                                                            ShowCaseProperty(
+                                                                index = 2,
+                                                                coordinate = coordinates,
+                                                                title = "View password",
+                                                                subTitle = "Click here to view password"
+                                                            )
+                                                    }
+                                                } else {
+                                                    null
+                                                },
+                                                onLongPressGloballyPositioned = if (password == state.value.passwords.first()) {
+                                                    { coordinates ->
+                                                        targets["PasswordOption"] =
+                                                            ShowCaseProperty(
+                                                                index = 3,
+                                                                coordinate = coordinates,
+                                                                title = "View password options",
+                                                                subTitle = "Click here or Long press on password item to view password options"
+                                                            )
+                                                    }
+                                                } else {
+                                                    null
                                                 }
-                                            } else {
-                                                null
-                                            },
-                                            onLongPressGloballyPositioned = if (password == state.value.passwords.first()) {
-                                                { coordinates ->
-                                                    targets["PasswordOption"] =
-                                                        ShowCaseProperty(
-                                                            index = 2,
-                                                            coordinate = coordinates,
-                                                            title = "View password options",
-                                                            subTitle = "Click here or Long press on password item to view password options"
-                                                        )
-                                                }
-                                            } else {
-                                                null
-                                            }
-                                        )
+                                            )
 //                                            ShimmerListItem(
 //                                                isLoading = isLoading,
 //                                                contentAfterLoading = {
 //
 //                                                })
-                                    }
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(50.dp)
-                                                .padding(top = 10.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(text = "This is end of passwords")
+                                        }
+                                        item {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(50.dp)
+                                                    .padding(top = 10.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(text = "This is end of passwords")
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                )
+                    )
+                }
+                if (multiFloatingState == MultiFloatingState.Expended) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .clickable { multiFloatingState = MultiFloatingState.Collapsed }
+                    )
+                }
             }
         }
     )
 
-    if (multiFloatingState == MultiFloatingState.Expended) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
-                .clickable { multiFloatingState = MultiFloatingState.Collapsed }
-        )
-    }
+
 
 
     if (state.value.isLoading) {

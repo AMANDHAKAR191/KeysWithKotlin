@@ -9,7 +9,6 @@ import com.aman.keyswithkotlin.ui.theme.Violet
 import okhttp3.internal.toHexString
 
 data class Note constructor(
-    var noteTitle: String = "",
     var noteBody: String = "",
     val timestamp: String = "",
     val color: String = "#" + noteColors.random().toArgb().toHexString(),

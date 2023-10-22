@@ -6,12 +6,14 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
@@ -27,7 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -48,7 +53,8 @@ fun ExpendableFloatingButton(
     multiFloatingState: MultiFloatingState,
     onMultiFabStateChange: (MultiFloatingState) -> Unit,
     item: List<MinFabItem>,
-    onMinFabItemClick: (MinFabItem) -> Unit
+    onMinFabItemClick: (MinFabItem) -> Unit,
+    onFABClickGloballyPositioned: ((LayoutCoordinates) -> Unit)? = null,
 ) {
     val transition = updateTransition(
         targetState = multiFloatingState, label = "transition"
@@ -71,27 +77,31 @@ fun ExpendableFloatingButton(
 
 
     Box(
-        modifier = Modifier.padding(end = 20.dp),
+        modifier = Modifier.wrapContentSize(),
         contentAlignment = Alignment.BottomEnd
     ) {
-        MinFab(item = item.get(0),
+        MinFab(
+            item = item.get(0),
             alpha = alpha,
             translateY = translateY,
             onMinFabItemClick = { minFabItem ->
                 onMinFabItemClick(minFabItem)
-            })
+            }
+        )
         MinFab(item = item.get(1),
             alpha = alpha,
             translateY = (translateY*16)/9,
             onMinFabItemClick = { minFabItem ->
                 onMinFabItemClick(minFabItem)
-            })
+            }
+        )
         MinFab(item = item.get(2),
             alpha = alpha,
             translateY = (translateY*5)/2,
             onMinFabItemClick = { minFabItem ->
                 onMinFabItemClick(minFabItem)
-            })
+            }
+        )
         FloatingActionButton(
             onClick = {
                 onMultiFabStateChange(
@@ -101,7 +111,11 @@ fun ExpendableFloatingButton(
                         MultiFloatingState.Expended
                     }
                 )
-            }, modifier = Modifier.padding(bottom = 20.dp)
+            }, modifier = Modifier.onGloballyPositioned { coordinates ->
+                if (onFABClickGloballyPositioned != null) {
+                    onFABClickGloballyPositioned(coordinates)
+                }
+            }
         ) {
             Icon(
                 Icons.Default.Add, contentDescription = "", modifier = Modifier.rotate(rotate)

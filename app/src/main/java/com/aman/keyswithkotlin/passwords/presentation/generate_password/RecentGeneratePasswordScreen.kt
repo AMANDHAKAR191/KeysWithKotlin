@@ -29,7 +29,7 @@ import com.aman.keyswithkotlin.passwords.domain.model.GeneratedPasswordModelClas
 @Composable
 fun RecentGeneratePasswordScreen(
     recentGeneratedPasswordList: MutableList<GeneratedPasswordModelClass> = mutableListOf<GeneratedPasswordModelClass>(),
-    navigateToGeneratePasswordScreen: () -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     Scaffold(modifier = Modifier.fillMaxSize(),
@@ -40,7 +40,7 @@ fun RecentGeneratePasswordScreen(
                     Icon(
                         Icons.Default.ArrowBack,
                         contentDescription = null,
-                        modifier = Modifier.clickable { navigateToGeneratePasswordScreen() })
+                        modifier = Modifier.clickable { navigateBack() })
                 })
         }) { innnerPaddng ->
         Column(

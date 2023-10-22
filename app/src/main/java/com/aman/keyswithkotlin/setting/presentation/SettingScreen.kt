@@ -9,13 +9,18 @@ import android.view.autofill.AutofillManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,8 +30,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
@@ -39,8 +46,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -63,6 +68,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -75,12 +81,10 @@ import com.aman.keyswithkotlin.core.LockAppType
 import com.aman.keyswithkotlin.core.components.ShowInfoToUser
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
 import com.aman.keyswithkotlin.passwords.domain.model.Password
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.google.android.gms.common.api.ApiException
 import com.opencsv.CSVReader
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import java.io.InputStreamReader
 
 
@@ -102,6 +106,8 @@ fun SettingScreen(
 
     val state = _state.collectAsState()
     val scope = rememberCoroutineScope()
+
+    val customSpacerWidth = 20.dp
 
     var lockAppSelectedOption by remember {
         mutableStateOf("")
@@ -154,7 +160,10 @@ fun SettingScreen(
         },
         content = { innerPadding ->
             Column(
-                modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
                 Header(
                     photoUrl = photoUrl,
                     displayName = displayName,
@@ -175,13 +184,14 @@ fun SettingScreen(
                                 )
                                 .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                                 .padding(top = 30.dp, start = 20.dp, end = 20.dp)
+                                .verticalScroll(rememberScrollState())
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(text = "Lock App", fontSize = 20.sp)
+                                CustomText(text = "Lock App", description = "")
                                 MenuSample(
                                     selectedOption = lockAppSelectedOption,
                                     updateLockAppSetting = {
@@ -189,7 +199,7 @@ fun SettingScreen(
                                     }
                                 )
                             }
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(customSpacerWidth))
                             SingleDeviceCard(loggedInDeviceList = state.value.loggedInDeviceList)
                             Spacer(modifier = Modifier.height(10.dp))
                             Row(
@@ -197,11 +207,7 @@ fun SettingScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(
-                                    text = "Autofill Password",
-                                    fontSize = 20.sp,
-                                )
-                                println("isAutofillServiceEnabled: $isAutofillServiceEnabled")
+                                CustomText(text = "Autofill Password", description = "")
                                 SwitchWithIcon(
                                     checked = isAutofillServiceEnabled,
                                     onCheckedChange = {
@@ -216,15 +222,11 @@ fun SettingScreen(
                                         }
                                     })
                             }
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = "Import Passwords", fontSize = 20.sp,
-                                modifier = Modifier.clickable {
-                                    isReadCSV = true
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(customSpacerWidth))
+                            CustomText(text = "Import Passwords", description = "", onClick = {
+                                isReadCSV = true
+                            })
+                            Spacer(modifier = Modifier.height(customSpacerWidth))
                             if (isReadCSV) {
                                 CsvReaderScreen(
                                     passwordImported = {
@@ -232,28 +234,21 @@ fun SettingScreen(
                                     }
                                 )
                             }
-                            Text(
-                                text = "User Guide", fontSize = 20.sp,
-                                modifier = Modifier.clickable {
-                                    onEvent(SettingEvent.EnableTutorial)
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = "App Info",
-                                fontSize = 20.sp,
-                                modifier = Modifier.clickable {
-                                    navigateToAppInfoScreen()
-                                })
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(text = "Contact Us", fontSize = 20.sp,
-                                modifier = Modifier.clickable {
-                                    showErrorDialog.value = true
-                                })
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(text = "Privacy Policy", fontSize = 20.sp)
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(text = "Terms & conditions", fontSize = 20.sp)
+                            CustomText(text = "User Guide", description = "", onClick = {
+                                onEvent(SettingEvent.EnableTutorial)
+                            })
+                            Spacer(modifier = Modifier.height(customSpacerWidth))
+                            CustomText(text = "App Info", description = "", onClick = {
+                                navigateToAppInfoScreen()
+                            })
+                            Spacer(modifier = Modifier.height(customSpacerWidth))
+                            CustomText(text = "Contact Us", description = "", onClick = {
+                                showErrorDialog.value = true
+                            })
+                            Spacer(modifier = Modifier.height(customSpacerWidth))
+                            CustomText(text = "Privacy Policy", description = "")
+                            Spacer(modifier = Modifier.height(customSpacerWidth))
+                            CustomText(text = "Terms & conditions", description = "")
                         }
                     }
                 )
@@ -261,6 +256,33 @@ fun SettingScreen(
         }
     )
 }
+
+
+@Composable
+fun CustomText(
+    text: String,
+    description: String,
+    customSpacerWidth: Dp = 10.dp,
+    textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    onClick: (() -> Unit)? = null,
+) {
+    Column(
+        modifier = Modifier.then(if (onClick==null) Modifier else Modifier.clickable { onClick() }),
+    ) {
+        Text(
+            text = text, fontSize = 20.sp,
+            fontWeight = FontWeight.W500,
+            color = textColor
+        )
+        Text(
+            text = "description", fontSize = 18.sp,
+            fontWeight = FontWeight.W300,
+            color = textColor
+        )
+        Spacer(modifier = Modifier.height(customSpacerWidth))
+    }
+}
+
 
 @Composable
 fun MenuSample(
@@ -359,13 +381,10 @@ fun SingleDeviceCard(loggedInDeviceList: List<DeviceData>) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
+            CustomText(
                 text = "Devices (${loggedInDeviceList.size})",
-                fontSize = 20.sp,
-                modifier = Modifier.noRippleEffect {
-                    isDevicesVisible = !isDevicesVisible
-                }
-            )
+                description = "",
+                onClick = { isDevicesVisible = !isDevicesVisible })
             if (isDevicesVisible) {
                 Card(
                     modifier = Modifier
@@ -450,7 +469,7 @@ fun SwitchWithIcon(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 
 @Composable
 fun CsvReaderScreen(
-    passwordImported:(List<Password>)->Unit
+    passwordImported: (List<Password>) -> Unit
 ) {
     var passwordList = remember { mutableStateListOf<Password>() }
     var csvData by remember { mutableStateOf<List<List<String>>?>(null) }
@@ -504,9 +523,11 @@ fun CsvReaderScreen(
 
 
     Column {
-        LazyColumn(modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        ) {
             items(passwordList) {
                 PasswordItem(password = it)
                 Spacer(modifier = Modifier.height(10.dp))

@@ -19,9 +19,6 @@ class AddNote(
 ) {
     @Throws(InvalidPasswordException::class)
     operator fun invoke(note: Note): Flow<Response<Pair<String?, Boolean?>>> {
-        if (note.noteTitle.isBlank()) {
-            throw InvalidNoteException("The noteTitle can't be empty.")
-        }
         if (note.noteBody.isBlank()) {
             throw InvalidNoteException("The noteBody can't be empty.")
         }
@@ -35,7 +32,6 @@ class AddNote(
 
     private fun encryptNote(note: Note, aes: AES): Note {
         val encryptedNote = note.copy()
-        encryptedNote.noteTitle = aes.singleEncryption(note.noteTitle)
         encryptedNote.noteBody = aes.singleEncryption(note.noteBody)
         // Encrypt any other user properties as needed
 

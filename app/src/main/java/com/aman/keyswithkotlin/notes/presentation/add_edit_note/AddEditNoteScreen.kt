@@ -180,18 +180,6 @@ fun AddEditNoteScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 TransparentHintTextField(
-                    text = state.noteTitle,
-                    label = "Title",
-                    hint = "Title",
-                    onValueChange = {
-                        onEvent(AddEditNoteEvent.EnteredTitle(it))
-                    },
-                    singleLine = true,
-                    showIndicator = true,
-                    textStyle = MaterialTheme.typography.headlineSmall
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TransparentHintTextField(
                     text = state.noteBody,
                     label = "Content",
                     hint = "Write here...",

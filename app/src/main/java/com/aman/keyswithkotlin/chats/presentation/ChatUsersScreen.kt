@@ -103,7 +103,8 @@ fun ChatsScreen(
             }
         }
     }
-    Scaffold(topBar = {
+    Scaffold(
+        topBar = {
         TopAppBar(
             title = {
                 Text(text = "Chat")
@@ -111,7 +112,8 @@ fun ChatsScreen(
             colors = TopAppBarDefaults.topAppBarColors(),
             modifier = Modifier.fillMaxWidth()
         )
-    }, modifier = Modifier, floatingActionButton = {
+    }, modifier = Modifier,
+        floatingActionButton = {
         FloatingActionButton(onClick = {
             isDialogVisible = true;
         },
@@ -124,14 +126,15 @@ fun ChatsScreen(
                         title = "Create Chat",
                         subTitle = "Click here!! to create new chat"
                     )
-                }
-                .padding(all = 20.dp),
+                },
             shape = FloatingActionButtonDefaults.shape) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
         }
-    }, bottomBar = {
+    },
+        bottomBar = {
         bottomBar()
-    }, content = { innerPadding ->
+    },
+        content = { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

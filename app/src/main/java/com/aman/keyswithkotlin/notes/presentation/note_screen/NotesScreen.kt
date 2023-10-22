@@ -113,8 +113,7 @@ fun NotesScreen(
                     handleNavigation()
                 },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier
-                    .padding(all = 20.dp),
+                modifier = Modifier,
                 shape = FloatingActionButtonDefaults.shape
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")

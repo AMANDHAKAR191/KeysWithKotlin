@@ -1,22 +1,15 @@
 package com.aman.keyswithkotlin.chats.presentation.individual_chat
 
 import UIEvents
-import android.view.ViewTreeObserver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -36,9 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -47,7 +39,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,8 +50,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -75,7 +64,6 @@ import com.aman.keyswithkotlin.chats.presentation.SharedChatState
 import com.aman.keyswithkotlin.chats.presentation.SpacerWidth
 import com.aman.keyswithkotlin.core.util.TimeStampUtil
 import com.aman.keyswithkotlin.passwords.domain.model.Password
-import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.PasswordEvent
 import com.aman.keyswithkotlin.ui.theme.Pink80
 import com.aman.keyswithkotlin.ui.theme.RedOrange
 import kotlinx.coroutines.flow.SharedFlow
@@ -108,9 +96,13 @@ fun IndividualChatScreen(
     LaunchedEffect(key1 = true) {
         eventFlowState.collectLatest { event ->
             when (event) {
-                is UIEvents.SendNotification->{
+                is UIEvents.SendNotification -> {
                     println("otherUserPublicUid: ${data?.otherUserPublicUid} my public Id: ${event.publicUid}")
-                    sendNotification(data?.otherUserPublicUid!!, event.publicUid, event.messageBody?:"test message")
+                    sendNotification(
+                        data?.otherUserPublicUid!!,
+                        event.publicUid,
+                        event.messageBody ?: "test message"
+                    )
                 }
 
                 else -> {}
@@ -131,7 +123,10 @@ fun IndividualChatScreen(
         }
     }
     // Scroll to the bottom of the LazyColumn when a new item is added
-    LaunchedEffect(key1 = state.value.chatMessagesList?.size, key2 = state.value.isMessageReceived) {
+    LaunchedEffect(
+        key1 = state.value.chatMessagesList?.size,
+        key2 = state.value.isMessageReceived
+    ) {
         if (chatMessages.isNullOrEmpty()) {
             //todo do nothing
         } else {
@@ -187,66 +182,54 @@ fun IndividualChatScreen(
         topBar = {
             TopAppBar(
                 modifier = Modifier.fillMaxWidth(),
-                title = { Text(text = "") },
+                title = {
+                    UserNameRow(
+                        person = data,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .padding(
+                                top = 20.dp,
+                                start = 20.dp,
+                                end = 20.dp,
+                                bottom = 20.dp
+                            )
+//                            .navigationBarsPadding()
+//                            .imePadding()
+                    )
+                },
                 navigationIcon = {
                     Icon(
                         Icons.Default.ArrowBack,
                         contentDescription = null,
                         modifier = Modifier.clickable {
-//                            onSharedChatEvent(ChatEvent.resetSharedViewModel)
                             navigateToPasswordScreen()
                         }
                     )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Black,
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                ),
-                scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+                }
             )
         },
         content = { innerPadding ->
-            Box(
+            Surface(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .background(Color.Black)
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
             ) {
-                UserNameRow(
-                    person = data,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(80.dp)
-                        .padding(
-                            top = 5.dp,
-                            start = 20.dp,
-                            end = 20.dp,
-                            bottom = 20.dp
-                        )
-                        .navigationBarsPadding()
-                        .imePadding()
-                )
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 80.dp)
                         .background(
-                            Color.White, RoundedCornerShape(
-                                topStart = 30.dp, topEnd = 30.dp
-                            )
-                        ),
-                    contentAlignment = Alignment.BottomCenter
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
+                        )
+                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                        .padding(top = 30.dp, start = 20.dp, end = 20.dp),
                 ) {
                     LazyColumn(
-                        modifier = Modifier.padding(
-                            start = 15.dp,
-                            top = 25.dp,
-                            end = 15.dp,
-                            bottom = 75.dp
-                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(all = 10.dp),
                         state = lazyColumnState
                     ) {
                         if (chatMessages != null) {
@@ -261,36 +244,35 @@ fun IndividualChatScreen(
                         } else {
                         }
                     }
-                }
-                CustomTextField(
-                    text = messageTextValue, onValueChange = {
-                        onChatEvent(ChatMessageEvent.OnMessageEntered(it))
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp, vertical = 10.dp)
-                        .align(Alignment.BottomCenter),
-                    onTrailingIconButtonClicked = {
-                        if (chatMessages.isNullOrEmpty()){
-                            onChatEvent(
-                                ChatMessageEvent.SendMessage(
-                                    data?.commonChatRoomId!!,
-                                    person = data,
-                                    sharedChatState.value.sharedPasswordItem
+                    CustomTextField(
+                        text = messageTextValue, onValueChange = {
+                            onChatEvent(ChatMessageEvent.OnMessageEntered(it))
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 5.dp, vertical = 10.dp),
+                        onTrailingIconButtonClicked = {
+                            if (chatMessages.isNullOrEmpty()) {
+                                onChatEvent(
+                                    ChatMessageEvent.SendMessage(
+                                        data?.commonChatRoomId!!,
+                                        person = data,
+                                        sharedChatState.value.sharedPasswordItem
+                                    )
                                 )
-                            )
-                        }else{
-                            onChatEvent(
-                                ChatMessageEvent.SendMessage(
-                                    data?.commonChatRoomId!!,
-                                    person = null,
-                                    sharedChatState.value.sharedPasswordItem
+                            } else {
+                                onChatEvent(
+                                    ChatMessageEvent.SendMessage(
+                                        data?.commonChatRoomId!!,
+                                        person = null,
+                                        sharedChatState.value.sharedPasswordItem
+                                    )
                                 )
-                            )
+                            }
+                            onSharedChatEvent(SharedChatEvent.SharePasswordItem(null))
+                            onSharedChatEvent(SharedChatEvent.ShareNoteItem(null))
                         }
-                        onSharedChatEvent(SharedChatEvent.SharePasswordItem(null))
-                        onSharedChatEvent(SharedChatEvent.ShareNoteItem(null))
-                    }
-                )
+                    )
+                }
             }
         }
     )
@@ -311,7 +293,7 @@ fun ChatRow(
             modifier = Modifier
                 .background(
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    RoundedCornerShape(20f)
+                    RoundedCornerShape(10.dp)
                 ),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Center
@@ -331,7 +313,7 @@ fun ChatRow(
             modifier = Modifier
                 .background(
                     if (chat.publicUid != senderPublicUID) RedOrange else Pink80,
-                    RoundedCornerShape(100.dp)
+                    RoundedCornerShape(10.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -372,12 +354,9 @@ fun CustomTextField(
     ) {
         IconButton(
             onClick = { /*TODO*/ },
-            modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(100.dp))
-                .background(Color.Yellow)
+            modifier = Modifier.size(32.dp)
         ) {
-            Icon(Icons.Default.Add, contentDescription = "", modifier = Modifier.size(16.dp))
+            Icon(Icons.Default.Add, contentDescription = "", modifier = Modifier.size(32.dp))
         }
         TextField(
             value = text, onValueChange = { onValueChange(it) },
@@ -397,24 +376,26 @@ fun CustomTextField(
                 focusedIndicatorColor = Color.Transparent
             ),
             keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Send
+            ),
+            keyboardActions = KeyboardActions(
+                onSend = {
+                    onTrailingIconButtonClicked()
+                }
             ),
             modifier = Modifier
                 .padding(horizontal = 5.dp)
-                .weight(0.8f),
+                .weight(1f),
             maxLines = 5,
-            shape = CircleShape
+            shape = RoundedCornerShape(20.dp)
         )
         IconButton(
             onClick = {
                 onTrailingIconButtonClicked()
             },
-            modifier = Modifier
-                .size(24.dp)
-                .clip(RoundedCornerShape(50.dp))
-                .background(Color.Yellow)
+            modifier = Modifier.size(32.dp)
         ) {
-            Icon(Icons.Default.Send, contentDescription = "", modifier = Modifier.size(16.dp))
+            Icon(Icons.Default.Send, contentDescription = "", modifier = Modifier.size(32.dp))
         }
     }
 

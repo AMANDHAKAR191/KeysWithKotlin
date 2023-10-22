@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -25,9 +27,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.core.Constants.EXIT_DURATION
+import com.aman.keyswithkotlin.notes.presentation.add_edit_note.components.CustomTransparentTextField
 import com.aman.keyswithkotlin.notes.presentation.add_edit_note.components.TransparentHintTextField
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 import kotlinx.coroutines.delay
@@ -44,23 +48,20 @@ fun AddEditPasswordScreen(
     onSharedPasswordEvent: (SharedPasswordEvent) -> Unit,
     generatedPassword: String? = "",
     passwordItem: Password?,
-    navigateToPasswordScreen: () -> Unit,
+    navigateBack: () -> Unit,
     navigateToGeneratePasswordScreen: () -> Unit
 ) {
 
-    val coroutineScope = rememberCoroutineScope()
     val focusState = remember {
         mutableStateOf(false)
     }
     //if generatedPassword is not null then we are coming from GeneratePasswordScreen
-    println("generatedPassword: ${generatedPassword}")
     if (!generatedPassword.equals("")) {
         generatedPassword?.let {
             onEvent(PasswordEvent.EnteredPassword(it))
         }
     }
 
-    println("generatedPassword: ${generatedPassword}")
     passwordItem?.let {
         onEvent(PasswordEvent.EnteredUsername(passwordItem.userName))
         onEvent(PasswordEvent.EnteredPassword(passwordItem.password))
@@ -78,7 +79,7 @@ fun AddEditPasswordScreen(
                 }
 
                 is UIEvents.SavePassword -> {
-                    navigateToPasswordScreen()
+                    navigateBack()
                 }
 
                 else -> {}
@@ -86,13 +87,6 @@ fun AddEditPasswordScreen(
         }
     }
 
-    // Define a separate lambda for handling back navigation
-    val handleBackNavigation: () -> Unit = {
-        coroutineScope.launch {
-            delay(EXIT_DURATION.toLong()) // Adjust this to match your animation duration
-            navigateToPasswordScreen()
-        }
-    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -102,15 +96,15 @@ fun AddEditPasswordScreen(
                 modifier = Modifier.fillMaxWidth(),
                 title = { Text(text = "Add Password") },
                 navigationIcon = {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = null,
-                        modifier = Modifier.clickable {
-                            onSharedPasswordEvent(SharedPasswordEvent.resetViewmodel)
-//                                navigateToPasswordScreen()
-                            handleBackNavigation()
-                        }
-                    )
+                    IconButton(onClick = {
+                        onSharedPasswordEvent(SharedPasswordEvent.resetViewmodel)
+                        navigateBack()
+                    }) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = null,
+                        )
+                    }
                 }
             )
         }, content = { innerPadding ->
@@ -119,17 +113,18 @@ fun AddEditPasswordScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                TransparentHintTextField(
+                CustomTransparentTextField(
                     text = state.username,
                     label = "Username",
                     hint = "Enter userName",
                     onValueChange = {
                         onEvent(PasswordEvent.EnteredUsername(it))
                     },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     showIndicator = false,
 
                     )
-                TransparentHintTextField(
+                CustomTransparentTextField(
                     text = state.password,
                     label = "Password",
                     hint = "Enter Password",
@@ -137,6 +132,7 @@ fun AddEditPasswordScreen(
                         onEvent(PasswordEvent.EnteredPassword(it))
                     },
                     showIndicator = false,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     trailingIcon = {
                         if (focusState.value) {
                             TextButton(onClick = {
@@ -150,7 +146,7 @@ fun AddEditPasswordScreen(
                         focusState.value = it.isFocused
                     }
                 )
-                TransparentHintTextField(
+                CustomTransparentTextField(
                     text = state.websiteName,
                     label = "Website name",
                     hint = "Enter website name",
@@ -158,8 +154,9 @@ fun AddEditPasswordScreen(
                         onEvent(PasswordEvent.EnteredWebsiteName(it))
                     },
                     showIndicator = false,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                 )
-                TransparentHintTextField(
+                CustomTransparentTextField(
                     text = state.username,
                     label = "Website Link (optional)",
                     hint = "Enter userName",
@@ -197,6 +194,6 @@ fun Preview() {
         onEvent = onEvent,
         onSharedPasswordEvent = {},
         passwordItem = Password(),
-        navigateToPasswordScreen = { /*TODO*/ },
+        navigateBack = { /*TODO*/ },
         navigateToGeneratePasswordScreen = {})
 }

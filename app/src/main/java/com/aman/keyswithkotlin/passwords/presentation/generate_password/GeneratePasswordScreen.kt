@@ -46,27 +46,20 @@ fun GeneratePasswordScreen(
     state: GeneratePasswordState,
     onEvent: (GeneratePasswordEvent) -> Unit,
     onSharedPasswordEvent: (SharedPasswordEvent) -> Unit,
-    navigateToPasswordScreen: () -> Unit,
+    navigateBack: () -> Unit,
     navigateToAddEditPasswordScreen: (String) -> Unit,
     navigateToGeneratedPasswordScreen: (MutableList<GeneratedPasswordModelClass>) -> Unit
 ) {
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
 
-    // Define a separate lambda for handling back navigation
-    val handleBackNavigation: () -> Unit = {
-        scope.launch {
-            delay(Constants.EXIT_DURATION.toLong()) // Adjust this to match your animation duration
-            navigateToPasswordScreen()
-        }
-    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text(text = "Generate Password") },
                 navigationIcon = {
-                    IconButton(onClick = { handleBackNavigation() }) {
+                    IconButton(onClick = { navigateBack()  }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
                     }
                 },
@@ -156,7 +149,6 @@ fun GeneratePasswordScreen(
                     Text(text = "Copy")
                 }
                 Button(onClick = {
-                    println("generatedPassword1: ${state.generatedPassword}")
                     onSharedPasswordEvent(SharedPasswordEvent.onPasswordGenerated(state.generatedPassword))
                     navigateToAddEditPasswordScreen(state.generatedPassword)
                 }) {
@@ -181,7 +173,7 @@ fun preview() {
         ),
         onEvent = {},
         onSharedPasswordEvent = {},
-        navigateToPasswordScreen = { /*TODO*/ },
+        navigateBack = { /*TODO*/ },
         navigateToAddEditPasswordScreen = {},
         navigateToGeneratedPasswordScreen = {}
     )
