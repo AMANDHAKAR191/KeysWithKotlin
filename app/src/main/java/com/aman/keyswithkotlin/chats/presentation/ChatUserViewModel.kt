@@ -46,9 +46,9 @@ class ChatUserViewModel @Inject constructor(
 
     init {
         _isTutorialEnabled.update { myPreference.isTutorialEnabled }
-//        _state.value = state.value.copy(
-//            username = userName
-//        )
+        _state.update { it.copy(
+            username = userName
+        ) }
         getChatUsers()
     }
 

@@ -15,10 +15,10 @@ val passwordWeak = Color(0xFFEE9F27)
 val passwordPoor = Color(0xFFDB0404)
 
 val RedOrange = Color(0xffffab91)
-val RedPink = Color(0xfff48fb1)
-val BabyBlue = Color(0xff81deea)
-val Violet = Color(0xffcf94da)
 val LightGreen = Color(0xffe7ed9b)
+val Violet = Color(0xffcf94da)
+val BabyBlue = Color(0xff81deea)
+val RedPink = Color(0xfff48fb1)
 
 
 val ColorBlue = Color(0xFF008AC3)

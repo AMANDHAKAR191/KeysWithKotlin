@@ -15,6 +15,7 @@ sealed class Screen(val route: String) {
     object AddEditNoteScreen : Screen(ADD_EDIT_NOTE_SCREEN)
 
     object IndividualChatScreen : Screen(INDIVIDUAL_CHAT_SCREEN)
+    object AppInfoScreen : Screen(APP_INFO_SCREEN)
 }
 
 //Screens
@@ -28,3 +29,4 @@ const val GENERATE_PASSWORD_SCREEN = "GeneratePasswordScreen"
 const val RECENT_GENERATE_PASSWORD_SCREEN = "RecentGeneratedPasswordScreen"
 const val ADD_EDIT_NOTE_SCREEN = "AddEditNoteScreen"
 const val INDIVIDUAL_CHAT_SCREEN = "IndividualChatScreen"
+const val APP_INFO_SCREEN = "AppInfoScreen"

@@ -141,6 +141,7 @@ fun AddEditNoteScreen(
                     .background(noteBackgroundAnimatable.value)
                     .padding(innerPadding)
             ) {
+                //Color Header
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -166,13 +167,13 @@ fun AddEditNoteScreen(
                                 .clickable {
                                     scope.launch {
                                         noteBackgroundAnimatable.animateTo(
-                                            targetValue = Color(colorInt),
+                                            targetValue = color,
                                             animationSpec = tween(
                                                 durationMillis = 500
                                             )
                                         )
                                     }
-                                    onEvent(AddEditNoteEvent.ChangeColor(colorInt.toString()))
+                                    onEvent(AddEditNoteEvent.ChangeColor(Integer.toHexString(colorInt)))
                                 }
                         )
                     }

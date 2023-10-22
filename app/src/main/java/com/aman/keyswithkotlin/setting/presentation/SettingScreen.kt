@@ -96,7 +96,8 @@ fun SettingScreen(
     eventFlowState: SharedFlow<UIEvents>,
     autofillManager: AutofillManager,
     bottomBar: @Composable (() -> Unit),
-    navigateToProfileScreen: () -> Unit
+    navigateToProfileScreen: () -> Unit,
+    navigateToAppInfoScreen: () -> Unit,
 ) {
 
     val state = _state.collectAsState()
@@ -135,25 +136,16 @@ fun SettingScreen(
             showErrorDialog.value = false
         }
     }
+
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "Setting")
-                    }
+                    Text(text = "Setting")
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Black,
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                ),
+                colors = TopAppBarDefaults.topAppBarColors(),
                 modifier = Modifier.fillMaxWidth()
             )
         },
@@ -161,107 +153,107 @@ fun SettingScreen(
             bottomBar()
         },
         content = { innerPadding ->
-            Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                Header(
+                    photoUrl = photoUrl,
+                    displayName = displayName,
+                    email = email,
+                    navigateToProfileScreen = {
+                        navigateToProfileScreen()
+                    })
                 Surface(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    color = Color.Black,
+                        .fillMaxSize(),
                     content = {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            Header(
-                                photoUrl = photoUrl,
-                                displayName = displayName,
-                                email = email,
-                                navigateToProfileScreen = {
-                                    navigateToProfileScreen()
-                                })
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(
-                                        MaterialTheme.colorScheme.surfaceVariant,
-                                        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
-                                    )
-                                    .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-                                    .padding(top = 30.dp, start = 20.dp, end = 20.dp)
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
+                                )
+                                .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                                .padding(top = 30.dp, start = 20.dp, end = 20.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(text = "Lock App", fontSize = 20.sp)
-                                    MenuSample(
-                                        selectedOption = lockAppSelectedOption,
-                                        updateLockAppSetting = {
-                                            onEvent(SettingEvent.UpdateLockAppSetting(it.toString()))
-                                        }
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(10.dp))
-                                SingleDeviceCard(loggedInDeviceList = state.value.loggedInDeviceList)
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = "Autofill Password",
-                                        fontSize = 20.sp,
-                                    )
-                                    println("isAutofillServiceEnabled: $isAutofillServiceEnabled")
-                                    SwitchWithIcon(
-                                        checked = isAutofillServiceEnabled,
-                                        onCheckedChange = {
-                                            isAutofillServiceEnabled = it
-                                            if (it) {
-                                                val intent =
-                                                    Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE)
-                                                intent.data = Uri.parse("package:" + packageName)
-                                                launcher.launch(intent)
-                                            } else {
-                                                autofillManager.disableAutofillServices()
-                                            }
-                                        })
-                                }
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = "Import Passwords", fontSize = 20.sp,
-                                    modifier = Modifier.clickable {
-                                        isReadCSV = true
+                                Text(text = "Lock App", fontSize = 20.sp)
+                                MenuSample(
+                                    selectedOption = lockAppSelectedOption,
+                                    updateLockAppSetting = {
+                                        onEvent(SettingEvent.UpdateLockAppSetting(it.toString()))
                                     }
                                 )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Spacer(modifier = Modifier.height(10.dp))
-                                if (isReadCSV) {
-                                    CsvReaderScreen(
-                                        passwordImported = {
-                                            onEvent(SettingEvent.StoreImportedPasswords(it))
-                                        }
-                                    )
-                                }
-                                Text(
-                                    text = "User Guide", fontSize = 20.sp,
-                                    modifier = Modifier.clickable {
-                                        onEvent(SettingEvent.EnableTutorial)
-                                    }
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = "App Info",
-                                    fontSize = 20.sp,
-                                    modifier = Modifier.clickable {
-                                        showErrorDialog.value = true
-                                    })
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(text = "Contact Us", fontSize = 20.sp)
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(text = "Privacy Policy", fontSize = 20.sp)
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(text = "Terms & conditions", fontSize = 20.sp)
                             }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            SingleDeviceCard(loggedInDeviceList = state.value.loggedInDeviceList)
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Autofill Password",
+                                    fontSize = 20.sp,
+                                )
+                                println("isAutofillServiceEnabled: $isAutofillServiceEnabled")
+                                SwitchWithIcon(
+                                    checked = isAutofillServiceEnabled,
+                                    onCheckedChange = {
+                                        isAutofillServiceEnabled = it
+                                        if (it) {
+                                            val intent =
+                                                Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE)
+                                            intent.data = Uri.parse("package:" + packageName)
+                                            launcher.launch(intent)
+                                        } else {
+                                            autofillManager.disableAutofillServices()
+                                        }
+                                    })
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "Import Passwords", fontSize = 20.sp,
+                                modifier = Modifier.clickable {
+                                    isReadCSV = true
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
+                            if (isReadCSV) {
+                                CsvReaderScreen(
+                                    passwordImported = {
+                                        onEvent(SettingEvent.StoreImportedPasswords(it))
+                                    }
+                                )
+                            }
+                            Text(
+                                text = "User Guide", fontSize = 20.sp,
+                                modifier = Modifier.clickable {
+                                    onEvent(SettingEvent.EnableTutorial)
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "App Info",
+                                fontSize = 20.sp,
+                                modifier = Modifier.clickable {
+                                    navigateToAppInfoScreen()
+                                })
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(text = "Contact Us", fontSize = 20.sp,
+                                modifier = Modifier.clickable {
+                                    showErrorDialog.value = true
+                                })
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(text = "Privacy Policy", fontSize = 20.sp)
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(text = "Terms & conditions", fontSize = 20.sp)
                         }
                     }
                 )
@@ -344,13 +336,13 @@ fun Header(
         Column {
             Text(
                 text = displayName,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 20.sp,
-                fontWeight = FontWeight.W300
+                fontWeight = FontWeight.W700
             )
             Text(
                 text = email,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Normal,
                 fontSize = 12.sp
             )

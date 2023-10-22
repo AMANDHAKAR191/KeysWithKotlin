@@ -18,6 +18,7 @@ import com.aman.keyswithkotlin.core.MyPreference
 import com.aman.keyswithkotlin.navigation.Graph
 import com.aman.keyswithkotlin.navigation.RootNavGraph
 import com.aman.keyswithkotlin.notification_service.FCMNotificationSender
+import com.aman.keyswithkotlin.ui.theme.KeysTheme
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -40,37 +41,39 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         setContent {
-            Firebase.database.setPersistenceEnabled(true)
-            mAutofillManager = getSystemService(AutofillManager::class.java) as AutofillManager
+            KeysTheme {
+                Firebase.database.setPersistenceEnabled(true)
+                mAutofillManager = getSystemService(AutofillManager::class.java) as AutofillManager
 
-            FirebaseMessaging.getInstance().subscribeToTopic("UserName")
+                FirebaseMessaging.getInstance().subscribeToTopic("UserName")
 
-            navController = rememberNavController()
-            RootNavGraph(
-                navController = navController,
-                mAutofillManager!!,
-                biometricAuthentication,
-                this@MainActivity,
-                this@MainActivity
-            )
-            val myPreference = MyPreference()
-            println("myPreference.isNewUser: ${myPreference.isOldUser}")
-            if (myPreference.isOldUser) {
-                checkAuthState()
-            } else {
-                navigateToOnBoardingScreens()
+                navController = rememberNavController()
+                RootNavGraph(
+                    navController = navController,
+                    mAutofillManager!!,
+                    biometricAuthentication,
+                    this@MainActivity,
+                    this@MainActivity
+                )
+                val myPreference = MyPreference()
+                println("myPreference.isNewUser: ${myPreference.isOldUser}")
+                if (myPreference.isOldUser) {
+                    checkAuthState()
+                } else {
+                    navigateToOnBoardingScreens()
+                }
+
+                appLockCounter = AppLockCounterClass(
+                    myPreference,
+                    this@MainActivity,
+                    this@MainActivity,
+                    finishActivity = {
+                        println("finishActivity()")
+                        finish()
+                    })
+                appLockCounter.initializeCounter()
+                appLockCounter.onStartOperation()
             }
-
-            appLockCounter = AppLockCounterClass(
-                myPreference,
-                this@MainActivity,
-                this@MainActivity,
-                finishActivity = {
-                    println("finishActivity()")
-                    finish()
-                })
-            appLockCounter.initializeCounter()
-            appLockCounter.onStartOperation()
         }
     }
 

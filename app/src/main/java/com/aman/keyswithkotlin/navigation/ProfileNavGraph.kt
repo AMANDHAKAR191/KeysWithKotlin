@@ -24,7 +24,7 @@ fun NavGraphBuilder.profileNavGraph(
         ) {
             val viewModel: ProfileViewModel = hiltViewModel()
             ProfileScreen(
-                state = viewModel.state.value,
+                _state = viewModel.state,
                 displayName = viewModel.displayName.invoke(),
                 photoUrl = viewModel.photoUrl.invoke(),
                 eventFlowState = viewModel.eventFlow,
@@ -41,10 +41,8 @@ fun NavGraphBuilder.profileNavGraph(
                     navController.popBackStack()
                     navController.navigate(Graph.AUTHENTICATION)
                 },
-                navigateToPasswordScreen = {
-                    navController.navigate(Graph.HOME) {
-                        popUpTo(Graph.HOME)
-                    }
+                navigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

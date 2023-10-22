@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -61,13 +62,14 @@ import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.DeviceType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    state: ProfileState,
+    _state: StateFlow<ProfileState>,
     displayName: String,
     photoUrl: String,
     onEvent: (AuthEvent) -> Unit,
@@ -77,8 +79,10 @@ fun ProfileScreen(
     onSignOut: () -> Unit,
     onRevokeAccess: () -> Unit,
     navigateToAuthScreen: () -> Unit,
-    navigateToPasswordScreen: () -> Unit,
+    navigateBack: () -> Unit
 ) {
+
+    val state = _state.collectAsState()
     val snackBarHostState = remember {
         SnackbarHostState()
     }
@@ -134,22 +138,6 @@ fun ProfileScreen(
 
     }
 
-    // Define a separate lambda for handling back navigation
-    val handleBackNavigation: (String) -> Unit = {
-        coroutineScope.launch {
-            delay(Constants.EXIT_DURATION.toLong()) // Adjust this to match your animation duration
-            when (it) {
-                "AuthScreen" -> {
-                    navigateToAuthScreen()
-                }
-
-                "PasswordScreen" -> {
-                    navigateToPasswordScreen()
-                }
-            }
-        }
-    }
-
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
@@ -161,7 +149,8 @@ fun ProfileScreen(
                     onRevokeAccess()
                 },
                 navigateToPasswordScreen = {
-                    handleBackNavigation("PasswordScreen")
+                    navigateBack()
+//                    handleBackNavigation("PasswordScreen")
                 }
             )
         },
@@ -195,7 +184,7 @@ fun ProfileScreen(
                     val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
                     var isCurrentUserPrimary by remember { mutableStateOf(false) }
                     //to check is current device is primary
-                    for (deviceData in state.loggedInDeviceList) {
+                    for (deviceData in state.value.loggedInDeviceList) {
                         if (deviceData.deviceId == deviceInfo.getDeviceId()) {
                             if (deviceData.deviceType == DeviceType.Primary.toString()) {
                                 isCurrentUserPrimary = true
@@ -204,7 +193,7 @@ fun ProfileScreen(
                         }
                     }
                     LazyColumn {
-                        items(state.loggedInDeviceList) { deviceData ->
+                        items(state.value.loggedInDeviceList) { deviceData ->
                             Column {
                                 Text(text = "Device ID: ${deviceData.deviceId}")
                                 Text(text = "Device Name: ${deviceData.deviceName}")
@@ -312,7 +301,7 @@ fun ProfileScreen(
         signOutResponse = signOutResponse,
         navigateToAuthScreen = { signedOut ->
             if (signedOut) {
-                handleBackNavigation("AuthScreen")
+                navigateToAuthScreen()
             }
         }
     )
@@ -331,7 +320,7 @@ fun ProfileScreen(
         revokeAccessResponse = revokeAccessResponse,
         navigateToAuthScreen = { accessRevoked ->
             if (accessRevoked) {
-                handleBackNavigation("AuthScreen")
+                navigateToAuthScreen()
             }
         },
         showSnackBar = {

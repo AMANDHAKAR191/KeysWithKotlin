@@ -1,20 +1,18 @@
 package com.aman.keyswithkotlin.navigation
 
-import android.content.Context
 import android.view.autofill.AutofillManager
-import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.activity
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.aman.keyswithkotlin.core.components.BottomBar
+import com.aman.keyswithkotlin.setting.presentation.AppInfoScreen
 import com.aman.keyswithkotlin.setting.presentation.SettingScreen
 import com.aman.keyswithkotlin.setting.presentation.SettingViewModel
 
 fun NavGraphBuilder.settingNavGraph(
-    packageName:String,
+    packageName: String,
     navController: NavController,
     mAutofillManager: AutofillManager
 ) {
@@ -23,7 +21,7 @@ fun NavGraphBuilder.settingNavGraph(
         route = Graph.SETTING
     ) {
         composable(BottomBarScreen.Settings.route) {
-            val viewModel:SettingViewModel = hiltViewModel()
+            val viewModel: SettingViewModel = hiltViewModel()
             if (!mAutofillManager.hasEnabledAutofillServices()) {
                 // Prompt the user to enable your service
             }
@@ -37,7 +35,7 @@ fun NavGraphBuilder.settingNavGraph(
                 autofillManager = mAutofillManager,
                 packageName = packageName,
                 bottomBar = {
-                    BottomBar(navController, navigateTo = {destScreen->
+                    BottomBar(navController, navigateTo = { destScreen ->
                         navController.navigate(destScreen) {
                             launchSingleTop = true
                         }
@@ -45,8 +43,16 @@ fun NavGraphBuilder.settingNavGraph(
                 },
                 navigateToProfileScreen = {
                     navController.navigate(Graph.PROFILE)
+                },
+                navigateToAppInfoScreen = {
+                    navController.navigate(Screen.AppInfoScreen.route)
                 }
             )
+        }
+        composable(route = Screen.AppInfoScreen.route) {
+            AppInfoScreen(appVersion = "2.0", navigateBack = {
+                navController.popBackStack()
+            })
         }
     }
 

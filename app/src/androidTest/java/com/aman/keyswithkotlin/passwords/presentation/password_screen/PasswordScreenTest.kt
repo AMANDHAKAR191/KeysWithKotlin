@@ -34,7 +34,9 @@ class PasswordScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
     private val dummyState =  MutableStateFlow(PasswordState()).asStateFlow()  // Initialize with your default state
+    private val _isTutorialEnabled =  MutableStateFlow(String()).asStateFlow()  // Initialize with your default state
     private val dummySharedPasswordState = PasswordState()  // Initialize with your default state
+
 
     private val _dummyEventFlow = MutableSharedFlow<UIEvents>()
     private val dummyEventFlow = _dummyEventFlow.asSharedFlow()
@@ -50,7 +52,7 @@ class PasswordScreenTest {
             userName = "test username1",
             password = "testPassword1",
             websiteName = "test websitename1",
-            websiteLink = "",
+            linkTo = emptyList(),
             timestamp = "",
             lastUsedTimeStamp = ""
         )
@@ -58,7 +60,7 @@ class PasswordScreenTest {
             userName = "test username2",
             password = "testPassword2",
             websiteName = "test websitename2",
-            websiteLink = "",
+            linkTo = emptyList(),
             timestamp = "",
             lastUsedTimeStamp = ""
         )
@@ -69,6 +71,7 @@ class PasswordScreenTest {
 
         composeTestRule.setContent {
             PasswordScreen(
+                _isTutorialEnabled = _isTutorialEnabled,
                 _state = dummyState,
                 eventFlowState =dummyEventFlow,
                 searchedPasswordState = searchedPasswords.collectAsState(),
@@ -98,6 +101,7 @@ class PasswordScreenTest {
 
         composeTestRule.setContent {
             PasswordScreen(
+                _isTutorialEnabled = _isTutorialEnabled,
                 _state = dummyState,
                 eventFlowState =dummyEventFlow,
                 searchedPasswordState = searchedPasswords.collectAsState(),
@@ -123,7 +127,7 @@ class PasswordScreenTest {
             userName = "test username1",
             password = "testPassword1",
             websiteName = "test websitename1",
-            websiteLink = "",
+            linkTo = emptyList(),
             timestamp = "",
             lastUsedTimeStamp = ""
         )
@@ -131,7 +135,7 @@ class PasswordScreenTest {
             userName = "test username2",
             password = "testPassword2",
             websiteName = "test websitename2",
-            websiteLink = "",
+            linkTo = emptyList(),
             timestamp = "",
             lastUsedTimeStamp = ""
         )
@@ -142,6 +146,7 @@ class PasswordScreenTest {
 
         composeTestRule.setContent {
             PasswordScreen(
+                _isTutorialEnabled = _isTutorialEnabled,
                 _state = dummyState,
                 eventFlowState =dummyEventFlow,
                 searchedPasswordState = searchedPasswords.collectAsState(),
@@ -167,6 +172,7 @@ class PasswordScreenTest {
         val searchedPasswords =  MutableStateFlow<List<Password>>(listOf())
         composeTestRule.setContent {
             PasswordScreen(
+                _isTutorialEnabled = _isTutorialEnabled,
                 _state = dummyState,
                 eventFlowState =dummyEventFlow,
                 searchedPasswordState = searchedPasswords.collectAsState(),
