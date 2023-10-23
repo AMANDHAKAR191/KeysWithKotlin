@@ -56,6 +56,17 @@
             </intent-filter>
         </service>
 
+        <receiver
+            android:name=".presentation.ChargerCableReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <!-- Define the intent filter for the BroadcastReceiver -->
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <!-- Add more actions if needed -->
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_google_logo" />

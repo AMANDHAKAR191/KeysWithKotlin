@@ -83,7 +83,7 @@ fun AuthScreen(
         signInWithGoogleResponse = signInWithGoogleResponse,
         navigateToHomeScreen = { signedIn ->
             if (signedIn) {
-                navigateToProfileScreen()
+                navigateToPasswordScreen()
             }
         }
     )

@@ -1,8 +1,8 @@
 package com.aman.keyswithkotlin.auth.presentation.auth.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieClipSpec
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.aman.keyswithkotlin.R
@@ -41,31 +39,16 @@ fun AuthContent(
             .fillMaxSize()
             .padding(padding),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.SpaceAround
     ) {
-        val composition by rememberLottieComposition(
-            spec = LottieCompositionSpec.RawRes(
-                R.raw.keys_lock_logo_animation
-            )
-        )
-        val progress by animateLottieCompositionAsState(
-            composition,
-            iterations = 1
-        )
-        LottieAnimation(
-            composition = composition,
-            progress = { progress },
-            modifier = Modifier
-                .width(300.dp)
-                .height(300.dp)
-                .testTag("LottieAnimation")
+        Image(
+            painter = painterResource(id = if (isSystemInDarkTheme()) R.drawable.keys_full_logo_dark else R.drawable.keys_full_logo_light),
+            contentDescription = "keys full logo"
         )
         Button(
             modifier = Modifier.padding(bottom = 100.dp),
             shape = RoundedCornerShape(6.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.purple_700)
-            ),
+            colors = ButtonDefaults.buttonColors(),
             onClick = oneTapSignIn
         ) {
             val composition1 by rememberLottieComposition(

@@ -125,13 +125,7 @@ fun AddEditNoteScreen(
                         Icon(imageVector = Icons.Default.Save, contentDescription = "Save note")
                     }
                 },
-                scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = Color.Black,
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
+                colors = TopAppBarDefaults.mediumTopAppBarColors()
             )
         },
         content = { innerPadding ->
@@ -181,7 +175,7 @@ fun AddEditNoteScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 TransparentHintTextField(
                     text = state.noteBody,
-                    label = "Content",
+                    label = "Note Body",
                     hint = "Write here...",
                     onValueChange = {
                         onEvent(AddEditNoteEvent.EnteredContent(it))

@@ -66,7 +66,7 @@ fun OnBoardingScreen(
         OnBoardingData(
             R.raw.animation_password,
             "Secure Authentication",
-            "A variety of healthy foods made by the best chefs. Ingredients are easy to find. all delicious flavors can only be found at cookbunda",
+            "Log in with a high level of security and privacy. Protects the app data and functionality from malicious attacks. Our app is secured with your Biometric. We verify the identity of the user and prevent unauthorized access. We use Google Sign-In to make authentication more secure.",
             backgroundColor = Color(0xFF0189C5),
             mainColor = Color(0xFF00B5EA)
         )
@@ -76,7 +76,7 @@ fun OnBoardingScreen(
         OnBoardingData(
             R.raw.animation_add_password_note,
             "Save password and Note more Securely",
-            "Not only food. we provide clear healthy drink options for you. Fresh taste always accompanies you",
+            "Store your passwords and notes in an encrypted vault. You can access them anytime with your biometric authentication. Keep your sensitive information safe from hackers, phishing, and data breaches.",
             backgroundColor = Color(0xFFE4AF19),
             mainColor = ColorYellow
         )
@@ -86,7 +86,7 @@ fun OnBoardingScreen(
         OnBoardingData(
             R.raw.animation_autofill,
             "Autofill Password",
-            "Are you ready to make a dish for your friends or family? create an account and cook",
+            "Automatically fill in your login credentials on any android app that supports it. Save your time and hassle when you need to access your accounts quickly and securely.",
             backgroundColor = Color(0xFF96E172),
             mainColor = ColorGreen
         )

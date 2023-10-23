@@ -57,12 +57,6 @@ fun TransparentHintTextField(
                     Text(text = hint)
                 }
             },
-            trailingIcon = {
-                trailingIcon?.invoke()
-            },
-            leadingIcon = {
-                leadingIcon?.invoke()
-            },
             singleLine = singleLine,
             textStyle = textStyle,
             minLines = minLines,
