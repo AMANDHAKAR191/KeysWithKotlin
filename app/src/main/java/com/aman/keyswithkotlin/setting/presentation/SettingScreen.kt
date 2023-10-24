@@ -98,7 +98,8 @@ fun SettingScreen(
     navigateToProfileScreen: () -> Unit,
     navigateToAppInfoScreen: () -> Unit,
     openPrivacyPolicy: () -> Unit,
-    openTermsAndCondtion: () -> Unit,
+    openTermsAndCondition: () -> Unit,
+    openContactUs: () -> Unit,
 ) {
 
     val state = _state.collectAsState()
@@ -240,7 +241,8 @@ fun SettingScreen(
                             })
                             Spacer(modifier = Modifier.height(customSpacerWidth))
                             CustomText(text = "Contact Us", description = "", onClick = {
-                                showErrorDialog.value = true
+                                openContactUs()
+//                                showErrorDialog.value = true
                             })
                             Spacer(modifier = Modifier.height(customSpacerWidth))
                             CustomText(text = "Privacy Policy", description = "", onClick = {
@@ -248,7 +250,7 @@ fun SettingScreen(
                             })
                             Spacer(modifier = Modifier.height(customSpacerWidth))
                             CustomText(text = "Terms & conditions", description = "", onClick = {
-                                openTermsAndCondtion()
+                                openTermsAndCondition()
                             })
                         }
                     }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.view.autofill.AutofillManager
+import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -13,6 +14,7 @@ import com.aman.keyswithkotlin.core.components.BottomBar
 import com.aman.keyswithkotlin.setting.presentation.AppInfoScreen
 import com.aman.keyswithkotlin.setting.presentation.SettingScreen
 import com.aman.keyswithkotlin.setting.presentation.SettingViewModel
+
 
 fun NavGraphBuilder.settingNavGraph(
     context: Context,
@@ -56,10 +58,15 @@ fun NavGraphBuilder.settingNavGraph(
                     open_privacy_policy.data = Uri.parse("https://amandhakar.blogspot.com/2022/02/privacy-policy-keys.html")
                     context.startActivity(open_privacy_policy)
                 },
-                openTermsAndCondtion = {
+                openTermsAndCondition = {
                     val open_privacy_policy = Intent(Intent.ACTION_VIEW)
                     open_privacy_policy.data = Uri.parse("https://amandhakar.blogspot.com/2022/02/terms-conditions-keys.html")
                     context.startActivity(open_privacy_policy)
+                },
+                openContactUs = {
+                    val openMail =
+                        Intent(Intent.ACTION_VIEW, Uri.parse("mailto:amandhakar.keys@gmail.com"))
+                    context.startActivity(openMail)
                 }
             )
         }
