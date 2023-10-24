@@ -2,6 +2,7 @@ package com.aman.keyswithkotlin.notification_service
 
 import android.app.Activity
 import android.content.Context
+import com.aman.keyswithkotlin.Keys
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.RequestQueue
@@ -21,9 +22,6 @@ class FCMNotificationSender(
 ) {
     private var requestQueue: RequestQueue? = null
     private val postUrl = "https://fcm.googleapis.com/fcm/send"
-    private val fcmServerKey =
-        "AAAADjQBUvg:APA91bFwbsYgMatxJPuhsUCu39ALX5qrdpTIaYgKYCOulV_svsm-Fc9texM3XAjuy07jNJxU5w4PaDQViVUawuTFaqxB1TB8yLOoYNyGTW3AbXLf_6ImP8DdZ0GMyxuNmiU1Afn2ytK5"
-
     fun sendNotification() {
         println("sendNotification: check1")
         requestQueue = Volley.newRequestQueue(mActivity)
@@ -49,7 +47,7 @@ class FCMNotificationSender(
                 override fun getHeaders(): MutableMap<String, String> {
                     val header: MutableMap<String, String> = HashMap()
                     header["content-type"] = "application/json"
-                    header["authorization"] = "key=$fcmServerKey"
+                    header["authorization"] = "key=${Keys.fcm_server_key}"
                     return header
                 }
             }

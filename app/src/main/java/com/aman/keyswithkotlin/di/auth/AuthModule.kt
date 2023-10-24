@@ -2,6 +2,7 @@ package com.aman.keyswithkotlin.di.auth
 
 import android.app.Application
 import android.content.Context
+import com.aman.keyswithkotlin.Keys
 import com.aman.keyswithkotlin.R
 import com.aman.keyswithkotlin.access_verification.data.repository.AccessVerificationRepositoryImpl
 import com.aman.keyswithkotlin.auth.data.repository.AuthRepositoryImpl
@@ -58,7 +59,7 @@ class AuthModule {
         .setGoogleIdTokenRequestOptions(
             BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                 .setSupported(true)
-                .setServerClientId(app.getString(R.string.web_client_id))
+                .setServerClientId(Keys.web_client_id)
                 .setFilterByAuthorizedAccounts(false)
                 .build()
         )
@@ -73,7 +74,7 @@ class AuthModule {
         .setGoogleIdTokenRequestOptions(
             BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                 .setSupported(true)
-                .setServerClientId(app.getString(R.string.web_client_id))
+                .setServerClientId(Keys.web_client_id)
                 .setFilterByAuthorizedAccounts(false)
                 .build()
         )
@@ -83,7 +84,7 @@ class AuthModule {
     fun provideGoogleSignInOptions(
         app: Application
     ) = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(app.getString(R.string.web_client_id))
+        .requestIdToken(Keys.web_client_id)
         .requestEmail()
         .build()
 

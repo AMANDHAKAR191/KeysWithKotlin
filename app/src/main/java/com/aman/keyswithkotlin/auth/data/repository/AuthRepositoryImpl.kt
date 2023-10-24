@@ -248,7 +248,8 @@ class AuthRepositoryImpl @Inject constructor(
 
     private fun checkFirebaseUser(): Flow<Boolean> = callbackFlow {
         auth.currentUser?.let { user ->
-            val query = db.reference.child("users").orderByChild("privateUID").equalTo(user.uid)
+            println("UID: ${user.uid}")
+            val query = db.reference.child("users").child(user.uid)
 
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -263,6 +264,7 @@ class AuthRepositoryImpl @Inject constructor(
 
                 override fun onCancelled(error: DatabaseError) {
                     // You can handle the error here as you see fit
+                    println("check1")
                 }
             }
             query.addValueEventListener(listener)
@@ -295,6 +297,7 @@ class AuthRepositoryImpl @Inject constructor(
 
                 override fun onCancelled(error: DatabaseError) {
                     // You can handle the error here as you see fit
+                    println("check2")
                 }
             }
             query.addValueEventListener(listener)
@@ -353,6 +356,7 @@ class AuthRepositoryImpl @Inject constructor(
                     }
 
                     override fun onCancelled(error: DatabaseError) {
+                        println("check3")
                         trySend(Response.Failure(error.toException()))
                     }
                 }
@@ -390,6 +394,7 @@ class AuthRepositoryImpl @Inject constructor(
                 }
 
                 override fun onCancelled(error: DatabaseError) {
+                    println("check4")
                 }
             }
             reference.addValueEventListener(listener)
@@ -404,6 +409,7 @@ class AuthRepositoryImpl @Inject constructor(
         user?.let {
             var _user: User? = null
             try {
+                println("check")
                 val reference = db.reference.child(USERS).child(it.uid)
                 val listener = object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -411,6 +417,7 @@ class AuthRepositoryImpl @Inject constructor(
                     }
 
                     override fun onCancelled(error: DatabaseError) {
+                        println("check5")
                         // Handle the cancellation if needed
                         Response.Failure(error.toException())
                     }
@@ -455,6 +462,7 @@ class AuthRepositoryImpl @Inject constructor(
                         }
 
                         override fun onCancelled(error: DatabaseError) {
+                            println("check6")
                             Response.Failure(error.toException())
                             _user = null
                         }

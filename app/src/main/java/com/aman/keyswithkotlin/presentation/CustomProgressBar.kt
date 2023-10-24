@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,7 +37,7 @@ fun CustomCircularProgressBar(showStatus: Boolean = false, status: String? = nul
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f)).zIndex(2f),
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)).zIndex(2f),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -49,15 +50,15 @@ fun CustomCircularProgressBar(showStatus: Boolean = false, status: String? = nul
         )
         Spacer(modifier = Modifier.size(10.dp))
         status?.let {
-            Text(text = it)
+            Text(text = it, color = MaterialTheme.colorScheme.onSurface)
         }
 
     }
 }
 
 
-@Preview
-@Composable
-fun PreviewCustomCircularProgressBar() {
-    CustomCircularProgressBar(true, "Hello")
-}
+//@Preview
+//@Composable
+//fun PreviewCustomCircularProgressBar() {
+//    CustomCircularProgressBar(true, "Hello")
+//}

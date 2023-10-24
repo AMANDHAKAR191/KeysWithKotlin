@@ -1,7 +1,6 @@
 package com.aman.keyswithkotlin.on_boarding_screens
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -49,9 +48,9 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.aman.keyswithkotlin.R
-import com.aman.keyswithkotlin.ui.theme.ColorBlue
 import com.aman.keyswithkotlin.ui.theme.ColorGreen
 import com.aman.keyswithkotlin.ui.theme.ColorYellow
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -66,7 +65,7 @@ fun OnBoardingScreen(
         OnBoardingData(
             R.raw.animation_password,
             "Secure Authentication",
-            "Log in with a high level of security and privacy. Protects the app data and functionality from malicious attacks. Our app is secured with your Biometric. We verify the identity of the user and prevent unauthorized access. We use Google Sign-In to make authentication more secure.",
+            "Log in with a high level of security and privacy. Protects the app data and functionality from malicious attacks.",
             backgroundColor = Color(0xFF0189C5),
             mainColor = Color(0xFF00B5EA)
         )
@@ -76,7 +75,7 @@ fun OnBoardingScreen(
         OnBoardingData(
             R.raw.animation_add_password_note,
             "Save password and Note more Securely",
-            "Store your passwords and notes in an encrypted vault. You can access them anytime with your biometric authentication. Keep your sensitive information safe from hackers, phishing, and data breaches.",
+            "Store your passwords and notes in an encrypted vault. You can access them anytime with your biometric authentication.",
             backgroundColor = Color(0xFFE4AF19),
             mainColor = ColorYellow
         )
@@ -86,7 +85,7 @@ fun OnBoardingScreen(
         OnBoardingData(
             R.raw.animation_autofill,
             "Autofill Password",
-            "Automatically fill in your login credentials on any android app that supports it. Save your time and hassle when you need to access your accounts quickly and securely.",
+            "Automatically fill in your login credentials on any android app that supports it.",
             backgroundColor = Color(0xFF96E172),
             mainColor = ColorGreen
         )
@@ -94,8 +93,8 @@ fun OnBoardingScreen(
     items.add(
         OnBoardingData(
             R.raw.animation_password,
-            "Secure Authentication",
-            "A variety of healthy foods made by the best chefs. Ingredients are easy to find. all delicious flavors can only be found at cookbunda",
+            "Easy Sharing",
+            "Share you password and note in clicks",
             backgroundColor = Color(0xFF0189C5),
             mainColor = Color(0xFF00B5EA)
         )
@@ -109,7 +108,7 @@ fun OnBoardingScreen(
     OnBoardingPager(
         item = items, pagerState = pagerState, modifier = Modifier
             .fillMaxWidth()
-            .background(color = ColorBlue),
+            .background(color = MaterialTheme.colorScheme.surface),
         navigateToAuthScreen = {
             navigateToAuthScreen()
         }
@@ -117,7 +116,10 @@ fun OnBoardingScreen(
 
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class,
+    DelicateCoroutinesApi::class
+)
 @Composable
 fun OnBoardingPager(
     item: List<OnBoardingData>,
@@ -129,137 +131,126 @@ fun OnBoardingPager(
         skipPartiallyExpanded = false
     )
 
-    Box(modifier = modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            HorizontalPager(state = pagerState) { page ->
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        SimpleBottomSheetScaffoldSample(
+            sheetContent = {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(item[page].backgroundColor),
+                    modifier = Modifier.height(300.dp).padding(all = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val composition by rememberLottieComposition(
-                        spec = LottieCompositionSpec.RawRes(
-                            item[page].image
-                        )
-                    )
-                    val progress by animateLottieCompositionAsState(
-                        composition,
-                        iterations = LottieConstants.IterateForever
-                    )
-                    LottieAnimation(
-                        composition = composition,
-                        progress = { progress },
+                    PagerIndicator(items = item, currentPage = pagerState.currentPage)
+                    Text(
+                        text = item[pagerState.currentPage].title,
                         modifier = Modifier
-                            .width(400.dp)
-                            .height(400.dp)
-                            .testTag("LottieAnimation")
+                            .fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Right,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold
                     )
-                }
-            }
 
-        }
-
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            SimpleBottomSheetScaffoldSample(
-                sheetContent = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Text(
+                        text = item[pagerState.currentPage].desc,
+                        modifier = Modifier.padding(all = 10.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 17.sp,
+                        textAlign = TextAlign.Right,
+                        fontWeight = FontWeight.Normal
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        PagerIndicator(items = item, currentPage = pagerState.currentPage)
-                        Text(
-                            text = item[pagerState.currentPage].title,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 20.dp, end = 30.dp),
-//                            color = Color(0xFF292D32),
-                            color = item[pagerState.currentPage].mainColor,
-                            textAlign = TextAlign.Right,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        )
+                        if (pagerState.currentPage != 3) {
+                            TextButton(onClick = {
+                                navigateToAuthScreen()
+                            }) {
+                                Text(
+                                    text = "Skip Now",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Right,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
 
-                        Text(
-                            text = item[pagerState.currentPage].desc,
-                            modifier = Modifier.padding(top = 20.dp, start = 40.dp, end = 20.dp),
-                            color = Color.Gray,
-                            fontSize = 17.sp,
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.ExtraLight
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 30.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            if (pagerState.currentPage != 3) {
-                                TextButton(onClick = {
-                                    //skip
+                            Button(
+                                onClick = {
+                                    GlobalScope.launch {
+                                        pagerState.scrollToPage(
+                                            pagerState.currentPage + 1,
+                                            pageOffsetFraction = 0f
+                                        )
+                                    }
+                                },
+                                shape = RoundedCornerShape(50),
+                                modifier = Modifier.size(65.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.ArrowForward,
+                                    contentDescription = "",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    //show home screen
                                     navigateToAuthScreen()
-                                }) {
-                                    Text(
-                                        text = "Skip Now",
-                                        color = Color(0xFF292D32),
-                                        textAlign = TextAlign.Right,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                }
-
-                                OutlinedButton(
-                                    onClick = {
-                                        GlobalScope.launch {
-                                            pagerState.scrollToPage(
-                                                pagerState.currentPage + 1,
-                                                pageOffsetFraction = 0f
-                                            )
-                                        }
-                                    },
-                                    border = BorderStroke(
-                                        14.dp,
-                                        item[pagerState.currentPage].mainColor
-                                    ),
-                                    shape = RoundedCornerShape(50), // = 50% percent
-                                    //or shape = CircleShape
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = item[pagerState.currentPage].mainColor),
-                                    modifier = Modifier.size(65.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Default.ArrowForward,
-                                        contentDescription = "",
-                                        tint = item[pagerState.currentPage].mainColor,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            } else {
-                                Button(
-                                    onClick = {
-                                        //show home screen
-                                        navigateToAuthScreen()
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = item[pagerState.currentPage].mainColor
-                                    ),
-                                    contentPadding = PaddingValues(vertical = 12.dp),
-                                    elevation = ButtonDefaults.elevatedButtonElevation(
-                                        defaultElevation = 0.dp
-                                    )
-                                ) {
-                                    Text(
-                                        text = "Get Started",
-                                        color = Color.White,
-                                        fontSize = 16.sp
-                                    )
-                                }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(),
+                                contentPadding = PaddingValues(vertical = 12.dp),
+                                elevation = ButtonDefaults.elevatedButtonElevation()
+                            ) {
+                                Text(
+                                    text = "Get Started",
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                )
                             }
                         }
                     }
-                },
-                content = {}
-            )
-        }
+                }
+            },
+            content = {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    HorizontalPager(state = pagerState) { page ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(item[page].backgroundColor),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            val composition by rememberLottieComposition(
+                                spec = LottieCompositionSpec.RawRes(
+                                    item[page].image
+                                )
+                            )
+                            val progress by animateLottieCompositionAsState(
+                                composition,
+                                iterations = LottieConstants.IterateForever
+                            )
+                            LottieAnimation(
+                                composition = composition,
+                                progress = { progress },
+                                modifier = Modifier
+                                    .width(400.dp)
+                                    .height(400.dp)
+                                    .testTag("LottieAnimation")
+                            )
+                        }
+                    }
+
+                }
+            }
+        )
     }
 }
 
@@ -287,7 +278,7 @@ fun SimpleBottomSheetScaffoldSample(
 fun PagerIndicator(currentPage: Int, items: List<OnBoardingData>) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.padding(top = 20.dp)
+        modifier = Modifier.padding(top = 10.dp)
     ) {
         repeat(items.size) {
             Indicator(isSelected = it == currentPage, color = items[it].mainColor)

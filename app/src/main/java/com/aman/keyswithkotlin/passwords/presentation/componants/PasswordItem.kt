@@ -106,23 +106,16 @@ fun PasswordItem(
 
         Column(
             modifier = Modifier
-                .padding(16.dp)
+//                .padding(16.dp)
                 .padding(start = 20.dp)
                 .weight(1f),
             horizontalAlignment = Alignment.Start
         ) {
             if (password != null) {
                 Text(
-//                    modifier = if (onGloballyPositioned != null) {
-//                        Modifier.onGloballyPositioned { coordinates ->
-//                            onGloballyPositioned(coordinates)
-//                        }
-//                    } else {
-//                        Modifier
-//                    },
                     text = password.websiteName,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -132,8 +125,8 @@ fun PasswordItem(
                 Text(
                     text = password.userName,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 10,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -151,12 +144,12 @@ fun PasswordItem(
         ) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = "Mmore",
-                tint = MaterialTheme.colorScheme.onSurface
+                contentDescription = "more",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
-    Divider(color = MaterialTheme.colorScheme.onSurfaceVariant)
+//    Divider(color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 fun getOneWordName(input: String): String {

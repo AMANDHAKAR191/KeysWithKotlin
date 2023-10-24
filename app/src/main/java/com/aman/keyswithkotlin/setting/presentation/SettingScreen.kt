@@ -9,18 +9,13 @@ import android.view.autofill.AutofillManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -71,10 +66,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.Keys
 import com.aman.keyswithkotlin.auth.domain.model.DeviceData
-import com.aman.keyswithkotlin.chats.presentation.noRippleEffect
 import com.aman.keyswithkotlin.core.DeviceInfo
 import com.aman.keyswithkotlin.core.DeviceType
 import com.aman.keyswithkotlin.core.LockAppType
@@ -102,6 +97,8 @@ fun SettingScreen(
     bottomBar: @Composable (() -> Unit),
     navigateToProfileScreen: () -> Unit,
     navigateToAppInfoScreen: () -> Unit,
+    openPrivacyPolicy: () -> Unit,
+    openTermsAndCondtion: () -> Unit,
 ) {
 
     val state = _state.collectAsState()
@@ -246,9 +243,13 @@ fun SettingScreen(
                                 showErrorDialog.value = true
                             })
                             Spacer(modifier = Modifier.height(customSpacerWidth))
-                            CustomText(text = "Privacy Policy", description = "")
+                            CustomText(text = "Privacy Policy", description = "", onClick = {
+                                openPrivacyPolicy()
+                            })
                             Spacer(modifier = Modifier.height(customSpacerWidth))
-                            CustomText(text = "Terms & conditions", description = "")
+                            CustomText(text = "Terms & conditions", description = "", onClick = {
+                                openTermsAndCondtion()
+                            })
                         }
                     }
                 )
@@ -267,7 +268,7 @@ fun CustomText(
     onClick: (() -> Unit)? = null,
 ) {
     Column(
-        modifier = Modifier.then(if (onClick==null) Modifier else Modifier.clickable { onClick() }),
+        modifier = Modifier.then(if (onClick == null) Modifier else Modifier.clickable { onClick() }),
     ) {
         Text(
             text = text, fontSize = 20.sp,

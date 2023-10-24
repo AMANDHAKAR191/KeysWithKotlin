@@ -266,7 +266,7 @@ fun PasswordScreen(
                         },
                         onSearch = {},
                         colors = SearchBarDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = MaterialTheme.colorScheme.surface
                         ),
                         placeholder = {
                             Text(
@@ -322,7 +322,8 @@ fun PasswordScreen(
                     )
                     Surface(
                         modifier = Modifier
-                            .fillMaxSize().padding(top = 80.dp),
+                            .fillMaxSize()
+                            .padding(top = 80.dp),
                         content = {
                             Box(
                                 modifier = Modifier
@@ -355,7 +356,8 @@ fun PasswordScreen(
                                             ) {
                                                 Text(
                                                     text = "Recently used passwords",
-                                                    textAlign = TextAlign.Start
+                                                    textAlign = TextAlign.Start,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
                                         }
@@ -389,7 +391,11 @@ fun PasswordScreen(
                                                     .padding(start = 10.dp),
                                                 horizontalAlignment = Alignment.Start
                                             ) {
-                                                Text(text = "All passwords")
+                                                Text(
+                                                    text = "All passwords",
+                                                    textAlign = TextAlign.Start,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
                                             }
                                         }
 
@@ -450,7 +456,10 @@ fun PasswordScreen(
                                                     .padding(top = 10.dp),
                                                 horizontalAlignment = Alignment.CenterHorizontally
                                             ) {
-                                                Text(text = "This is end of passwords")
+                                                Text(
+                                                    text = "This is end of passwords",
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
                                             }
                                         }
                                     }

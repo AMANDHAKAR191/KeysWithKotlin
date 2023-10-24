@@ -1,5 +1,8 @@
 package com.aman.keyswithkotlin.navigation
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.view.autofill.AutofillManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -12,6 +15,7 @@ import com.aman.keyswithkotlin.setting.presentation.SettingScreen
 import com.aman.keyswithkotlin.setting.presentation.SettingViewModel
 
 fun NavGraphBuilder.settingNavGraph(
+    context: Context,
     packageName: String,
     navController: NavController,
     mAutofillManager: AutofillManager
@@ -46,6 +50,16 @@ fun NavGraphBuilder.settingNavGraph(
                 },
                 navigateToAppInfoScreen = {
                     navController.navigate(Screen.AppInfoScreen.route)
+                },
+                openPrivacyPolicy = {
+                    val open_privacy_policy = Intent(Intent.ACTION_VIEW)
+                    open_privacy_policy.data = Uri.parse("https://amandhakar.blogspot.com/2022/02/privacy-policy-keys.html")
+                    context.startActivity(open_privacy_policy)
+                },
+                openTermsAndCondtion = {
+                    val open_privacy_policy = Intent(Intent.ACTION_VIEW)
+                    open_privacy_policy.data = Uri.parse("https://amandhakar.blogspot.com/2022/02/terms-conditions-keys.html")
+                    context.startActivity(open_privacy_policy)
                 }
             )
         }

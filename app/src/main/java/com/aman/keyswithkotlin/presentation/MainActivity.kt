@@ -1,10 +1,8 @@
 package com.aman.keyswithkotlin.presentation
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.provider.Settings.Global
@@ -14,7 +12,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.aman.keyswithkotlin.auth.presentation.auth.AuthViewModel
@@ -28,9 +25,6 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
 
 
 @AndroidEntryPoint
@@ -44,8 +38,10 @@ class MainActivity : ComponentActivity() {
     private var biometricAuthentication: BiometricAuthentication =
         BiometricAuthentication(
             this@MainActivity,
-            this@MainActivity)
-//    var useDataTransferIsAllowed = false
+            this@MainActivity
+        )
+
+    //    var useDataTransferIsAllowed = false
     var isUsbDebuggingEnabled = false
     var isWireLessDebuggingEnabled = false
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +49,6 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         setContent {
             KeysTheme {
-                Firebase.database.setPersistenceEnabled(true)
                 mAutofillManager = getSystemService(AutofillManager::class.java) as AutofillManager
 
                 FirebaseMessaging.getInstance().subscribeToTopic("UserName")
@@ -116,31 +111,31 @@ class MainActivity : ComponentActivity() {
 //                        }
 //                    builder.create().show()
 //                }
-                    RootNavGraph(
-                        navController = navController,
-                        mAutofillManager!!,
-                        biometricAuthentication,
-                        this@MainActivity,
-                        this@MainActivity
-                    )
-                    val myPreference = MyPreference()
-                    println("myPreference.isNewUser: ${myPreference.isOldUser}")
-                    if (myPreference.isOldUser) {
-                        checkAuthState()
-                    } else {
-                        navigateToOnBoardingScreens()
-                    }
+                RootNavGraph(
+                    navController = navController,
+                    mAutofillManager!!,
+                    biometricAuthentication,
+                    this@MainActivity,
+                    this@MainActivity
+                )
+                val myPreference = MyPreference()
+                println("myPreference.isNewUser: ${myPreference.isOldUser}")
+                if (myPreference.isOldUser) {
+                    checkAuthState()
+                } else {
+                    navigateToOnBoardingScreens()
+                }
 
-                    appLockCounter = AppLockCounterClass(
-                        myPreference,
-                        this@MainActivity,
-                        this@MainActivity,
-                        finishActivity = {
-                            println("finishActivity()")
-                            finish()
-                        })
-                    appLockCounter.initializeCounter()
-                    appLockCounter.onStartOperation()
+                appLockCounter = AppLockCounterClass(
+                    myPreference,
+                    this@MainActivity,
+                    this@MainActivity,
+                    finishActivity = {
+                        println("finishActivity()")
+                        finish()
+                    })
+                appLockCounter.initializeCounter()
+                appLockCounter.onStartOperation()
             }
         }
     }
@@ -179,7 +174,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-        if (isUsbDebuggingEnabled || isWireLessDebuggingEnabled){
+        if (isUsbDebuggingEnabled || isWireLessDebuggingEnabled) {
             appLockCounter.onPauseOperation()
         }
     }

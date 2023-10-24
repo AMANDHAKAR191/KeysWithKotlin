@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Keys</string>
-    <string name="web_client_id">61002044152-ai76eor6niqn69t7qrt38ss7kv86hgp4.apps.googleusercontent.com</string>
     <string name="title_activity_auth">AuthActivity</string>
     <string name="title_activity_autofill_service_test">AutofillServiceTestActivity</string>
     <string name="title_activity_save_autofill_password">SaveAutofillPasswordActivity</string>

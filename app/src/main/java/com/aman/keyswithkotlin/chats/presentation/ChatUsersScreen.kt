@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -42,6 +44,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
@@ -51,13 +54,13 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.chats.domain.model.UserPersonalChatList
 import com.aman.keyswithkotlin.core.util.TutorialType
-import com.aman.keyswithkotlin.passwords.presentation.componants.TopBar
 import com.aman.keyswithkotlin.presentation.ShowCaseProperty
 import com.aman.keyswithkotlin.presentation.ShowCaseView
 import kotlinx.coroutines.flow.SharedFlow
@@ -105,111 +108,113 @@ fun ChatsScreen(
     }
     Scaffold(
         topBar = {
-        TopAppBar(
-            title = {
-                Text(text = "Chat")
-            },
-            colors = TopAppBarDefaults.topAppBarColors(),
-            modifier = Modifier.fillMaxWidth()
-        )
-    }, modifier = Modifier,
-        floatingActionButton = {
-        FloatingActionButton(onClick = {
-            isDialogVisible = true;
-        },
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier
-                .onGloballyPositioned { coordinates ->
-                    targets["FAB"] = ShowCaseProperty(
-                        index = 1,
-                        coordinate = coordinates,
-                        title = "Create Chat",
-                        subTitle = "Click here!! to create new chat"
-                    )
+            TopAppBar(
+                title = {
+                    Text(text = "Chat")
                 },
-            shape = FloatingActionButtonDefaults.shape) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
-        }
-    },
+                colors = TopAppBarDefaults.topAppBarColors(),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }, modifier = Modifier,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    isDialogVisible = true;
+                },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier
+                    .onGloballyPositioned { coordinates ->
+                        targets["FAB"] = ShowCaseProperty(
+                            index = 1,
+                            coordinate = coordinates,
+                            title = "Create Chat",
+                            subTitle = "Click here!! to create new chat"
+                        )
+                    },
+                shape = FloatingActionButtonDefaults.shape
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
+            }
+        },
         bottomBar = {
-        bottomBar()
-    },
+            bottomBar()
+        },
         content = { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            Header(state.value.username)
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        MaterialTheme.colorScheme.surfaceVariant,
-                        RoundedCornerShape(
-                            topStart = 30.dp, topEnd = 30.dp
-                        )
-                    )
-                    .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-                    .padding(top = 30.dp, start = 20.dp, end = 20.dp)
+                    .padding(innerPadding)
             ) {
-                LazyColumn(
-                    modifier = Modifier.padding(bottom = 15.dp, top = 30.dp)
+                Header(state.value.username)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            RoundedCornerShape(
+                                topStart = 30.dp, topEnd = 30.dp
+                            )
+                        )
+                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                        .padding(top = 30.dp, start = 20.dp, end = 20.dp)
                 ) {
-                    if (!state.value.chatUsersList.isNullOrEmpty()) {
-                        items(items = state.value.chatUsersList!!) { person ->
-                            UserEachRow(person = person, onClick = {
-                                onSharedChatEvent(
-                                    SharedChatEvent.OpenSharedChat(
-                                        person, person.commonChatRoomId!!
+                    LazyColumn(
+                        modifier = Modifier
+                    ) {
+                        if (!state.value.chatUsersList.isNullOrEmpty()) {
+                            items(items = state.value.chatUsersList!!) { person ->
+                                UserEachRow(person = person, onClick = {
+                                    onSharedChatEvent(
+                                        SharedChatEvent.OpenSharedChat(
+                                            person, person.commonChatRoomId!!
+                                        )
                                     )
-                                )
-                                navigateToChatScreen()
-                            })
+                                    navigateToChatScreen()
+                                })
+                            }
+                        } else {
+                            //todo wrote code to show loading bar
                         }
-                    } else {
-                        //todo wrote code to show loading bar
                     }
                 }
             }
-        }
 
-        //for Access Alert
-        if (isDialogVisible) {
-            println("check2::")
-            AlertDialog(onDismissRequest = {
-                // Dismiss the dialog when the user clicks outside the dialog or on the back
-                // button. If you want to disable that functionality, simply use an empty
-                // onDismissRequest.
-            }, text = {
-                Column {
-                    Text(text = "Public ID")
-                    TextField(value = otherUserPublicUid,
-                        onValueChange = { otherUserPublicUid = it },
-                        trailingIcon = {
-                            if (isLoadingBarVisible) {
-                                CircularProgressIndicator(modifier = Modifier.size(25.dp))
-                            }
-                        })
-                    Text(
-                        text = errorMessage, color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }, confirmButton = {
-                Button(onClick = {
-                    onEvent(ChatUserEvent.CreateChatUser(otherUserPublicUid))
-                }) {
-                    Text("Create Chat")
-                }
-            }, dismissButton = {
-                TextButton(onClick = {
-                    isDialogVisible = false
-                }) {
-                    Text("Cancel")
-                }
-            })
-        }
-    })
+            //for Access Alert
+            if (isDialogVisible) {
+                println("check2::")
+                AlertDialog(onDismissRequest = {
+                    // Dismiss the dialog when the user clicks outside the dialog or on the back
+                    // button. If you want to disable that functionality, simply use an empty
+                    // onDismissRequest.
+                }, text = {
+                    Column {
+                        Text(text = "Public ID")
+                        TextField(value = otherUserPublicUid,
+                            onValueChange = { otherUserPublicUid = it },
+                            trailingIcon = {
+                                if (isLoadingBarVisible) {
+                                    CircularProgressIndicator(modifier = Modifier.size(25.dp))
+                                }
+                            })
+                        Text(
+                            text = errorMessage, color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }, confirmButton = {
+                    Button(onClick = {
+                        onEvent(ChatUserEvent.CreateChatUser(otherUserPublicUid))
+                    }) {
+                        Text("Create Chat")
+                    }
+                }, dismissButton = {
+                    TextButton(onClick = {
+                        isDialogVisible = false
+                    }) {
+                        Text("Cancel")
+                    }
+                })
+            }
+        })
 
     if (isTutorialEnabled.value == TutorialType.ENABLED.toString()) {
         println("my check115")
@@ -258,57 +263,53 @@ fun Header(userName: String) {
 fun UserEachRow(
     person: UserPersonalChatList, onClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .noRippleEffect { onClick() },
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .noRippleEffect { onClick() }
     ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row {
-                    person.otherUserProfileUrl?.let {
-                        AsyncImage(
-                            model = it,
-                            contentDescription = "Profile Image",
-                            modifier = Modifier
-                                .size(55.dp)
-                                .clip(
-                                    CircleShape
-                                )
-                                .background(Color.Yellow)
-                                .padding(2.dp)
-                                .clip(CircleShape)
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            person.otherUserProfileUrl?.let {
+                AsyncImage(
+                    model = it,
+                    contentDescription = "Profile Image",
+                    modifier = Modifier
+                        .size(55.dp)
+                        .clip(
+                            CircleShape
                         )
-                    }
-                    SpacerWidth()
-                    Column {
-                        Text(
-                            text = person.otherUserPublicUid!!, style = TextStyle(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp, fontWeight = FontWeight.Bold
-                            )
-                        )
-                        SpacerHeight(5.dp)
-                        Text(
-                            text = person.otherUserPublicUname!!, style = TextStyle(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp
-                            )
-                        )
-                    }
-
-                }
+                        .background(Color.Yellow)
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                )
+            }
+            SpacerWidth()
+            Column(modifier = Modifier.fillMaxHeight().weight(1f)) {
                 Text(
-                    text = "12:30 PM", style = TextStyle(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp
+                    text = person.otherUserPublicUid!!, style = TextStyle(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+//                SpacerHeight(5.dp)
+                Text(
+                    text = person.otherUserPublicUname!!, style = TextStyle(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp
                     )
                 )
             }
-            SpacerHeight(15.dp)
-            Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
+            Text(
+                text = "12:30 PM", style = TextStyle(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp
+                ),
+                textAlign = TextAlign.End
+            )
         }
+        SpacerHeight(10.dp)
+        Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
     }
-
 }
 
 @SuppressLint("UnnecessaryComposedModifier")

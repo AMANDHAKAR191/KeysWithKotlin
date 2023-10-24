@@ -219,8 +219,6 @@ fun IndividualChatScreen(
                                 end = 20.dp,
                                 bottom = 20.dp
                             )
-//                            .navigationBarsPadding()
-//                            .imePadding()
                     )
                 },
                 navigationIcon = {
@@ -463,14 +461,14 @@ fun UserNameRow(
                 Column {
                     Text(
                         text = personData.otherUserPublicUname ?: "Username", style = TextStyle(
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         )
                     )
                     Text(
                         text = "Online", style = TextStyle(
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 14.sp
                         )
                     )
