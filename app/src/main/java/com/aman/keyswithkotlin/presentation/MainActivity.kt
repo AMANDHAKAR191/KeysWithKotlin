@@ -63,6 +63,11 @@ class MainActivity : ComponentActivity() {
             this@MainActivity
         )
 
+    private val receiver = ChargerCableReceiver(updateState = {
+        //                    println("useDataTransferIsAllowed: $useDataTransferIsAllowed")
+        //                    useDataTransferIsAllowed = it
+    })
+
     //    var useDataTransferIsAllowed = false
     var isUsbDebuggingEnabled = false
     var isWireLessDebuggingEnabled = false
@@ -105,10 +110,7 @@ class MainActivity : ComponentActivity() {
 
         // In your main activity, register the BroadcastReceiver with an IntentFilter
         val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        val receiver = ChargerCableReceiver(updateState = {
-            //                    println("useDataTransferIsAllowed: $useDataTransferIsAllowed")
-            //                    useDataTransferIsAllowed = it
-        })
+
         registerReceiver(receiver, filter)
 
         isUsbDebuggingEnabled = isUsbDebuggingEnabled(this)
@@ -277,6 +279,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
+        unregisterReceiver(receiver)
         if (isUsbDebuggingEnabled || isWireLessDebuggingEnabled) {
             appLockCounter.onPauseOperation()
         }
