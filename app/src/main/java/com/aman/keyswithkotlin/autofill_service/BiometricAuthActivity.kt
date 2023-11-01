@@ -32,7 +32,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
@@ -41,6 +44,7 @@ import com.aman.keyswithkotlin.passwords.domain.model.Password
 import com.aman.keyswithkotlin.passwords.presentation.componants.SearchedPasswordItem
 import com.aman.keyswithkotlin.ui.theme.KeysWithKotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 
 
 @AndroidEntryPoint
@@ -111,32 +115,80 @@ class BiometricAuthActivity : ComponentActivity() {
             KeysWithKotlinTheme {
                 val viewModel: AutofillPasswordViewModel = hiltViewModel()
                 passwordList = viewModel.state.value.passwords
+                var showProgress by remember { mutableStateOf(true) }
+                var showError by remember { mutableStateOf(false) }
+
+                //get autofillids from intent
+                autofillHints = intent.getStringArrayListExtra(EXTRA_AUTOFILL_HINTS)
+                autofillIds = intent.getParcelableArrayListExtra(EXTRA_AUTOFILL_IDS)
 
                 println("passwordList11: $passwordList")
                 if (passwordList.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
+                        if (showError) {
+                            var fillResponse = FillResponse.Builder()
+
+                            val presentation =
+                                RemoteViews(
+                                    applicationContext.packageName,
+                                    com.aman.keyswithkotlin.R.layout.autofill_list_item
+                                )
+                            presentation.setTextViewText(
+                                com.aman.keyswithkotlin.R.id.text,
+                                "no saved password"
+                            )
+
+                            val datasetBuilder = Dataset.Builder()
+                            autofillIds?.let {
+                                datasetBuilder.setValue(it[0], AutofillValue.forText("no saved password") ,presentation)
+                            }
+
+                            fillResponse.addDataset(datasetBuilder.build())
+
+                            val replyIntent = Intent()
+                            // Send the data back to the service
+                            replyIntent.putExtra(EXTRA_AUTHENTICATION_RESULT, fillResponse.build())
+
+                            setResult(RESULT_OK, replyIntent)
+                            finish()
+                        }
                     }
                 } else {
 //                    val someWebsiteName = "20BCR70782"
                     val someWebsiteName = intent.getStringExtra(EXTRA_CLIENT_PACKAGE_NAME)
                     println("someWebsiteName: $someWebsiteName")
                     //write code filter passwordList based on given value websiteName and store in filteredPasswordList
-                    filteredPasswordList= passwordList.filter {
-                        println("${it.websiteName} == $someWebsiteName || ${it.websiteName==someWebsiteName}")
+                    filteredPasswordList = passwordList.filter {
+                        println("${it.websiteName} == $someWebsiteName || ${it.websiteName == someWebsiteName}")
                         it.websiteName == someWebsiteName
                     }
                     println("filteredPasswordList: $filteredPasswordList")
-                    if (filteredPasswordList.isEmpty()){
+                    if (filteredPasswordList.isEmpty()) {
                         ShowPasswordList(passwordList)
-                    }else{
+                    } else {
                         ShowPasswordList(filteredPasswordList)
                     }
-                    launchBiometric()
+//                    launchBiometric()
+                    if (filteredPasswordList.isNotEmpty()) {
+                        onYes(filteredPasswordList.take(4))
+                    } else {
+                        onYes(passwordList.take(4))
+                    }
                 }
-                LaunchedEffect(key1 = biometricResponse.value){
-                    println("check point biometric")
-                    println("value: ${biometricResponse.value}")
+
+
+                LaunchedEffect(showProgress) {
+                    if (showProgress) {
+                        // Simulate loading for a few seconds
+                        delay(1000) // Adjust the duration as needed
+                        showProgress = false
+
+                        if (passwordList.isEmpty()) {
+                            // If the passwordList is still empty after the delay, show the error
+                            showError = true
+                        }
+                    }
                 }
             }
         }
@@ -145,22 +197,22 @@ class BiometricAuthActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ShowPasswordList(passwordList1: List<Password>) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LazyColumn {
-                    items(passwordList1) {
-                        SearchedPasswordItem(
-                            password = it,
-                            onItemClick = {
-                                onYes(passwordList1.take(4))
-                            }
-                        )
-                    }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            LazyColumn {
+                items(passwordList1) {
+                    SearchedPasswordItem(
+                        password = it,
+                        onItemClick = {
+                            onYes(passwordList1.take(4))
+                        }
+                    )
                 }
             }
+        }
     }
 
 
-    private fun onYes(tempPasswordList:List<Password>) {
+    private fun onYes(tempPasswordList: List<Password>) {
         var fillResponse = FillResponse.Builder()
         println("list: ${tempPasswordList}")
 //        tempPasswordList.forEach { password ->
@@ -201,17 +253,19 @@ class BiometricAuthActivity : ComponentActivity() {
 //            fillResponse.addDataset(datasetBuilder.build())
 //        }
 
-        //get autofillids from intent
-        autofillHints = intent.getStringArrayListExtra(EXTRA_AUTOFILL_HINTS)
-        autofillIds = intent.getParcelableArrayListExtra(EXTRA_AUTOFILL_IDS)
-
         val size: Int = autofillHints?.size!!
         val fields: ArrayMap<String, AutofillId> = ArrayMap(size)
         for (i in 0 until size) {
             fields[autofillHints?.get(i)] = autofillIds?.get(i) as AutofillId
         }
 
-        fillResponse = KeysAutofillService().createResponse(this, fields = fields, 3, tempPasswordList,false)
+        fillResponse = KeysAutofillService().createResponse(
+            this,
+            fields = fields,
+            tempPasswordList.size,
+            tempPasswordList,
+            false
+        )
 
 
         val replyIntent = Intent()
@@ -252,10 +306,6 @@ class BiometricAuthActivity : ComponentActivity() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
                     biometricResponse.value = "success"
-                    if (filteredPasswordList.isNotEmpty()){
-                        onYes(filteredPasswordList.take(4))
-                    }else
-                        onYes(passwordList.take(4))
                 }
 
                 override fun onAuthenticationFailed() {
