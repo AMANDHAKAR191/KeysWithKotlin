@@ -44,7 +44,7 @@ class PasswordViewModel @Inject constructor(
     val isTutorialEnabled = _isTutorialEnabled.asStateFlow()
 
     private val _searchText = MutableStateFlow("")
-    private val searchText = _searchText.asSharedFlow()
+    private val searchText = _searchText.asStateFlow()
 
     private var recentlyDeletedPassword: Password? = null
 
@@ -53,18 +53,18 @@ class PasswordViewModel @Inject constructor(
     val searchedPasswords = searchText
         .combine(_passwords) { text, passwords ->
             if (text.isBlank()) {
-                null
+                passwords
             } else {
                try {
                    passwords.filter { it.doesMatchSearchQuery(text) }
                }catch (e:Exception){
-                   println("check1")
+                   e.printStackTrace()
                    null
                }
             }
         }.stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
+            SharingStarted.WhileSubscribed(1000),
             _passwords.value
         )
 
@@ -136,7 +136,6 @@ class PasswordViewModel @Inject constructor(
             }
 
             is PasswordEvent.OnSearchTextChange -> {
-                println("search text: ${event.value}")
                 _searchText.value = event.value
             }
 
