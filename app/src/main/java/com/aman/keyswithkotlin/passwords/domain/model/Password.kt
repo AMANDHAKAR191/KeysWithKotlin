@@ -13,11 +13,15 @@ data class Password constructor(
 //    var encryptionIV:String = ""
 ){
     fun doesMatchSearchQuery(query: String): Boolean {
-        val matchingCombination = listOf(
+        // if username is empty is then don't match with username
+        val matchingCombination = if (userName != "") listOf(
             "$websiteName",
             "$userName",
             "${websiteName.first()}",
             "${userName.first()}"
+        ) else listOf(
+            "$websiteName",
+            "${websiteName.first()}",
         )
         return matchingCombination.any {
             it.contains(query, ignoreCase = true)
