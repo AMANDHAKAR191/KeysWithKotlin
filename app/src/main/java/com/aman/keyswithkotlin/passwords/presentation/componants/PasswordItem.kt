@@ -2,6 +2,7 @@ package com.aman.keyswithkotlin.passwords.presentation.componants
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.aman.keyswithkotlin.chats.presentation.SpacerHeight
 import com.aman.keyswithkotlin.passwords.domain.model.Password
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -47,7 +49,7 @@ fun PasswordItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 10.dp)
+//            .padding(horizontal = 5.dp, vertical = 5.dp)
             .combinedClickable(
                 onClick = {
                     onItemClick()
@@ -106,10 +108,10 @@ fun PasswordItem(
 
         Column(
             modifier = Modifier
-//                .padding(16.dp)
-                .padding(start = 20.dp)
+                .padding(start = 10.dp)
                 .weight(1f),
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
             if (password != null) {
                 Text(
@@ -120,7 +122,6 @@ fun PasswordItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
             if (password != null) {
                 Text(
                     text = password.userName,

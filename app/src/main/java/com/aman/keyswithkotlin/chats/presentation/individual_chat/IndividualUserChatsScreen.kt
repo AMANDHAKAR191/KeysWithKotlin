@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -403,7 +404,7 @@ fun CustomTextField(
                 focusedIndicatorColor = Color.Transparent
             ),
             keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Send
+                imeAction = if (text.isNullOrEmpty()) ImeAction.Send else ImeAction.Default
             ),
             keyboardActions = KeyboardActions(
                 onSend = {
@@ -439,40 +440,38 @@ fun UserNameRow(
     person: UserPersonalChatList? = null
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = modifier.fillMaxWidth()
     ) {
         person?.let { personData ->
-            Row {
-                personData.otherUserProfileUrl?.let {
-                    AsyncImage(
-                        model = personData.otherUserProfileUrl,
-                        contentDescription = "",
-                        modifier = Modifier
-                            .clip(
-                                CircleShape
-                            )
-                            .background(Color.Yellow)
-                            .padding(2.dp)
-                            .clip(CircleShape)
-                    )
-                }
-                SpacerWidth()
-                Column {
-                    Text(
-                        text = personData.otherUserPublicUname ?: "Username", style = TextStyle(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
+            personData.otherUserProfileUrl?.let {
+                AsyncImage(
+                    model = personData.otherUserProfileUrl,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .aspectRatio(1f)
+                        .clip(
+                            CircleShape
                         )
+                        .background(Color.Yellow)
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                )
+            }
+            SpacerWidth()
+            Column {
+                Text(
+                    text = personData.otherUserPublicUname ?: "Username", style = TextStyle(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
                     )
-                    Text(
-                        text = "Online", style = TextStyle(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 14.sp
-                        )
+                )
+                Text(
+                    text = "Online", style = TextStyle(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 14.sp
                     )
-                }
+                )
             }
         }
     }

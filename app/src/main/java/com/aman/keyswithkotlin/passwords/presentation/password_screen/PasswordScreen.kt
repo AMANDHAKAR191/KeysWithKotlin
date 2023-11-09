@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -65,6 +66,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aman.keyswithkotlin.chats.presentation.SharedChatEvent
+import com.aman.keyswithkotlin.chats.presentation.SpacerHeight
 import com.aman.keyswithkotlin.core.BiometricStatus
 import com.aman.keyswithkotlin.core.Constants.ENTER_DURATION
 import com.aman.keyswithkotlin.core.util.TutorialType
@@ -360,6 +362,7 @@ fun PasswordScreen(
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
+                                            SpacerHeight()
                                         }
                                         items(state.value.recentlyUsedPasswords.take(3)) { password ->
                                             PasswordItem(
@@ -377,6 +380,7 @@ fun PasswordScreen(
                                                     onLongClicked = true
                                                 }
                                             )
+                                            SpacerHeight()
 //                                            ShimmerListItem(
 //                                                isLoading = isLoading,
 //                                                contentAfterLoading = {
@@ -384,6 +388,7 @@ fun PasswordScreen(
 //                                                })
                                         }
                                         item {
+                                            SpacerHeight()
                                             Column(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
@@ -397,6 +402,7 @@ fun PasswordScreen(
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
+                                            SpacerHeight()
                                         }
 
                                         items(state.value.passwords) { password ->
@@ -442,6 +448,7 @@ fun PasswordScreen(
                                                     null
                                                 }
                                             )
+                                            SpacerHeight()
 //                                            ShimmerListItem(
 //                                                isLoading = isLoading,
 //                                                contentAfterLoading = {
@@ -449,6 +456,7 @@ fun PasswordScreen(
 //                                                })
                                         }
                                         item {
+                                            SpacerHeight()
                                             Column(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
@@ -456,6 +464,7 @@ fun PasswordScreen(
                                                     .padding(top = 10.dp),
                                                 horizontalAlignment = Alignment.CenterHorizontally
                                             ) {
+                                                Divider()
                                                 Text(
                                                     text = "This is end of passwords",
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
