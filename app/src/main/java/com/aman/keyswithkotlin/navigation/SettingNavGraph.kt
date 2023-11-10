@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.view.autofill.AutofillManager
-import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -14,6 +13,8 @@ import com.aman.keyswithkotlin.core.components.BottomBar
 import com.aman.keyswithkotlin.setting.presentation.AppInfoScreen
 import com.aman.keyswithkotlin.setting.presentation.SettingScreen
 import com.aman.keyswithkotlin.setting.presentation.SettingViewModel
+import com.aman.keyswithkotlin.setting.presentation.manage_devicces.ManageDevicesScreen
+import com.aman.keyswithkotlin.setting.presentation.manage_devicces.ManageDevicesViewModel
 
 
 fun NavGraphBuilder.settingNavGraph(
@@ -55,18 +56,23 @@ fun NavGraphBuilder.settingNavGraph(
                 },
                 openPrivacyPolicy = {
                     val open_privacy_policy = Intent(Intent.ACTION_VIEW)
-                    open_privacy_policy.data = Uri.parse("https://amandhakar.blogspot.com/2022/02/privacy-policy-keys.html")
+                    open_privacy_policy.data =
+                        Uri.parse("https://amandhakar.blogspot.com/2022/02/privacy-policy-keys.html")
                     context.startActivity(open_privacy_policy)
                 },
                 openTermsAndCondition = {
                     val open_privacy_policy = Intent(Intent.ACTION_VIEW)
-                    open_privacy_policy.data = Uri.parse("https://amandhakar.blogspot.com/2022/02/terms-conditions-keys.html")
+                    open_privacy_policy.data =
+                        Uri.parse("https://amandhakar.blogspot.com/2022/02/terms-conditions-keys.html")
                     context.startActivity(open_privacy_policy)
                 },
                 openContactUs = {
                     val openMail =
                         Intent(Intent.ACTION_VIEW, Uri.parse("mailto:amandhakar.keys@gmail.com"))
                     context.startActivity(openMail)
+                },
+                navigateToManageDevicesScreen = {
+                    navController.navigate(Screen.ManageDevicesScreen.route)
                 }
             )
         }
@@ -74,6 +80,15 @@ fun NavGraphBuilder.settingNavGraph(
             AppInfoScreen(appVersion = "2.0", navigateBack = {
                 navController.popBackStack()
             })
+        }
+        composable(route = Screen.AppInfoScreen.route) {
+            val viewModel: ManageDevicesViewModel = hiltViewModel()
+            ManageDevicesScreen(
+                _state = viewModel.state,
+                onEvent = viewModel::onEvent,
+                navigateBack = {
+                    navController.popBackStack()
+                })
         }
     }
 

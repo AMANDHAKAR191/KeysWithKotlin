@@ -27,7 +27,7 @@ fun ShowInfoToUser(
     showDialog: Boolean = false,
     title: String? = null,
     message: String? = null,
-    onConfirmation: (() -> Unit)? = null,
+    onRetry: (() -> Unit)? = null,
 ) {
     val isDialogVisible = remember {
         mutableStateOf(showDialog)
@@ -68,8 +68,9 @@ fun ShowInfoToUser(
                     ) {
                         TextButton(
                             onClick = {
-                                if (onConfirmation != null) {
-                                    onConfirmation()
+                                if (onRetry != null) {
+                                    isDialogVisible.value = false
+                                    onRetry()
                                 }
                             },
                             modifier = Modifier.padding(8.dp),

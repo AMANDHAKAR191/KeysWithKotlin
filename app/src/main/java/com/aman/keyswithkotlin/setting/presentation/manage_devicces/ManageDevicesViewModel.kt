@@ -1,19 +1,14 @@
-package com.aman.keyswithkotlin.auth.presentation.profile
+package com.aman.keyswithkotlin.setting.presentation.manage_devicces
 
 import UIEvents
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aman.keyswithkotlin.Keys
 import com.aman.keyswithkotlin.access_verification.domain.use_cases.AccessVerificationUseCases
 import com.aman.keyswithkotlin.auth.domain.model.DeviceData
 import com.aman.keyswithkotlin.auth.domain.model.RequestAuthorizationAccess
-import com.aman.keyswithkotlin.auth.domain.repository.RevokeAccessResponse
-import com.aman.keyswithkotlin.auth.domain.repository.SignOutResponse
 import com.aman.keyswithkotlin.auth.domain.use_cases.AuthUseCases
 import com.aman.keyswithkotlin.auth.presentation.AuthEvent
 import com.aman.keyswithkotlin.core.DeviceInfo
@@ -33,24 +28,17 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(
+class ManageDevicesViewModel @Inject constructor(
     private val authUseCases: AuthUseCases,
     private val accessVerificationUseCases: AccessVerificationUseCases,
     private val myPreference: MyPreference
 ) : ViewModel() {
-    val displayName get() = authUseCases.displayName
-    val photoUrl get() = authUseCases.photoUrl
 
-    private val _state = MutableStateFlow(ProfileState())
+    private val _state = MutableStateFlow(ManageDevicesState())
     val state = _state.asStateFlow()
 
     private val _eventFlow = MutableSharedFlow<UIEvents>()
     val eventFlow = _eventFlow.asSharedFlow()
-
-    var signOutResponse by mutableStateOf<SignOutResponse>(Success(false))
-        private set
-    var revokeAccessResponse by mutableStateOf<RevokeAccessResponse>(Success(false))
-        private set
 
     val _accessRequestingDeviceId = mutableStateOf("")
     val _authorizationCode = mutableIntStateOf(0)
@@ -67,7 +55,7 @@ class ProfileViewModel @Inject constructor(
                     is Success -> {
                         _state.update {
                             it.copy(
-//                                loggedInDeviceList = response.data as List<DeviceData>
+                                loggedInDeviceList = response.data as List<DeviceData>
                             )
                         }
                     }
@@ -85,10 +73,10 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: AuthEvent) {
+    fun onEvent(event: ManageDevicesEvent) {
         val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
         when (event) {
-            is AuthEvent.GiveAuthorizationAccess -> {
+            is ManageDevicesEvent.GiveAuthorizationAccess -> {
                 viewModelScope.launch {
                     accessVerificationUseCases.giveAuthorizationAccessOfSecondaryDevice(event.deviceID)
                         .collect {
@@ -97,7 +85,7 @@ class ProfileViewModel @Inject constructor(
                 }
             }
 
-            is AuthEvent.RemoveAuthorizationAccess -> {
+            is ManageDevicesEvent.RemoveAuthorizationAccess -> {
                 viewModelScope.launch {
                     accessVerificationUseCases.removeAuthorizationAccessOfSecondaryDevice(event.deviceID)
                         .collect {
@@ -106,7 +94,7 @@ class ProfileViewModel @Inject constructor(
                 }
             }
 
-            AuthEvent.GrantAccessPermission -> {
+            ManageDevicesEvent.GrantAccessPermission -> {
                 viewModelScope.launch {
                     println("_accessRequestingDeviceId.value: ${_accessRequestingDeviceId.value}")
                     accessVerificationUseCases.giveAuthorizationAccessOfSecondaryDevice(
@@ -133,17 +121,18 @@ class ProfileViewModel @Inject constructor(
                     }
                 }
             }
-            AuthEvent.DeclineAuthorizationAccessProcess -> {
+
+            ManageDevicesEvent.DeclineAuthorizationAccessProcess -> {
                 completeAccessGrantingProcess(deviceInfo.getDeviceId())
             }
 
-            AuthEvent.CancelAuthorizationAccessProcess -> {
+            ManageDevicesEvent.CancelAuthorizationAccessProcess -> {
                 completeAccessGrantingProcess(myPreference.primaryUserDeviceId!!)
             }
         }
     }
 
-    private fun completeAccessGrantingProcess(deviceId:String) {
+    private fun completeAccessGrantingProcess(deviceId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             accessVerificationUseCases.completeAuthorizationAccessProcess(deviceId)
                 .collect { response ->
@@ -178,7 +167,12 @@ class ProfileViewModel @Inject constructor(
                                 if (response.data.requestingAccess) {
                                     _accessRequestingDeviceId.value = response.data.requesterID!!
                                     _authorizationCode.value = response.data.authorizationCode
-                                    _eventFlow.emit(UIEvents.ShowAuthorizationAlertDialog(_accessRequestingDeviceId.toString(), _authorizationCode.value))
+                                    _eventFlow.emit(
+                                        UIEvents.ShowAuthorizationAlertDialog(
+                                            _accessRequestingDeviceId.toString(),
+                                            _authorizationCode.value
+                                        )
+                                    )
                                 } else {
                                     _eventFlow.emit(UIEvents.HideAuthorizationAlertDialog)
                                     _eventFlow.emit(UIEvents.NavigateToNextScreen)
@@ -195,21 +189,6 @@ class ProfileViewModel @Inject constructor(
                         }
                     }
                 }
-        }
-    }
-
-    fun signOut() = viewModelScope.launch {
-        signOutResponse = Loading
-        authUseCases.signOut().collect { response ->
-            signOutResponse = response
-        }
-
-    }
-
-    fun revokeAccess() = viewModelScope.launch {
-        revokeAccessResponse = Loading
-        authUseCases.revokeAccess().collect { response ->
-            revokeAccessResponse = response
         }
     }
 }

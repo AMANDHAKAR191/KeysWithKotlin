@@ -71,9 +71,9 @@ fun GeneratePasswordScreen(
         }) { innnerPaddng ->
         Column(
             modifier = Modifier
-                .padding(innnerPaddng)
-                .padding(all = 10.dp)
                 .fillMaxSize()
+                .padding(innnerPaddng)
+                .padding(all = 20.dp)
         ) {
             Text(text = "Generated password: ${state.generatedPassword}")
             Spacer(modifier = Modifier.height(10.dp))

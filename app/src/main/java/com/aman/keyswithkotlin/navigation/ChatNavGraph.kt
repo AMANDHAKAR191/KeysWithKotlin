@@ -61,7 +61,7 @@ fun NavGraphBuilder.chatNavGraph(
                 eventFlowState = viewModel.eventFlow,
                 onChatEvent = viewModel::onEvent,
                 onSharedChatEvent = sharedChatViewModel::onEvent,
-                navigateToPasswordScreen = {
+                navigateBack = {
                     navController.popBackStack()
                 },
                 sendNotification = {otherUserPublicUid, senderPublicUid, body->

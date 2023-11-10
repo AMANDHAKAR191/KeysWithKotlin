@@ -66,7 +66,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import coil.compose.AsyncImage
 import com.aman.keyswithkotlin.Keys
 import com.aman.keyswithkotlin.auth.domain.model.DeviceData
@@ -97,6 +96,7 @@ fun SettingScreen(
     bottomBar: @Composable (() -> Unit),
     navigateToProfileScreen: () -> Unit,
     navigateToAppInfoScreen: () -> Unit,
+    navigateToManageDevicesScreen: () -> Unit,
     openPrivacyPolicy: () -> Unit,
     openTermsAndCondition: () -> Unit,
     openContactUs: () -> Unit,
@@ -135,11 +135,14 @@ fun SettingScreen(
     var showErrorDialog = remember {
         mutableStateOf(false)
     }
-    if (showErrorDialog.value) {
-        ShowInfoToUser(showDialog = true, title = "Error", message = "Hello") {
+    ShowInfoToUser(
+        showDialog = showErrorDialog.value,
+        title = "Error",
+        message = "Hello",
+        onRetry = {
             showErrorDialog.value = false
         }
-    }
+    )
 
 
     Scaffold(
@@ -198,7 +201,10 @@ fun SettingScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.height(customSpacerWidth))
-                            SingleDeviceCard(loggedInDeviceList = state.value.loggedInDeviceList)
+                            SingleDeviceCard(
+                                loggedInDeviceList = state.value.loggedInDeviceList,
+                                navigateToManageDevicesScreen = navigateToManageDevicesScreen
+                            )
                             Spacer(modifier = Modifier.height(10.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -241,8 +247,8 @@ fun SettingScreen(
                             })
                             Spacer(modifier = Modifier.height(customSpacerWidth))
                             CustomText(text = "Contact Us", description = "", onClick = {
-                                openContactUs()
-//                                showErrorDialog.value = true
+//                                openContactUs()
+                                showErrorDialog.value = true
                             })
                             Spacer(modifier = Modifier.height(customSpacerWidth))
                             CustomText(text = "Privacy Policy", description = "", onClick = {
@@ -376,7 +382,10 @@ fun Header(
 }
 
 @Composable
-fun SingleDeviceCard(loggedInDeviceList: List<DeviceData>) {
+fun SingleDeviceCard(
+    loggedInDeviceList: List<DeviceData>,
+    navigateToManageDevicesScreen: () -> Unit
+) {
     var isDevicesVisible by remember { mutableStateOf(false) }
     Column {
         Row(
@@ -398,7 +407,10 @@ fun SingleDeviceCard(loggedInDeviceList: List<DeviceData>) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                            .clickable {
+                                navigateToManageDevicesScreen()
+                            },
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.Center
                     ) {

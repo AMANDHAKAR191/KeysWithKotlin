@@ -31,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -83,7 +84,7 @@ fun IndividualChatScreen(
     eventFlowState: SharedFlow<UIEvents>,
     onChatEvent: (ChatMessageEvent) -> Unit,
     onSharedChatEvent: (SharedChatEvent) -> Unit,
-    navigateToPasswordScreen: () -> Unit,
+    navigateBack: () -> Unit,
     sendNotification: (String, String, String) -> Unit
 ) {
     val state = _state.collectAsState()
@@ -216,20 +217,23 @@ fun IndividualChatScreen(
                             .height(80.dp)
                             .padding(
                                 top = 20.dp,
-                                start = 20.dp,
+//                                start = 20.dp,
                                 end = 20.dp,
                                 bottom = 20.dp
                             )
                     )
                 },
                 navigationIcon = {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = null,
-                        modifier = Modifier.clickable {
-                            navigateToPasswordScreen()
-                        }
-                    )
+                    IconButton(
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        onClick = { navigateBack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                    }
                 }
             )
         },
@@ -404,11 +408,13 @@ fun CustomTextField(
                 focusedIndicatorColor = Color.Transparent
             ),
             keyboardOptions = KeyboardOptions(
-                imeAction = if (text.isNullOrEmpty()) ImeAction.Send else ImeAction.Default
+                imeAction = ImeAction.Default
             ),
             keyboardActions = KeyboardActions(
                 onSend = {
-                    onTrailingIconButtonClicked()
+                    if (text.isNotEmpty()) {
+                        onTrailingIconButtonClicked()
+                    }
                 }
             ),
             modifier = Modifier

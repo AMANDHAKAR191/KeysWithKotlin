@@ -67,6 +67,8 @@ class MainActivity : ComponentActivity() {
         //                    println("useDataTransferIsAllowed: $useDataTransferIsAllowed")
         //                    useDataTransferIsAllowed = it
     })
+    // In your main activity, register the BroadcastReceiver with an IntentFilter
+   private final val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
 
     //    var useDataTransferIsAllowed = false
     var isUsbDebuggingEnabled = false
@@ -107,9 +109,6 @@ class MainActivity : ComponentActivity() {
         FirebaseMessaging.getInstance().subscribeToTopic("UserName")
 
         navController = rememberNavController()
-
-        // In your main activity, register the BroadcastReceiver with an IntentFilter
-        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
 
         registerReceiver(receiver, filter)
 
@@ -265,6 +264,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onRestart() {
         super.onRestart()
+//        registerReceiver(receiver,filter)
 //        val notificationSender = FCMNotificationSender(
 //            "/topics/" + "UserName",
 //            "FCMessage test",
@@ -279,7 +279,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-        unregisterReceiver(receiver)
+//        unregisterReceiver(receiver)
         if (isUsbDebuggingEnabled || isWireLessDebuggingEnabled) {
             appLockCounter.onPauseOperation()
         }

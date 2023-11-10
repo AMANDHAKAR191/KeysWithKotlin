@@ -35,15 +35,14 @@ fun OneTapSignIn(
 
         is Failure -> {
             showErrorDialog.value = true
-            if (showErrorDialog.value) {
-                ShowInfoToUser(
-                    showDialog = true,
-                    title = "Error",
-                    message = oneTapSignInResponse.e.message
-                ) {
+            ShowInfoToUser(
+                showDialog = showErrorDialog.value,
+                title = "Error",
+                message = oneTapSignInResponse.e.message,
+                onRetry = {
                     showErrorDialog.value = false
                 }
-            }
+            )
 //            CustomCircularProgressBar(showStatus = true, status = "Error: ${oneTapSignInResponse.e.message}")
             LaunchedEffect(Unit) {
                 print(oneTapSignInResponse.e)

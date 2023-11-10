@@ -16,17 +16,28 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -107,6 +118,8 @@ fun ProfileScreen(
         mutableStateOf(false)
     }
 
+    var openMenu by remember { mutableStateOf(false) }
+
     LaunchedEffect(key1 = isCodeInvaildError.value){
         showError != showError
     }
@@ -141,18 +154,71 @@ fun ProfileScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
-            ProfileTopBar(
-                signOut = {
-                    onSignOut()
+            TopAppBar(
+                title = { Text(text = "App Info", color = MaterialTheme.colorScheme.onSurface) },
+                navigationIcon = {
+                    IconButton(
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        onClick = { navigateBack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                    }
                 },
-                revokeAccess = {
-                    onRevokeAccess()
+                actions = {
+                    IconButton(
+                        onClick = {
+                            openMenu = !openMenu
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.MoreVert,
+                            contentDescription = null,
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = openMenu,
+                        onDismissRequest = {
+                            openMenu = !openMenu
+                        }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = SIGN_OUT)
+                            },
+                            onClick = {
+                                onSignOut()
+                                openMenu = !openMenu
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = Constants.REVOKE_ACCESS)
+                            },
+                            onClick = {
+                                onRevokeAccess()
+                                openMenu = !openMenu
+                            }
+                        )
+                    }
                 },
-                navigateToPasswordScreen = {
-                    navigateBack()
-//                    handleBackNavigation("PasswordScreen")
-                }
+                colors = TopAppBarDefaults.largeTopAppBarColors()
             )
+//            ProfileTopBar(
+//                signOut = {
+//                    onSignOut()
+//                },
+//                revokeAccess = {
+//                    onRevokeAccess()
+//                },
+//                navigateToPasswordScreen = {
+//                    navigateBack()
+////                    handleBackNavigation("PasswordScreen")
+//                }
+//            )
         },
         content = { padding ->
             Column(
@@ -180,54 +246,54 @@ fun ProfileScreen(
                     text = displayName,
                     fontSize = 24.sp
                 )
-                Column {
-                    val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
-                    var isCurrentUserPrimary by remember { mutableStateOf(false) }
-                    //to check is current device is primary
-                    for (deviceData in state.value.loggedInDeviceList) {
-                        if (deviceData.deviceId == deviceInfo.getDeviceId()) {
-                            if (deviceData.deviceType == DeviceType.Primary.toString()) {
-                                isCurrentUserPrimary = true
-                                break
-                            }
-                        }
-                    }
-                    LazyColumn {
-                        items(state.value.loggedInDeviceList) { deviceData ->
-                            Column {
-                                Text(text = "Device ID: ${deviceData.deviceId}")
-                                Text(text = "Device Name: ${deviceData.deviceName}")
-                                Text(text = "Device Type: ${deviceData.deviceType}")
-                                Text(text = "Device Authorization: ${deviceData.authorization}")
-                                Text(text = "Last login time: ${deviceData.lastLoginTimeStamp}")
-                                //if current device is primary device then show remove access for secondary devices
-                                if (isCurrentUserPrimary) {
-                                    if (deviceData.deviceType == DeviceType.Secondary.toString()) {
-                                        Button(onClick = {
-                                            if (deviceData.authorization == Authorization.Authorized.toString()) {
-                                                println("deviceName: ${deviceData.deviceName} authorization: ${deviceData.authorization}")
-                                                onEvent(
-                                                    AuthEvent.RemoveAuthorizationAccess(
-                                                        deviceData.deviceId!!
-                                                    )
-                                                )
-                                            } else {
-                                                println("deviceName: ${deviceData.deviceName} authorization: ${deviceData.authorization}")
-                                                onEvent(AuthEvent.GiveAuthorizationAccess(deviceData.deviceId!!))
-                                            }
-                                        }) {
-                                            if (deviceData.authorization == Authorization.Authorized.toString()) {
-                                                Text(text = "Remove Access")
-                                            } else {
-                                                Text(text = "Give Access")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+//                Column {
+//                    val deviceInfo = DeviceInfo(Keys.instance.applicationContext)
+//                    var isCurrentUserPrimary by remember { mutableStateOf(false) }
+//                    //to check is current device is primary
+//                    for (deviceData in state.value.loggedInDeviceList) {
+//                        if (deviceData.deviceId == deviceInfo.getDeviceId()) {
+//                            if (deviceData.deviceType == DeviceType.Primary.toString()) {
+//                                isCurrentUserPrimary = true
+//                                break
+//                            }
+//                        }
+//                    }
+//                    LazyColumn {
+//                        items(state.value.loggedInDeviceList) { deviceData ->
+//                            Column {
+//                                Text(text = "Device ID: ${deviceData.deviceId}")
+//                                Text(text = "Device Name: ${deviceData.deviceName}")
+//                                Text(text = "Device Type: ${deviceData.deviceType}")
+//                                Text(text = "Device Authorization: ${deviceData.authorization}")
+//                                Text(text = "Last login time: ${deviceData.lastLoginTimeStamp}")
+//                                //if current device is primary device then show remove access for secondary devices
+//                                if (isCurrentUserPrimary) {
+//                                    if (deviceData.deviceType == DeviceType.Secondary.toString()) {
+//                                        Button(onClick = {
+//                                            if (deviceData.authorization == Authorization.Authorized.toString()) {
+//                                                println("deviceName: ${deviceData.deviceName} authorization: ${deviceData.authorization}")
+//                                                onEvent(
+//                                                    AuthEvent.RemoveAuthorizationAccess(
+//                                                        deviceData.deviceId!!
+//                                                    )
+//                                                )
+//                                            } else {
+//                                                println("deviceName: ${deviceData.deviceName} authorization: ${deviceData.authorization}")
+//                                                onEvent(AuthEvent.GiveAuthorizationAccess(deviceData.deviceId!!))
+//                                            }
+//                                        }) {
+//                                            if (deviceData.authorization == Authorization.Authorized.toString()) {
+//                                                Text(text = "Remove Access")
+//                                            } else {
+//                                                Text(text = "Give Access")
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             }
 
             if (isAuthorizationAlertDialogVisible) {

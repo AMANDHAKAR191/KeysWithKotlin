@@ -1,12 +1,16 @@
 package com.aman.keyswithkotlin.navigation
 
+import android.view.animation.Animation
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.navigation
 import com.aman.keyswithkotlin.chats.presentation.SharedChatViewModel
+import com.aman.keyswithkotlin.core.AnimationType
 import com.aman.keyswithkotlin.core.BiometricAuthentication
 import com.aman.keyswithkotlin.core.components.BottomBar
 import com.aman.keyswithkotlin.passwords.presentation.add_edit_password.AddEditPasswordScreen
