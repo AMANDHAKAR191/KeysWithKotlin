@@ -37,7 +37,11 @@ class AppModule {
     fun providePublicUID(
         auth: FirebaseAuth
     ): String {
-        return auth.currentUser?.email?.split('@')?.get(0)!!
+        return if (auth.currentUser?.email?.substringBeforeLast("@")?.contains(".") != true){
+            auth.currentUser?.email?.substringBeforeLast("@")!!
+        }else{
+            auth.currentUser?.email?.substringBeforeLast("@")?.replace(".", "_")!!
+        }
     }
 
 

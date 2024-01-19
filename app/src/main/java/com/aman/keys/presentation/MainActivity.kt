@@ -155,7 +155,7 @@ class MainActivity : ComponentActivity() {
             this@MainActivity
         )
         val myPreference = MyPreference()
-        println("myPreference.isNewUser: ${myPreference.isOldUser}")
+        println("myPreference.isOldUser: ${myPreference.isOldUser}")
         if (myPreference.isOldUser) {
             checkAuthState()
         } else {

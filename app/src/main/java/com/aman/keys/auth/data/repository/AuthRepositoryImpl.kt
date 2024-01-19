@@ -479,7 +479,12 @@ class AuthRepositoryImpl @Inject constructor(
 
 
     private fun createPublicUID(email: String?): String? {
-        return email?.substringBeforeLast("@")
+
+        return if (email?.substringBeforeLast("@")?.contains(".") != true){
+            email?.substringBeforeLast("@")
+        }else{
+            email.substringBeforeLast("@").replace(".", "_")
+        }
     }
 
 

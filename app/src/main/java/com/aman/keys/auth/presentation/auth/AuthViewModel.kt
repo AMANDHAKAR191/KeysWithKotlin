@@ -26,9 +26,6 @@ class AuthViewModel @Inject constructor(
 ) : ViewModel() {
 
 
-    init {
-        myPreference.isOldUser = true
-    }
     val isUserAuthenticated get() = authUseCases.isUserAuthenticated.invoke()
     var oneTapSignInResponse by mutableStateOf<OneTapSignInResponse>(Success(null))
         private set
@@ -48,6 +45,7 @@ class AuthViewModel @Inject constructor(
         authUseCases.firebaseSignInWithGoogle(googleCredential).collect { response ->
             when(response) {
                 is Response.Success -> {
+                    myPreference.isOldUser = true
                 }
 
                 else -> {}
