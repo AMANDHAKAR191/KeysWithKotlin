@@ -30,13 +30,13 @@
 -keep class com.google.firebase.database.*{*;}
 -keep class com.google.firebase.messaging.*{*;}
 #for model classses
--keep class com.aman.keyswithkotlin.auth.domain.model.*{*;}
--keep class com.aman.keyswithkotlin.chats.domain.model.*{*;}
--keep class com.aman.keyswithkotlin.notes.domain.model.*{*;}
--keep class com.aman.keyswithkotlin.passwords.domain.model.*{*;}
+-keep class com.aman.keys.auth.domain.model.*{*;}
+-keep class com.aman.keys.chats.domain.model.*{*;}
+-keep class com.aman.keys.notes.domain.model.*{*;}
+-keep class com.aman.keys.passwords.domain.model.*{*;}
 
 #for services
--keep class com.aman.keyswithkotlin.notification_service.NotificationReceiver
+-keep class com.aman.keys.notification_service.NotificationReceiver
 
 -keep class com.google.gson.** { *; }
 -keep class com.shaded.fasterxml.jackson.** { *; }

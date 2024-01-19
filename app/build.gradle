@@ -10,27 +10,28 @@ plugins {
 }
 
 android {
-    namespace 'com.aman.keyswithkotlin'
-    compileSdk 33
+    namespace 'com.aman.keys'
+    compileSdk 34
 
     defaultConfig {
-        applicationId "com.aman.keyswithkotlin"
+        applicationId "com.aman.keys"
         minSdk 30
-        targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        targetSdk 34
+        versionCode 3
+        versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
         }
+//        signingConfig signingConfigs.release
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            shrinkResources = false
-            _isDebuggable = true
+            minifyEnabled true
+            shrinkResources = true
+            _isDebuggable = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug{
@@ -40,18 +41,26 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    signingConfigs {
+        release {
+            keyAlias 'key0'
+            keyPassword 'amandhakar966key0'
+            storeFile file('F:\\keys All doc\\keys_keystore\\keys_keystore.jks')
+            storePassword 'amandhakarkeys_keystore_20112023'
+        }
+    }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
     buildFeatures {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.3.2'
+        kotlinCompilerExtensionVersion '1.4.3'
     }
     packagingOptions {
         resources {
@@ -62,18 +71,19 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.8.0' // AndroidX Core library with Kotlin extensions
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    implementation 'androidx.core:core-ktx:1.9.0' // AndroidX Core library with Kotlin extensions
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
     // Kotlin extensions for Lifecycle components
-    implementation 'androidx.activity:activity-compose:1.5.1' // Compose support for Activities
+    implementation 'androidx.activity:activity-compose:1.8.2' // Compose support for Activities
     implementation 'androidx.compose.ui:ui' // Compose UI framework
     implementation 'androidx.compose.ui:ui-graphics' // Compose UI Graphics
     implementation 'androidx.compose.ui:ui-tooling-preview' // Compose UI tooling for preview
     implementation 'androidx.compose.material3:material3' // Compose Material3 library
-    implementation 'com.google.firebase:firebase-auth-ktx:22.0.0' // Firebase Authentication
-    implementation 'com.google.firebase:firebase-database-ktx:20.2.2' // Firebase Realtime Database
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.3.7' // Firebase Crashlytics
-    implementation 'com.google.firebase:firebase-analytics-ktx:21.3.0' // Firebase Analytics
+    implementation 'com.google.firebase:firebase-auth-ktx:22.3.0' // Firebase Authentication
+//    implementation 'com.google.android.recaptcha:recaptcha:18.4.0'
+    implementation 'com.google.firebase:firebase-database-ktx:20.3.0' // Firebase Realtime Database
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.6.0' // Firebase Crashlytics
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.5.0' // Firebase Analytics
     implementation platform('androidx.compose:compose-bom:2023.06.01')
 
 // Testing dependencies
@@ -91,31 +101,31 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-test-manifest' // Compose UI testing manifest
 
 // Play Services Auth
-    implementation "com.google.android.gms:play-services-auth:20.5.0" // Google Play Services Auth
+    implementation "com.google.android.gms:play-services-auth:20.7.0" // Google Play Services Auth
 
     implementation "androidx.biometric:biometric-ktx:1.2.0-alpha05"
     // Biometric authentication with Kotlin extensions
 
 // Compose dependencies
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0"
     // ViewModel support for Compose
-    implementation "androidx.navigation:navigation-compose:2.7.0-beta01"
+    implementation "androidx.navigation:navigation-compose:2.7.6"
     // Navigation support for Compose
-    implementation "androidx.compose.material:material-icons-extended:1.4.3"
+    implementation "androidx.compose.material:material-icons-extended:1.5.4"
     // Material icons extended library for Compose
-    implementation "androidx.hilt:hilt-navigation-compose:1.1.0-alpha01"
+    implementation "androidx.hilt:hilt-navigation-compose:1.2.0-alpha01"
     // Hilt Navigation Compose integration
 
     // Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
     // Kotlin Coroutines core library
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
     // Kotlin Coroutines Android extensions
 
     // Dagger - Hilt
     implementation "com.google.dagger:hilt-android:2.46.1" // Dagger Hilt Android library
     kapt "com.google.dagger:hilt-android-compiler:2.46.1" // Dagger Hilt Android compiler
-    kapt "androidx.hilt:hilt-compiler:1.0.0" // Hilt annotation processor
+    kapt "androidx.hilt:hilt-compiler:1.1.0" // Hilt annotation processor
 
     implementation "io.coil-kt:coil-compose:2.4.0" // Coil image loading library for Compose
     implementation 'com.google.code.gson:gson:2.10.1'
@@ -126,7 +136,7 @@ dependencies {
 
     //for send notification
     implementation 'com.android.volley:volley:1.2.1'
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.2.1'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.4.0'
 
     implementation 'com.github.bumptech.glide:glide:4.13.0'
     kapt 'com.github.bumptech.glide:compiler:4.13.0'

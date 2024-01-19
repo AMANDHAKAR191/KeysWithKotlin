@@ -14,4 +14,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "KeysWithKotlin"
 include ':app'
-include ':expendable_floating_action_button'

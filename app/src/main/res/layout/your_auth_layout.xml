@@ -3,30 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
-
-    <ImageView
-        android:id="@+id/iconImageView"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@mipmap/ic_launcher_keys_lock"/>
+    android:layout_gravity="center"
+    android:gravity="center">
 
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Biometric Authentication"
+        android:drawableTop="@mipmap/ic_launcher_keys_lock"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginTop="8dp" />
+        android:textStyle="bold"/>
 
     <TextView
         android:id="@+id/descriptionTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Biometric Authentication"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp" />
+        android:text="Tap here to see available login credentials"
+        android:textSize="14sp"/>
 
     <!-- Additional UI components as needed -->
 </LinearLayout>
