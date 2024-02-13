@@ -1,11 +1,11 @@
 # KEYS Password Manager
-Kotlin Externship Team Project
+KEYS Password Manager Project
 
 ## Description
 
-Welcome to the Kotlin Externship Team Project. This is a robust and modern application, designed and built as part of an externship program. Our team is using latest Jetpack Compose, using Kotlin programming language.
+Welcome to KEYS Password Manager Project. This is a robust and modern application, designed and built. Our team is using latest Jetpack Compose, using Kotlin programming language.
 
-The application is an exciting project that serves users in managing a unique entity known as "expanse". This could be viewed as a learning project to explore modern Android development techniques, libraries, and best practices.
+The application is an exciting project that serves users in managing a unique entity known as "Password". This could be viewed as a learning project to explore modern Android development techniques, libraries, and best practices.
 
 
 ## Features
