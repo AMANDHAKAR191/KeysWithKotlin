@@ -10,16 +10,13 @@ The application is an exciting project that serves users in managing a unique en
 
 ## Features
 
-### Chats
-
-### Notes Management
-
-The core functionality of the application revolves around managing user login credientials. Users have the ability to add new password, edit existing ones, and delete any they no longer need. To atuometically fill in login page.
-
 ### Password Management
 
 The core functionality of the application revolves around managing user login credientials. Users have the ability to add new password, edit existing ones, and delete any they no longer need. To atuometically fill in login page.
 
+### Chats
+
+### Notes Management
 
 ## Project Structure
 
